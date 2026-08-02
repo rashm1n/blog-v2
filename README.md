@@ -60,7 +60,23 @@ Before the first deploy:
    into the `caddy` service at `/certs`. Only switch Cloudflare to Full (strict) after
    confirming the origin serves this cert (`curl --resolve <domain>:443:127.0.0.1 ...`) —
    switching first, before the origin is ready, takes the live site down.
-4. Set repo secrets: `VPS_HOST`, `VPS_USER`, `SSH_PRIVATE_KEY` (deploy-only key).
+4. Set repo secrets: `VPS_HOST`, `VPS_USER`, `SSH_PRIVATE_KEY` (deploy-only key). **The
+   `deploy` job will fail silently-ish with `error: missing server host` until all three
+   exist** — `gh secret list` returns empty with no error if they were never set, so this
+   is easy to miss; the `build-and-push` job can go green for a long time while `deploy`
+   quietly fails every run. Generate the key pair on the VPS itself (`ssh-keygen -t
+   ed25519 -f ~/.ssh/gh_deploy -N ""`), append `gh_deploy.pub` to that user's
+   `~/.ssh/authorized_keys`, then push the private key as the `SSH_PRIVATE_KEY` secret
+   (`gh secret set SSH_PRIVATE_KEY < ~/.ssh/gh_deploy`).
 5. Optionally set repo variables for comments/analytics (see `.env.example`).
 6. On the VPS: copy `deploy/docker-compose.yml`, `deploy/Caddyfile`, and a `deploy/.env`
    (from `deploy/.env.example`) into `/srv/blog/`, then `docker compose up -d`.
+
+### CI gotcha: buildx cache driver
+
+`docker/build-push-action` with `cache-to: type=gha` requires the `docker-container`
+buildx driver. The buildx builder pre-installed on `ubuntu-24.04` GitHub-hosted runners
+now defaults to the plain `docker` driver, which doesn't support GHA cache export and
+fails with `Cache export is not supported for the docker driver.` Add a
+`docker/setup-buildx-action@v3` step before the build step to fix it — see
+`.github/workflows/deploy.yml`.

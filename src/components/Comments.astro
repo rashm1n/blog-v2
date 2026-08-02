@@ -1,10 +1,11 @@
 ---
 // Requires: public GitHub repo, Discussions enabled, giscus app installed
-// (https://github.com/apps/giscus), and a "Comments" discussion category created.
+// (https://github.com/apps/giscus), and the "Announcements" discussion category
+// (created by default when Discussions is enabled).
 // Get data-repo-id / data-category-id from https://giscus.app once the repo exists.
 const repo = import.meta.env.GISCUS_REPO ?? '';
 const repoId = import.meta.env.GISCUS_REPO_ID ?? '';
-const category = import.meta.env.GISCUS_CATEGORY ?? 'Comments';
+const category = import.meta.env.GISCUS_CATEGORY ?? 'Announcements';
 const categoryId = import.meta.env.GISCUS_CATEGORY_ID ?? '';
 
 const configured = Boolean(repo && repoId && categoryId);
