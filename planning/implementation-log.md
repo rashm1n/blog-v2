@@ -233,6 +233,136 @@ not exist or is empty` once per route touching it. `llms.txt` and `llms-full.txt
 instances. It's an Astro warning about the empty `travel` collection, not a fault in the new
 routes, and it will disappear when the first travel post lands.
 
+## Phase 9 — First VPS deploy
+
+First real deploy, done live on the Hetzner VPS (Ubuntu 26.04, x86_64, IPv4 `77.42.80.2`).
+Domain is `rashmin.dev`. Executed directly by Claude Code running *on* the VPS, not through
+the GitHub Actions pipeline — no CI run has ever happened (no GitHub remote push since the
+initial `git init`), so there was no GHCR image to pull yet.
+
+**Domain placeholders** (`astro.config.mjs` `site`, `src/consts.ts` `SITE_URL`,
+`public/robots.txt` sitemap line) replaced with `https://rashmin.dev`, per
+[`next-steps.md`](./next-steps.md#1-domain). DNS itself was **not** pointed at the VPS before
+this — see "Still open" below; the `next-steps.md` warning about burning Let's Encrypt's rate
+limit on a failed challenge is exactly what happened on the first `docker compose up`, caught
+after the fact rather than avoided.
+
+**No `deploy` user, no `ufw`, no `fail2ban`.** `next-steps.md` step 3 called for a dedicated
+non-root `deploy` user and host hardening; none of that happened here. Docker was installed
+under the existing `rush` account, `/srv/blog` is owned by `rush`, and no firewall/fail2ban
+setup was done. This was a scope call for "get it live now," not a decision that this is
+sufficient — still open.
+
+**Passwordless sudo for `docker` only, not the `docker` group.** `usermod -aG docker rush`
+was run twice and the group membership genuinely landed in `/etc/group` both times, but the
+shell Claude Code was operating in never picked it up — group membership is fixed at login,
+and there was no way to force a fresh login on an already-running session. Rather than block
+on that, a narrowly scoped `/etc/sudoers.d/rush-docker` grants `NOPASSWD` on `/usr/bin/docker`
+specifically (validated with `visudo -c`), which is what CI/CD-adjacent automation actually
+needs — nothing broader. A few one-off `sudo` calls outside that rule (`mkdir /srv/blog`,
+`chown`) still needed the user to type a password interactively via `!`.
+
+**Generated Postgres password broke Umami's DB connection string.** The first `.env` used
+`openssl rand -base64 32` for `POSTGRES_PASSWORD`; the result happened to contain a `/`,
+which `docker-compose.yml`'s `postgresql://umami:${POSTGRES_PASSWORD}@umami-db:5432/umami`
+passes straight into a `new URL()` call in Umami's `check-db.js` — a `/` there is parsed as a
+path separator, not part of the password, so the URL was malformed and Umami crash-looped on
+every start (`TypeError: Invalid URL`). Fixed by regenerating both `POSTGRES_PASSWORD` and
+`APP_SECRET` with `openssl rand -hex 24` instead — hex output can't contain URL-structural
+characters, so the connection string is safe by construction rather than by luck. Required
+tearing down the stack and deleting the `umami_db_data` volume, since Postgres had already
+initialized its superuser role with the broken password on first boot.
+
+**`postgres:18-alpine` rejects the volume layout `deploy/docker-compose.yml` used.** This is a
+genuine bug in the repo, not a config mistake made during this deploy: the compose file mounted
+`umami_db_data:/var/lib/postgresql/data`, which worked with earlier Postgres images but which
+Postgres 18's Docker image now refuses at startup —
+[docker-library/postgres#1259](https://github.com/docker-library/postgres/pull/1259) changed
+the image to expect a single volume at the *parent* directory, `/var/lib/postgresql`, so it
+can lay out data in a major-version-specific subdirectory. The old mount point produced
+`Error: in 18+, these Docker images are configured to store database data in a format which is
+compatible with "pg_ctlcluster"...` and refused to start, even against a freshly created,
+empty volume. Fixed in `deploy/docker-compose.yml` by changing the mount to
+`umami_db_data:/var/lib/postgresql`. Anyone running an older copy of this compose file against
+`postgres:18-alpine` will hit this.
+
+**Verification performed:** `docker build` completed clean and produced a working image
+(`ghcr.io/rashm1n/blog:latest`, tagged locally — not yet pushed to GHCR by CI). After the two
+fixes above, `docker compose ps` showed all four containers (`blog`, `caddy`, `umami`,
+`umami-db`) in a stable `Up` state with no restart loops. Content was confirmed end-to-end by
+running a throwaway `curlimages/curl` container on the `blog_web` network and fetching
+`http://blog:80/` directly (bypassing the edge Caddy, which can't yet get a TLS cert without
+DNS) — returned the real homepage, `<title>rashmin — software engineer</title>`. Umami's logs
+showed migrations applying successfully and the Next.js server starting clean. Edge Caddy was
+confirmed to be routing `rashmin.dev` correctly at the HTTP layer (`Host: rashmin.dev` request
+to port 80 returned a `308` redirect to HTTPS, matching the Caddyfile's automatic-HTTPS
+behavior), but the HTTPS side itself couldn't be verified — see "Still open."
+
+**Still open:**
+
+- ~~DNS was never pointed at the VPS before or during this deploy~~ Resolved in Phase 10 — see
+  below. Left here because the sequence (bring the stack up *before* DNS exists) is the mistake
+  worth not repeating on the next fresh deploy.
+- CI/CD is still unwired — no GitHub remote push has happened, so `VPS_HOST`, `VPS_USER`,
+  `SSH_PRIVATE_KEY` secrets and the `GISCUS_*`/`UMAMI_*` repo variables from
+  [`next-steps.md`](./next-steps.md#2-github-repo) are all still todo. Until then, the image
+  running on the VPS is a one-off local build and won't update on future pushes to `main`.
+- Umami's default `admin`/`umami` login hasn't been changed yet (the UI is reachable now, per
+  Phase 10, but the login swap itself hasn't happened).
+- Host hardening (`deploy` user, `ufw`, `fail2ban`) from `next-steps.md` step 3 is still
+  entirely undone.
+
+## Phase 10 — DNS, and switching off Let's Encrypt for Cloudflare Origin CA
+
+DNS for `rashmin.dev`, `www.rashmin.dev`, and `analytics.rashmin.dev` was added in Cloudflare
+— proxied (orange-cloud), not DNS-only — pointing at `77.42.80.2` /
+`2a01:4f9:c014:6fd5::1`. This is what Phase 9 was blocked on.
+
+**The predicted rate-limit hit actually happened.** Phase 9's repeated failed ACME attempts
+(made before DNS existed) had already burned Let's Encrypt's "too many failed authorizations"
+limit for `rashmin.dev` and `www.rashmin.dev` within their 1-hour window. The moment DNS went
+live, Caddy's automatic HTTPS validated ownership fine but then got `HTTP 429 rateLimited`
+trying to finalize a production-CA order. Caddy's own fallback behavior handled this
+gracefully — it obtained a **staging** Let's Encrypt cert as an interim (not served to real
+traffic, staging certs aren't browser-trusted; this looked like it should work but a direct TLS
+handshake to the origin still failed with `tlsv1 alert internal error`, which was the confusing
+part) — then automatically retried production once the rate-limit window passed
+(`retry after 2026-08-02 02:48:59 UTC`), succeeding without any manual intervention roughly 3
+minutes later. Confirmed via polling: real `Let's Encrypt` (`issuer CN=YE2`) certs live on both
+hostnames, `curl` through Cloudflare returning `200`/`301` as expected.
+
+**Then deliberately moved off Let's Encrypt entirely**, to eliminate the rate-limit class of
+failure going forward rather than just having recovered from it once. Considered Cloudflare
+"Flexible" SSL (Cloudflare↔origin over plain HTTP) — rejected because it drops encryption on
+that leg and would require disabling Caddy's automatic HTTP→HTTPS redirect to avoid a proxy
+redirect loop (Cloudflare fetches over HTTP, origin 308s to HTTPS, Cloudflare re-enters via
+HTTPS, converts back to HTTP for the origin request, repeat). Went with a **Cloudflare Origin
+CA certificate** instead — 15-year validity, encrypted end-to-end, but no ACME/rate-limit
+exposure ever again for this origin.
+
+- Private key generated *on the VPS* and never left it: `openssl ecparam -genkey -name
+  prime256v1` → `/srv/blog/certs/origin-key.pem`, plus a CSR (`origin.csr`, SAN
+  `rashmin.dev` + `*.rashmin.dev`) submitted through the Cloudflare dashboard
+  (SSL/TLS → Origin Server → Create Certificate → "Use my private key and CSR"). Only the
+  signed certificate came back over chat, not key material.
+- `deploy/Caddyfile` — added `tls /certs/origin.pem /certs/origin-key.pem` to all three site
+  blocks (apex, `www`, `analytics`), replacing Caddy's automatic HTTPS/ACME for these hosts.
+  Confirmed via log line `skipping automatic certificate management because one or more
+  matching certificates are already loaded` for all three domains on restart.
+- `deploy/docker-compose.yml` — mounted `./certs:/certs:ro` into the `caddy` service.
+- Verified the cert's public key matches the generated private key
+  (`openssl x509 -pubkey` / `openssl ec -pubout`, SHA-256 digest compared) before wiring it in.
+- Verified against the origin directly (`curl --resolve ... 127.0.0.1`) for all three hostnames
+  that Caddy now presents the Cloudflare Origin certificate, not a Let's Encrypt one, before
+  asking for the Cloudflare-side change.
+- Cloudflare SSL/TLS mode switched from whatever the zone's default was to **Full (strict)**
+  only *after* the origin cert was confirmed live — sequenced deliberately to avoid a window
+  where Cloudflare is validating against an origin that isn't ready, which would have taken the
+  live site down. Confirmed post-switch: all three hostnames still `200`/`301` through
+  Cloudflare.
+- The `caddy_data`/`caddy_config` volumes from the Let's Encrypt era were left in place rather
+  than cleaned up — they hold now-unused ACME account/cert state, harmless but not pruned.
+
 ## Verification performed
 
 Phase 8:

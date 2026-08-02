@@ -1,4 +1,6 @@
 {$DOMAIN} {
+	tls /certs/origin.pem /certs/origin-key.pem
+
 	encode zstd gzip
 
 	header {
@@ -26,9 +28,11 @@
 }
 
 www.{$DOMAIN} {
+	tls /certs/origin.pem /certs/origin-key.pem
 	redir https://{$DOMAIN}{uri} permanent
 }
 
 analytics.{$DOMAIN} {
+	tls /certs/origin.pem /certs/origin-key.pem
 	reverse_proxy umami:3000
 }

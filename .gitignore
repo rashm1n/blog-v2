@@ -17,6 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# TLS private keys / origin certs — generated on the VPS, never committed
+deploy/certs/
+
 # macOS-specific files
 .DS_Store
 

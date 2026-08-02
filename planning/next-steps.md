@@ -1,24 +1,31 @@
 # Next steps
 
-What's left before this goes live, roughly in the order it needs to happen. Steps 1–4 and 6
-haven't been started — all deliberately deferred per the decisions in
-[`decisions.md`](./decisions.md). Step 5 is partially done; see the note there.
+What's left before this goes live, roughly in the order it needs to happen. Steps 1 and 4 are
+done. Step 3 is partially done as of Phase 9 (see
+[`implementation-log.md`](./implementation-log.md#phase-9--first-vps-deploy)) — done ahead of
+schedule and deviating from the plan below. Steps 2 and 6 haven't been started. Step 5 is
+partially done; see the note there.
 
 ## 1. Domain
 
-- Register the domain.
-- Point DNS at the Hetzner VPS: `A @ → <IPv4>`, `AAAA @ → <IPv6>`, `CNAME www → @`.
-- Let DNS propagate *before* first boot of the edge Caddy — a failed ACME challenge burns
-  Let's Encrypt's rate limit.
-- Replace every `example.com` placeholder: `astro.config.mjs` (`site`), `src/consts.ts`
-  (`SITE_URL`), `public/robots.txt`. Note that the OG social cards now print the domain in
-  their footer, so it's user-visible, not just metadata — it reads from `SITE_URL`, so the
-  `consts.ts` edit covers it, but re-check a generated card afterwards.
-- Phase 8 added three more user-visible surfaces that bake the domain into their *bodies*, not
-  just into metadata: the JSON-LD `@id`s and URLs, `/llms.txt` and `/llms-full.txt`, and the
-  `Canonical URL:` line in every `/blog/<slug>.md`. All derive from the same two constants, so
-  the swap is still mechanical — but `curl` the built `/llms.txt` afterwards to confirm, since
-  a stale `example.com` there would be handed straight to an LLM as fact.
+- ~~Register the domain.~~ Done — `rashmin.dev`.
+- ~~Point DNS at the Hetzner VPS.~~ Done in Phase 10 — `A`/`AAAA` for apex, `www`, and
+  `analytics`, added via Cloudflare, **proxied** (not DNS-only). Note this was done *after*
+  first bringing the stack up (Phase 9), not before — exactly the "burns Let's Encrypt's rate
+  limit" scenario this doc originally warned about, and it did happen (Caddy hit `HTTP 429` on
+  the first real attempt, self-recovered ~3 minutes later once the window passed). Do DNS
+  *before* first boot on any future fresh deploy.
+- **TLS no longer depends on Let's Encrypt at all.** Phase 10 replaced Caddy's automatic
+  HTTPS/ACME with a static **Cloudflare Origin CA** certificate
+  (`/srv/blog/certs/origin.pem` + `origin-key.pem`, 15-year validity, `deploy/Caddyfile`'s
+  `tls` directive), and Cloudflare's SSL/TLS mode is set to **Full (strict)**. This means the
+  rate-limit failure mode above can't recur for this domain — worth keeping if this deploy is
+  ever repeated elsewhere. The private key was generated on the VPS and never left it; only a
+  CSR went out, only a signed cert came back.
+- ~~Replace every `example.com` placeholder~~ Done in Phase 9: `astro.config.mjs` (`site`),
+  `src/consts.ts` (`SITE_URL`), `public/robots.txt`. Re-check a generated OG card and the built
+  `/llms.txt` now that the site is live over HTTPS — swapped mechanically, not yet re-verified
+  against a live build.
 
 ## 2. GitHub repo
 
@@ -32,24 +39,33 @@ haven't been started — all deliberately deferred per the decisions in
 
 ## 3. VPS prep
 
-- Non-root `deploy` user, SSH key-only auth, `PasswordAuthentication no`, root login disabled.
-- `ufw`: allow 22, 80, 443; deny the rest.
-- fail2ban on sshd.
-- Docker Engine + Compose plugin; add `deploy` to the `docker` group.
-- Run `uname -m` — if it says `aarch64` (Hetzner CAX instances are ARM64), change both
-  `runs-on` values in `.github/workflows/deploy.yml` to `ubuntu-24.04-arm` before the first
-  deploy, or the pushed image won't run.
-- `/srv/blog/` owned by `deploy`, holding `docker-compose.yml`, `Caddyfile`, and `.env` (from
-  `deploy/.env.example`, `chmod 600`, never committed).
+- **Still open — deviated from plan in Phase 9, not completed as designed.** Docker Engine +
+  Compose plugin are installed, but everything else here is either done differently or not
+  done:
+  - No dedicated `deploy` user — Docker and `/srv/blog/` (`docker-compose.yml`, `Caddyfile`,
+    `.env`, `chmod 600`) run under the existing `rush` account instead.
+  - `rush` was added to the `docker` group, but the running shell never picked it up (group
+    membership needs a fresh login this session couldn't force). Worked around with a scoped
+    `NOPASSWD` sudoers rule for `/usr/bin/docker` only (`/etc/sudoers.d/rush-docker`) — narrower
+    than full docker-group access, but still a deviation worth revisiting with a real re-login.
+  - `ufw`, `fail2ban`, `PasswordAuthentication no`, root login disabled — none of this was
+    touched.
+  - `uname -m` confirmed `x86_64`, so `.github/workflows/deploy.yml`'s `runs-on` values are
+    already correct as-is; no change needed there.
 
 ## 4. First deploy
 
-- `docker compose up -d` on the VPS.
-- Confirm valid TLS on the apex domain, `www` redirect works.
-- Umami reachable at `analytics.<domain>` — change the default `admin`/`umami` login
-  immediately.
-- Push a trivial commit to `main` and confirm the GitHub Actions deploy workflow reaches the
-  live domain unattended.
+- `docker compose up -d` on the VPS — done (Phase 9), but from a locally-built image
+  (`docker build` run directly on the VPS), not a GHCR pull, since no CI run has ever happened.
+- ~~TLS not valid yet~~ Resolved in Phase 10 — valid Cloudflare Origin CA cert served at the
+  origin, `Full (strict)` confirmed working end-to-end for `rashmin.dev`, `www.rashmin.dev`,
+  and `analytics.rashmin.dev`.
+- Umami container is up and reachable at `analytics.rashmin.dev` now, but the default
+  `admin`/`umami` login still hasn't been changed — do this next, nothing is blocking it
+  anymore.
+- CI-triggered deploy **not yet attempted** — no GitHub remote push has happened since the
+  original `git init`, so the GitHub Actions workflow has never run once, let alone against
+  this VPS.
 
 ## 5. Manual QA
 

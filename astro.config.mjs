@@ -7,8 +7,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: replace with the real domain once registered
-  site: 'https://example.com',
+  site: 'https://rashmin.dev',
   output: 'static',
   integrations: [mdx(), sitemap()],
   vite: {

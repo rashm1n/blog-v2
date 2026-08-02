@@ -1,5 +1,4 @@
-// TODO: swap in the real domain once registered (also update astro.config.mjs `site`)
-export const SITE_URL = 'https://example.com';
+export const SITE_URL = 'https://rashmin.dev';
 
 export const SITE_TITLE = 'rashmin';
 export const SITE_DESCRIPTION =
