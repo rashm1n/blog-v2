@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatDate, readingTime } from '../utils/posts';
+import { formatDate, formatDateISO, readingTime } from '../utils/posts';
 
 interface Props {
   entry: CollectionEntry<'posts'> | CollectionEntry<'travel'>;
@@ -8,17 +8,45 @@ interface Props {
 }
 
 const { entry, basePath } = Astro.props;
-const { title, description, pubDate } = entry.data;
+const { title, description, pubDate, tags } = entry.data;
 const { body = '' } = entry;
 const minutes = readingTime(body);
 ---
 
-<a href={`${basePath}/${entry.id}`} class="group block py-4">
-  <h3 class="text-base font-medium text-fg group-hover:text-accent">{title}</h3>
-  <p class="mt-1 line-clamp-2 text-sm text-muted">{description}</p>
-  <div class="mt-2 flex items-center gap-2 text-xs text-muted">
-    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-    <span aria-hidden="true">&middot;</span>
+<a
+  href={`${basePath}/${entry.id}`}
+  class="group -mx-3 block rounded-lg px-3 py-4 transition-colors hover:bg-surface"
+>
+  <div class="flex items-baseline justify-between gap-4">
+    <h3
+      class="text-[0.9375rem] font-medium leading-snug text-fg transition-colors group-hover:text-accent"
+    >
+      {title}
+    </h3>
+    <time
+      datetime={pubDate.toISOString()}
+      title={formatDate(pubDate)}
+      class="hidden shrink-0 font-mono text-xs tabular-nums text-muted xs:block"
+    >
+      {formatDateISO(pubDate)}
+    </time>
+  </div>
+
+  <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted">{description}</p>
+
+  <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted">
+    <time datetime={pubDate.toISOString()} class="tabular-nums xs:hidden">
+      {formatDateISO(pubDate)}
+    </time>
+    <span class="xs:hidden" aria-hidden="true">·</span>
     <span>{minutes} min</span>
+    {
+      tags.slice(0, 3).map((tag: string) => (
+        <>
+          <span aria-hidden="true">·</span>
+          <span class="transition-colors group-hover:text-fg">#{tag}</span>
+        </>
+      ))
+    }
   </div>
 </a>

@@ -3,9 +3,50 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Not found" description="Page not found.">
-  <div class="flex flex-col items-start gap-4 py-24">
-    <p class="font-mono text-sm text-muted">404</p>
+  <div class="flex flex-col items-start gap-6 py-24">
+    <div
+      class="w-full overflow-hidden rounded-lg border border-border bg-surface font-mono text-sm"
+    >
+      <div class="flex items-center gap-1.5 border-b border-border px-3 py-2">
+        <span class="h-2.5 w-2.5 rounded-full bg-border"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-border"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-border"></span>
+      </div>
+      <div class="space-y-1 px-4 py-4">
+        <p class="text-muted">
+          <span class="text-accent">$</span> curl -sI <span id="missing-path">/…</span>
+        </p>
+        <p class="text-fg">HTTP/2 404</p>
+      </div>
+    </div>
+
     <h1 class="text-2xl font-semibold tracking-tight text-fg">Page not found</h1>
-    <a href="/" class="text-accent underline underline-offset-4">Back home</a>
+    <p class="text-sm text-muted">
+      That URL doesn't resolve to anything. It may have moved, or never existed.
+    </p>
+
+    <div class="flex flex-wrap gap-x-5 gap-y-2 font-mono text-sm">
+      <a
+        href="/"
+        class="group inline-flex items-center gap-1.5 text-muted transition-colors hover:text-fg"
+      >
+        <span class="text-accent transition-transform group-hover:translate-x-0.5">→</span>
+        Home
+      </a>
+      <a
+        href="/blog"
+        class="group inline-flex items-center gap-1.5 text-muted transition-colors hover:text-fg"
+      >
+        <span class="text-accent transition-transform group-hover:translate-x-0.5">→</span>
+        All writing
+      </a>
+    </div>
   </div>
+
+  <script is:inline>
+    // This page is served for any unmatched URL, so the real path is only known
+    // at runtime — Astro.url.pathname would always render "/404" here.
+    const slot = document.getElementById('missing-path');
+    if (slot) slot.textContent = location.pathname;
+  </script>
 </BaseLayout>

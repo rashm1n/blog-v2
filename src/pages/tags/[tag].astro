@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import PostListItem from '../../components/PostListItem.astro';
 import { getPublished, allTags } from '../../utils/posts';
 import type { CollectionEntry } from 'astro:content';
@@ -24,14 +25,26 @@ interface Props {
 
 const { tag } = Astro.params;
 const { posts, travel } = Astro.props as Props;
+const total = posts.length + travel.length;
 ---
 
 <BaseLayout title={`#${tag}`} description={`Posts tagged #${tag}.`}>
-  <div class="py-8">
-    <h1 class="text-2xl font-semibold tracking-tight text-fg">#{tag}</h1>
-    <div class="mt-6 divide-y divide-border">
-      {posts.map((post) => <PostListItem entry={post} basePath="/blog" />)}
-      {travel.map((post) => <PostListItem entry={post} basePath="/travel" />)}
-    </div>
+  <PageHeader
+    eyebrow="Tagged"
+    title={`#${tag}`}
+    description={`${total} ${total === 1 ? 'entry' : 'entries'} tagged #${tag}.`}
+  />
+
+  <div class="pb-8">
+    {posts.map((post) => <PostListItem entry={post} basePath="/blog" />)}
+    {travel.map((post) => <PostListItem entry={post} basePath="/travel" />)}
   </div>
+
+  <a
+    href="/tags"
+    class="group inline-flex items-center gap-1.5 pb-8 font-mono text-xs text-muted transition-colors hover:text-fg"
+  >
+    <span class="text-accent transition-transform group-hover:-translate-x-0.5">←</span>
+    All tags
+  </a>
 </BaseLayout>

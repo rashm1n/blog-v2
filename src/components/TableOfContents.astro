@@ -15,12 +15,16 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 {
   items.length > 1 && (
-    <nav aria-label="Table of contents" class="mb-10 hidden text-sm md:block">
-      <p class="mb-2 font-medium text-muted">On this page</p>
-      <ul class="space-y-1.5 border-l border-border pl-4">
+    <nav class="toc" aria-label="Table of contents">
+      <p class="label">On this page</p>
+      <ul class="toc-list">
         {items.map((h) => (
-          <li class={h.depth === 3 ? 'ml-3' : ''}>
-            <a href={`#${h.slug}`} class="text-muted transition-colors hover:text-fg">
+          <li>
+            <a
+              href={`#${h.slug}`}
+              class="toc-link"
+              style={h.depth === 3 ? 'padding-left: 1.75rem' : undefined}
+            >
               {h.text}
             </a>
           </li>
@@ -29,3 +33,57 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     </nav>
   )
 }
+
+<script>
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc-link')];
+
+  if (links.length) {
+    const byId = new Map(links.map((a) => [decodeURIComponent(a.hash.slice(1)), a]));
+    const targets = [...byId.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    let active: HTMLAnchorElement | null = null;
+
+    const setActive = (id: string) => {
+      const link = byId.get(id);
+      if (!link || link === active) return;
+      active?.removeAttribute('data-active');
+      link.setAttribute('data-active', 'true');
+      active = link;
+
+      // Keep the current entry in view when the ToC is a scrollable rail.
+      const rail = link.closest('.toc');
+      if (rail && rail.scrollHeight > rail.clientHeight) {
+        link.scrollIntoView({ block: 'nearest' });
+      }
+    };
+
+    // Track the last heading whose top has passed just under the sticky header.
+    const onScroll = () => {
+      const line = 96;
+      let current = targets[0];
+      for (const el of targets) {
+        if (el.getBoundingClientRect().top <= line) current = el;
+        else break;
+      }
+      if (current) setActive(current.id);
+    };
+
+    let ticking = false;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          onScroll();
+        });
+      },
+      { passive: true }
+    );
+
+    onScroll();
+  }
+</script>

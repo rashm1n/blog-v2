@@ -9,9 +9,19 @@ export async function getPublished<C extends CollectionName>(collection: C) {
   return entries.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 }
 
+export function wordCount(body: string): number {
+  return body.trim().split(/\s+/).filter(Boolean).length;
+}
+
 export function readingTime(body: string): number {
-  const words = body.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.round(words / 200));
+  return Math.max(1, Math.round(wordCount(body) / 200));
+}
+
+/** Where a collection lives in the URL space, and what to call it in a breadcrumb. */
+export function sectionFor(collection: CollectionName): { label: string; path: string } {
+  return collection === 'travel'
+    ? { label: 'Travel', path: '/travel' }
+    : { label: 'Writing', path: '/blog' };
 }
 
 export function formatDate(date: Date): string {
@@ -21,6 +31,11 @@ export function formatDate(date: Date): string {
     day: 'numeric',
     timeZone: 'UTC',
   });
+}
+
+/** `2026-07-14` — used in monospace columns where alignment matters. */
+export function formatDateISO(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 export function allTags(entries: CollectionEntry<CollectionName>[]): string[] {

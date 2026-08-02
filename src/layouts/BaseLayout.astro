@@ -3,26 +3,47 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Search from '../components/Search.astro';
+import type { JsonLdNode } from '../utils/schema';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   article?: boolean;
+  jsonLd?: JsonLdNode[];
+  markdownPath?: string;
 }
 
-const { title, description, image, article } = Astro.props;
+const { title, description, image, article, jsonLd, markdownPath } = Astro.props;
 ---
 
 <html lang="en">
   <head>
-    <BaseHead title={title} description={description} image={image} article={article} />
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      article={article}
+      jsonLd={jsonLd}
+      markdownPath={markdownPath}
+    />
   </head>
-  <body class="min-h-screen bg-bg text-fg antialiased">
+  <!-- No background on <body>: <html> owns it, so the decorative grid drawn by
+       body::before (z-index -1) isn't painted over. -->
+  <body class="flex min-h-screen flex-col text-fg antialiased">
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:border-border focus:bg-bg focus:px-3 focus:py-2 focus:text-sm"
+    >
+      Skip to content
+    </a>
+
     <Header />
-    <main class="mx-auto max-w-2xl px-4 sm:px-6">
+
+    <main id="content" class="mx-auto w-full max-w-2xl flex-1 px-4 sm:px-6">
       <slot />
     </main>
+
     <Footer />
     <Search />
   </body>

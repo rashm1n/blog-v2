@@ -1,0 +1,60 @@
+---
+// Progressive enhancement for Shiki output: wraps every code block in a chrome
+// bar showing the language and a copy button. Done client-side so it stays a
+// zero-dependency layer over Astro's default markdown pipeline.
+---
+
+<script>
+  const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+  const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>`;
+
+  // Shiki labels un-annotated fences with these; showing them adds nothing.
+  const UNLABELLED = new Set(['plaintext', 'text', 'txt', 'ansi', '']);
+
+  function enhance(pre: HTMLPreElement) {
+    if (pre.parentElement?.classList.contains('code-block')) return;
+
+    const wrapper = document.createElement('figure');
+    wrapper.className = 'code-block';
+
+    const bar = document.createElement('figcaption');
+    bar.className = 'code-block__bar';
+
+    const lang = (pre.dataset.language ?? '').toLowerCase();
+    const label = document.createElement('span');
+    label.className = 'code-block__lang';
+    label.textContent = UNLABELLED.has(lang) ? '' : lang;
+    bar.append(label);
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'code-block__copy';
+    button.setAttribute('aria-label', 'Copy code to clipboard');
+    button.innerHTML = `${COPY_ICON}<span>Copy</span>`;
+
+    let resetTimer: ReturnType<typeof setTimeout>;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        button.innerHTML = `${CHECK_ICON}<span>Copied</span>`;
+      } catch {
+        button.innerHTML = `<span>Press ⌘C</span>`;
+      }
+      button.dataset.copied = 'true';
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        button.innerHTML = `${COPY_ICON}<span>Copy</span>`;
+        delete button.dataset.copied;
+      }, 1600);
+    });
+
+    bar.append(button);
+
+    pre.replaceWith(wrapper);
+    wrapper.append(bar, pre);
+  }
+
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre')) {
+    enhance(pre);
+  }
+</script>

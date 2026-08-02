@@ -5,6 +5,12 @@
 	@immutable path /_astro/* /pagefind/*
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
 
+	# The raw-Markdown twins (/blog/foo.md) and llms.txt. Pinned to text/plain so
+	# the edge's `nosniff` can't turn an unrecognized extension into a download
+	# prompt — these are meant to open in a tab and be read by crawlers.
+	@plaintext path *.md *.txt
+	header @plaintext Content-Type "text/plain; charset=utf-8"
+
 	file_server
 
 	handle_errors {

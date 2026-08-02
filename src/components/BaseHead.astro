@@ -2,19 +2,34 @@
 import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { SITE_TITLE, SITE_DESCRIPTION, SITE_URL } from '../consts';
+import { jsonLdScript, siteNodes, type JsonLdNode } from '../utils/schema';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   article?: boolean;
+  /** Page-specific schema.org nodes, appended to the site-wide Person + WebSite. */
+  jsonLd?: JsonLdNode[];
+  /** Path to a raw-Markdown twin of this page, advertised to LLM crawlers. */
+  markdownPath?: string;
 }
 
-const { title, description = SITE_DESCRIPTION, image, article = false } = Astro.props;
+const {
+  title,
+  description = SITE_DESCRIPTION,
+  image,
+  article = false,
+  jsonLd = [],
+  markdownPath,
+} = Astro.props;
 
+const siteURL = Astro.site ?? new URL(SITE_URL);
 const pageTitle = title ? `${title} — ${SITE_TITLE}` : `${SITE_TITLE} — software engineer`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? SITE_URL);
-const ogImageURL = new URL(image ?? '/og-default.png', Astro.site ?? SITE_URL);
+const canonicalURL = new URL(Astro.url.pathname, siteURL);
+const ogImageURL = new URL(image ?? '/og-default.png', siteURL);
+const markdownURL = markdownPath ? new URL(markdownPath, siteURL) : undefined;
+const graph = [...siteNodes(siteURL), ...jsonLd];
 
 // Self-hosted Umami; default script path is on some blocklists, so this is
 // expected to be reverse-proxied to your own domain (e.g. /stats.js) — see Phase 5 Caddyfile.
@@ -25,8 +40,15 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="theme-color" content="#fdfdfc" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href="/rss.xml" />
+{
+  markdownURL && (
+    <link rel="alternate" type="text/markdown" href={markdownURL} title="Markdown source" />
+  )
+}
 <meta name="generator" content={Astro.generator} />
 
 <title>{pageTitle}</title>
@@ -44,6 +66,8 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImageURL} />
+
+<script type="application/ld+json" is:inline set:html={jsonLdScript(graph)}></script>
 
 <Font cssVariable="--font-face-sans" preload />
 <Font cssVariable="--font-face-mono" preload />

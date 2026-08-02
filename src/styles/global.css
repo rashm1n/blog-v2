@@ -1,31 +1,48 @@
 @import 'tailwindcss';
 
+/* Class-based dark mode — the inline script in BaseHead sets .dark on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
 
-  --color-bg: #fcfcfc;
-  --color-fg: #171717;
-  --color-muted: #6b6b6b;
-  --color-border: #e4e4e4;
-  --color-accent: #955df5;
+  /* Light palette. Overridden wholesale under :root.dark below. */
+  --color-bg: #fdfdfc;
+  --color-surface: #f4f4f2;
+  --color-fg: #16161a;
+  --color-muted: #65656d;
+  --color-border: #e6e6e2;
+  --color-hairline: #efefec;
+  --color-accent: #6d46d9;
+  --color-accent-soft: #f0ebfd;
   --color-accent-fg: #ffffff;
 
   --breakpoint-xs: 30rem;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Slower than the built-in `animate-ping` — a sign of life, not an alert. */
+  --animate-ping-slow: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 :root {
   color-scheme: light;
+  --grid-line: rgb(0 0 0 / 0.08);
 }
 
 :root.dark {
   color-scheme: dark;
-  --color-bg: #0b0b0c;
-  --color-fg: #e8e8e6;
-  --color-muted: #9a9a97;
-  --color-border: #262626;
-  --color-accent: #b892ff;
-  --color-accent-fg: #0b0b0c;
+  --color-bg: #0c0c0e;
+  --color-surface: #151518;
+  --color-fg: #e9e9e7;
+  --color-muted: #8f8f96;
+  --color-border: #24242a;
+  --color-hairline: #1b1b20;
+  --color-accent: #a78bfa;
+  --color-accent-soft: #1c1730;
+  --color-accent-fg: #0c0c0e;
+  --grid-line: rgb(255 255 255 / 0.05);
 }
 
 @layer base {
@@ -37,20 +54,53 @@
     background: var(--color-bg);
     color: var(--color-fg);
     scroll-behavior: smooth;
+    /* Reserve the scrollbar track so short pages and the search modal (which
+       locks body scroll) don't shift the layout sideways. */
+    scrollbar-gutter: stable;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Faint engineering grid, strongest at the top of the page and fading out.
+     Purely decorative and fixed, so it costs nothing on scroll. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 3rem 3rem;
+    mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 0%, transparent 75%);
   }
 
   code,
   pre,
-  kbd {
+  kbd,
+  samp {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
   }
 
   a {
     text-underline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   ::selection {
@@ -60,7 +110,27 @@
 
   :focus-visible {
     outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border: 3px solid var(--color-bg);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -76,9 +146,65 @@
 }
 
 @layer components {
+  /* ---------------------------------------------------------------- shared */
+
+  /* Small monospace eyebrow used for section headings and metadata. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  /* Section heading: mono label followed by a hairline that fills the row. */
+  .rule-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  .rule-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0.0625rem 0.3125rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.3125rem;
+    background: var(--color-bg);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+
+  /* Entrance animation for above-the-fold content. */
+  .reveal {
+    animation: reveal 0.5s var(--ease-out-quint) both;
+  }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
+  /* ----------------------------------------------------------------- prose */
+
   .prose {
     max-width: 68ch;
     color: var(--color-fg);
+    font-size: 1.0625rem;
     line-height: 1.75;
   }
 
@@ -91,9 +217,10 @@
   .prose h4 {
     font-weight: 600;
     line-height: 1.3;
-    margin-top: 2.2em;
-    margin-bottom: 0.6em;
-    scroll-margin-top: 5rem;
+    letter-spacing: -0.011em;
+    margin-top: 2.4em;
+    margin-bottom: 0.7em;
+    scroll-margin-top: 6rem;
   }
 
   .prose h2 {
@@ -104,27 +231,75 @@
     font-size: clamp(1.1rem, 1rem + 0.5vw, 1.25rem);
   }
 
-  .prose p,
-  .prose ul,
-  .prose ol {
-    color: var(--color-fg);
+  /* Anchor links injected by PostLayout — visible on hover, mono hash. */
+  .heading-anchor {
+    position: absolute;
+    margin-left: -1.35em;
+    width: 1.35em;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--color-border);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+
+  .prose :is(h2, h3, h4):hover .heading-anchor,
+  .heading-anchor:focus-visible {
+    opacity: 1;
+  }
+
+  .heading-anchor:hover {
+    color: var(--color-accent);
   }
 
   .prose a {
     color: var(--color-accent);
     text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in oklab, var(--color-accent) 35%, transparent);
+    transition: text-decoration-color 0.15s ease;
+  }
+
+  .prose a:hover {
+    text-decoration-color: var(--color-accent);
+  }
+
+  .prose strong {
+    font-weight: 600;
+    color: var(--color-fg);
   }
 
   .prose blockquote {
-    border-left: 2px solid var(--color-border);
-    padding-left: 1rem;
+    border-left: 2px solid var(--color-accent);
+    padding-left: 1.15rem;
     color: var(--color-muted);
-    font-style: italic;
+    font-style: normal;
   }
 
-  .prose ul,
+  /* Preflight strips list markers from every ol/ul, so decimals have to come back. */
   .prose ol {
+    list-style: decimal;
     padding-left: 1.4em;
+  }
+
+  .prose ul {
+    list-style: none;
+    padding-left: 1.2em;
+  }
+
+  .prose ul > li {
+    position: relative;
+  }
+
+  .prose ul > li::before {
+    content: '';
+    position: absolute;
+    top: 0.72em;
+    left: -1em;
+    width: 0.3125rem;
+    height: 1px;
+    background: var(--color-muted);
   }
 
   .prose li {
@@ -135,31 +310,38 @@
     color: var(--color-muted);
   }
 
+  .prose ol > li::marker {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  /* Three centred dots instead of a full-width rule. */
   .prose hr {
-    border-color: var(--color-border);
-    margin: 2.5em 0;
+    border: 0;
+    margin: 3em 0;
+    text-align: center;
+  }
+
+  .prose hr::before {
+    content: '· · ·';
+    letter-spacing: 0.6em;
+    color: var(--color-muted);
   }
 
   .prose img {
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-border);
     max-width: 100%;
     height: auto;
   }
 
   .prose :not(pre) > code {
-    font-size: 0.875em;
-    background: var(--color-border);
-    padding: 0.15em 0.4em;
-    border-radius: 0.3em;
-  }
-
-  .prose pre {
+    font-size: 0.85em;
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 0.6rem;
-    padding: 1rem 1.2rem;
-    overflow-x: auto;
-    font-size: 0.875em;
-    line-height: 1.6;
+    padding: 0.1em 0.35em;
+    border-radius: 0.3em;
+    word-break: break-word;
   }
 
   .prose table {
@@ -167,25 +349,211 @@
     overflow-x: auto;
     border-collapse: collapse;
     width: 100%;
+    font-size: 0.9375rem;
   }
 
   .prose th,
   .prose td {
     border: 1px solid var(--color-border);
-    padding: 0.5em 0.8em;
+    padding: 0.55em 0.85em;
     text-align: left;
+  }
+
+  .prose th {
+    background: var(--color-surface);
+    font-weight: 600;
+  }
+
+  .prose sup a {
+    text-decoration: none;
+  }
+
+  /* ------------------------------------------------------------ code block */
+
+  .prose pre {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    tab-size: 2;
+  }
+
+  /* Wrapper added at runtime by CodeBlocks.astro. */
+  .code-block {
+    position: relative;
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+
+  .code-block__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    /* Left padding matches the <pre> below so the language label lines up with code. */
+    padding: 0.4375rem 0.75rem 0.4375rem 1.15rem;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in oklab, var(--color-surface) 60%, var(--color-bg));
+  }
+
+  .code-block__lang {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .code-block__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.1875rem 0.4375rem;
+    border-radius: 0.3125rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--color-muted);
+    cursor: pointer;
+    /* Dimmed rather than hidden: the chrome bar would otherwise look empty on
+       blocks with no language label. */
+    opacity: 0.5;
+    transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .code-block:hover .code-block__copy,
+  .code-block__copy:focus-visible,
+  .code-block__copy[data-copied='true'] {
+    opacity: 1;
+  }
+
+  .code-block__copy:hover {
+    color: var(--color-fg);
+    background: var(--color-border);
+  }
+
+  .code-block__copy[data-copied='true'] {
+    color: var(--color-accent);
+  }
+
+  /* The <pre> owns its own chrome elsewhere; inside a wrapper it goes bare. */
+  .code-block > pre {
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    background: transparent;
+  }
+
+  /* Touch devices have no hover, so keep the copy affordance permanent. */
+  @media (hover: none) {
+    .code-block__copy {
+      opacity: 1;
+    }
+  }
+
+  /* ---------------------------------------------------------------- search */
+
+  .search-result {
+    display: block;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+  }
+
+  .search-result:hover,
+  .search-result[data-selected] {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .search-result mark {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-radius: 0.1875rem;
+    padding: 0 0.125rem;
+    font-weight: 500;
+  }
+
+  /* ------------------------------------------------------- table of contents */
+
+  /* Inline card by default; a fixed rail once the viewport can spare the room.
+     Both states live here rather than in utility classes so the media query can
+     actually unset them. */
+  .toc {
+    margin-top: 2.5rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    background: var(--color-hairline);
+    font-size: 0.8125rem;
+  }
+
+  .toc-list {
+    margin-top: 0.5rem;
+    border-left: 1px solid var(--color-border);
+  }
+
+  .toc-list .toc-list {
+    margin-top: 0;
+    border-left: 0;
+    padding-left: 0.875rem;
+  }
+
+  .toc-link {
+    display: block;
+    padding: 0.1875rem 0 0.1875rem 1rem;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--color-muted);
+    line-height: 1.45;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .toc-link:hover {
+    color: var(--color-fg);
+  }
+
+  .toc-link[data-active='true'] {
+    color: var(--color-accent);
+    border-left-color: var(--color-accent);
+  }
+
+  @media (min-width: 82rem) {
+    .toc {
+      position: fixed;
+      top: 7.5rem;
+      left: calc(50% + 22rem);
+      width: 15rem;
+      max-height: calc(100vh - 12rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      scrollbar-width: none;
+    }
+
+    .toc::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
-/* Shiki dual-theme: follow the light/dark class instead of shipping two stylesheets */
+/* Shiki dual-theme: follow the light/dark class instead of shipping two stylesheets.
+   Only token colours are taken from the theme — the block background comes from the
+   site surface so code sits in the same material as the rest of the page. */
 .astro-code,
 .astro-code span {
   color: var(--shiki-light) !important;
-  background-color: var(--shiki-light-bg) !important;
+  background-color: transparent !important;
 }
 
 :root.dark .astro-code,
 :root.dark .astro-code span {
   color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
 }

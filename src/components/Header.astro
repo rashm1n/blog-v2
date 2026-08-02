@@ -5,46 +5,84 @@ import ThemeToggle from './ThemeToggle.astro';
 const { pathname } = Astro.url;
 ---
 
-<header class="mx-auto flex max-w-2xl items-center justify-between px-4 py-8 sm:px-6">
-  <a href="/" class="font-mono text-sm font-medium tracking-tight text-fg">
-    {SITE_TITLE}
-  </a>
-
-  <nav class="flex items-center gap-5 text-sm text-muted">
-    {
-      NAV_LINKS.map((link) => {
-        const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
-        return (
-          <a
-            href={link.href}
-            aria-current={active ? 'page' : undefined}
-            class={`transition-colors hover:text-fg ${active ? 'text-fg' : ''}`}
-          >
-            {link.label}
-          </a>
-        );
-      })
-    }
-    <button
-      id="search-trigger"
-      type="button"
-      aria-label="Search"
-      class="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:bg-border/60 hover:text-fg"
+<header
+  id="site-header"
+  class="sticky top-0 z-40 border-b border-transparent bg-bg/80 backdrop-blur-md transition-colors duration-200 data-[scrolled]:border-border"
+>
+  <div class="mx-auto flex h-16 max-w-2xl items-center justify-between gap-4 px-4 sm:px-6">
+    <a
+      href="/"
+      class="group font-mono text-sm font-medium tracking-tight text-fg transition-opacity hover:opacity-80"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="h-4 w-4"
+      <span class="text-accent">~</span><span class="text-muted">/</span>{SITE_TITLE}
+    </a>
+
+    <nav class="flex items-center gap-1 text-sm">
+      {
+        NAV_LINKS.map((link) => {
+          const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+          return (
+            <a
+              href={link.href}
+              aria-current={active ? 'page' : undefined}
+              class:list={[
+                'rounded-md px-2 py-1 transition-colors hover:text-fg',
+                active ? 'text-fg' : 'text-muted',
+              ]}
+            >
+              {link.label}
+            </a>
+          );
+        })
+      }
+
+      <span class="mx-1.5 hidden h-4 w-px bg-border xs:block"></span>
+
+      <button
+        id="search-trigger"
+        type="button"
+        aria-label="Search"
+        class="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted transition-colors hover:bg-surface hover:text-fg"
       >
-        <circle cx="11" cy="11" r="7"></circle>
-        <path d="m21 21-4.3-4.3"></path>
-      </svg>
-    </button>
-    <ThemeToggle />
-  </nav>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-4 w-4"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <kbd class="kbd hidden xs:inline-flex" data-shortcut-hint>⌘K</kbd>
+      </button>
+
+      <ThemeToggle />
+    </nav>
+  </div>
 </header>
+
+<script is:inline>
+  (() => {
+    const header = document.getElementById('site-header');
+    if (header) {
+      const sync = () => {
+        if (window.scrollY > 8) header.setAttribute('data-scrolled', '');
+        else header.removeAttribute('data-scrolled');
+      };
+      sync();
+      window.addEventListener('scroll', sync, { passive: true });
+    }
+
+    // Windows/Linux users press Ctrl, not Cmd — show them the key they actually have.
+    if (!/Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent)) {
+      for (const hint of document.querySelectorAll('[data-shortcut-hint]')) {
+        hint.textContent = 'Ctrl K';
+      }
+    }
+  })();
+</script>
