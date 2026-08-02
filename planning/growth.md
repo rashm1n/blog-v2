@@ -11,7 +11,7 @@ The site's craft was already ahead of most personal dev blogs before any of this
 cards, Pagefind search, reading progress, no-flash dark mode, clean Lighthouse surface. **Design
 was not the bottleneck.** Two things were:
 
-1. `SITE_DESCRIPTION` ("Software engineer. Writing about distributed systems, infrastructure,
+1. `SITE_DESCRIPTION` ("Software engineer. Writing about ai, microservices, distributed systems
    and the occasional trip") describes several hundred thousand people. Nothing tells a stranger
    why to spend eight minutes here rather than elsewhere.
 2. Three placeholder posts, one of which is "Setting up this blog" — the single most-written
