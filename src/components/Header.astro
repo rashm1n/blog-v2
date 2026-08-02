@@ -1,0 +1,50 @@
+---
+import { SITE_TITLE, NAV_LINKS } from '../consts';
+import ThemeToggle from './ThemeToggle.astro';
+
+const { pathname } = Astro.url;
+---
+
+<header class="mx-auto flex max-w-2xl items-center justify-between px-4 py-8 sm:px-6">
+  <a href="/" class="font-mono text-sm font-medium tracking-tight text-fg">
+    {SITE_TITLE}
+  </a>
+
+  <nav class="flex items-center gap-5 text-sm text-muted">
+    {
+      NAV_LINKS.map((link) => {
+        const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+        return (
+          <a
+            href={link.href}
+            aria-current={active ? 'page' : undefined}
+            class={`transition-colors hover:text-fg ${active ? 'text-fg' : ''}`}
+          >
+            {link.label}
+          </a>
+        );
+      })
+    }
+    <button
+      id="search-trigger"
+      type="button"
+      aria-label="Search"
+      class="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:bg-border/60 hover:text-fg"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-4 w-4"
+      >
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+    </button>
+    <ThemeToggle />
+  </nav>
+</header>

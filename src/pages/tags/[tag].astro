@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostListItem from '../../components/PostListItem.astro';
+import { getPublished, allTags } from '../../utils/posts';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const [posts, travel] = await Promise.all([getPublished('posts'), getPublished('travel')]);
+  const tags = allTags([...posts, ...travel]);
+
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      posts: posts.filter((p) => p.data.tags.includes(tag)),
+      travel: travel.filter((p) => p.data.tags.includes(tag)),
+    },
+  }));
+}
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+  travel: CollectionEntry<'travel'>[];
+}
+
+const { tag } = Astro.params;
+const { posts, travel } = Astro.props as Props;
+---
+
+<BaseLayout title={`#${tag}`} description={`Posts tagged #${tag}.`}>
+  <div class="py-8">
+    <h1 class="text-2xl font-semibold tracking-tight text-fg">#{tag}</h1>
+    <div class="mt-6 divide-y divide-border">
+      {posts.map((post) => <PostListItem entry={post} basePath="/blog" />)}
+      {travel.map((post) => <PostListItem entry={post} basePath="/travel" />)}
+    </div>
+  </div>
+</BaseLayout>

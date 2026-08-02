@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, readingTime } from '../utils/posts';
+
+interface Props {
+  entry: CollectionEntry<'posts'> | CollectionEntry<'travel'>;
+  basePath: '/blog' | '/travel';
+}
+
+const { entry, basePath } = Astro.props;
+const { title, description, pubDate } = entry.data;
+const { body = '' } = entry;
+const minutes = readingTime(body);
+---
+
+<a href={`${basePath}/${entry.id}`} class="group block py-4">
+  <h3 class="text-base font-medium text-fg group-hover:text-accent">{title}</h3>
+  <p class="mt-1 line-clamp-2 text-sm text-muted">{description}</p>
+  <div class="mt-2 flex items-center gap-2 text-xs text-muted">
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+    <span aria-hidden="true">&middot;</span>
+    <span>{minutes} min</span>
+  </div>
+</a>

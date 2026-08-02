@@ -1,0 +1,62 @@
+---
+// Requires: public GitHub repo, Discussions enabled, giscus app installed
+// (https://github.com/apps/giscus), and a "Comments" discussion category created.
+// Get data-repo-id / data-category-id from https://giscus.app once the repo exists.
+const repo = import.meta.env.GISCUS_REPO ?? '';
+const repoId = import.meta.env.GISCUS_REPO_ID ?? '';
+const category = import.meta.env.GISCUS_CATEGORY ?? 'Comments';
+const categoryId = import.meta.env.GISCUS_CATEGORY_ID ?? '';
+
+const configured = Boolean(repo && repoId && categoryId);
+---
+
+{
+  configured ? (
+    <div id="giscus-container" data-repo={repo} data-repo-id={repoId} data-category={category} data-category-id={categoryId} />
+  ) : (
+    <p class="text-sm text-muted">
+      Comments aren't configured yet — set <code>GISCUS_REPO</code>, <code>GISCUS_REPO_ID</code>,
+      and <code>GISCUS_CATEGORY_ID</code> once the repo exists.
+    </p>
+  )
+}
+
+<script>
+  const container = document.getElementById('giscus-container');
+  if (container) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting) return;
+        observer.disconnect();
+
+        const isDark = document.documentElement.classList.contains('dark');
+        const script = document.createElement('script');
+        script.src = 'https://giscus.app/client.js';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        script.setAttribute('data-repo', container.dataset.repo!);
+        script.setAttribute('data-repo-id', container.dataset.repoId!);
+        script.setAttribute('data-category', container.dataset.category!);
+        script.setAttribute('data-category-id', container.dataset.categoryId!);
+        script.setAttribute('data-mapping', 'pathname');
+        script.setAttribute('data-strict', '1');
+        script.setAttribute('data-reactions-enabled', '1');
+        script.setAttribute('data-emit-metadata', '0');
+        script.setAttribute('data-input-position', 'top');
+        script.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        script.setAttribute('data-lang', 'en');
+        container.appendChild(script);
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(container);
+  }
+
+  window.addEventListener('theme-change', ((e: CustomEvent<{ dark: boolean }>) => {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+    iframe?.contentWindow?.postMessage(
+      { giscus: { setConfig: { theme: e.detail.dark ? 'dark' : 'light' } } },
+      'https://giscus.app'
+    );
+  }) as EventListener);
+</script>

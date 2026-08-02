@@ -1,0 +1,191 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --color-bg: #fcfcfc;
+  --color-fg: #171717;
+  --color-muted: #6b6b6b;
+  --color-border: #e4e4e4;
+  --color-accent: #955df5;
+  --color-accent-fg: #ffffff;
+
+  --breakpoint-xs: 30rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --color-bg: #0b0b0c;
+  --color-fg: #e8e8e6;
+  --color-muted: #9a9a97;
+  --color-border: #262626;
+  --color-accent: #b892ff;
+  --color-accent-fg: #0b0b0c;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+  }
+
+  code,
+  pre,
+  kbd {
+    font-family: var(--font-mono);
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .prose {
+    max-width: 68ch;
+    color: var(--color-fg);
+    line-height: 1.75;
+  }
+
+  .prose > * + * {
+    margin-top: 1.4em;
+  }
+
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 2.2em;
+    margin-bottom: 0.6em;
+    scroll-margin-top: 5rem;
+  }
+
+  .prose h2 {
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  }
+
+  .prose h3 {
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.25rem);
+  }
+
+  .prose p,
+  .prose ul,
+  .prose ol {
+    color: var(--color-fg);
+  }
+
+  .prose a {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .prose blockquote {
+    border-left: 2px solid var(--color-border);
+    padding-left: 1rem;
+    color: var(--color-muted);
+    font-style: italic;
+  }
+
+  .prose ul,
+  .prose ol {
+    padding-left: 1.4em;
+  }
+
+  .prose li {
+    margin-top: 0.4em;
+  }
+
+  .prose li::marker {
+    color: var(--color-muted);
+  }
+
+  .prose hr {
+    border-color: var(--color-border);
+    margin: 2.5em 0;
+  }
+
+  .prose img {
+    border-radius: 0.5rem;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .prose :not(pre) > code {
+    font-size: 0.875em;
+    background: var(--color-border);
+    padding: 0.15em 0.4em;
+    border-radius: 0.3em;
+  }
+
+  .prose pre {
+    border: 1px solid var(--color-border);
+    border-radius: 0.6rem;
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+    font-size: 0.875em;
+    line-height: 1.6;
+  }
+
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .prose th,
+  .prose td {
+    border: 1px solid var(--color-border);
+    padding: 0.5em 0.8em;
+    text-align: left;
+  }
+}
+
+/* Shiki dual-theme: follow the light/dark class instead of shipping two stylesheets */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+}
+
+:root.dark .astro-code,
+:root.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}

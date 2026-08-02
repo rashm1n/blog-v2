@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostListItem from '../../components/PostListItem.astro';
+import { getPublished } from '../../utils/posts';
+
+const posts = await getPublished('travel');
+---
+
+<BaseLayout title="Travel" description="Notes and photos from trips.">
+  <div class="py-8">
+    <h1 class="text-2xl font-semibold tracking-tight text-fg">Travel</h1>
+    <div class="mt-6 divide-y divide-border">
+      {posts.map((post) => <PostListItem entry={post} basePath="/travel" />)}
+      {posts.length === 0 && <p class="py-8 text-sm text-muted">Nothing posted yet — coming soon.</p>}
+    </div>
+  </div>
+</BaseLayout>

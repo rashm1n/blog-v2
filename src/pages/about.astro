@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AUTHOR_NAME } from '../consts';
+---
+
+<BaseLayout title="About" description={`About ${AUTHOR_NAME}.`}>
+  <div class="py-8">
+    <h1 class="text-2xl font-semibold tracking-tight text-fg">About</h1>
+    <div class="prose mt-6">
+      <p>
+        I'm {AUTHOR_NAME}, a software engineer. I write about distributed systems,
+        infrastructure, and whatever I'm debugging that week — and occasionally about
+        places I've traveled to.
+      </p>
+      <p>
+        This site is built with <a href="https://astro.build">Astro</a>, deployed as a
+        Docker container behind Caddy on a Hetzner VPS.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

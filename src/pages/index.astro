@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostListItem from '../components/PostListItem.astro';
+import { SITE_DESCRIPTION } from '../consts';
+import { getPublished } from '../utils/posts';
+
+const posts = (await getPublished('posts')).slice(0, 5);
+const travel = (await getPublished('travel')).slice(0, 3);
+---
+
+<BaseLayout>
+  <section class="pt-4 pb-8">
+    <p class="max-w-lg text-lg text-fg">
+      {SITE_DESCRIPTION}
+    </p>
+  </section>
+
+  <section class="py-6">
+    <h2 class="border-b border-border pb-2 text-sm font-medium uppercase tracking-wide text-muted">
+      Writing
+    </h2>
+    <div class="divide-y divide-border">
+      {posts.map((post) => <PostListItem entry={post} basePath="/blog" />)}
+      {posts.length === 0 && <p class="py-8 text-sm text-muted">Nothing published yet.</p>}
+    </div>
+    {posts.length > 0 && (
+      <a href="/blog" class="mt-2 inline-block text-sm text-accent underline underline-offset-4">
+        All writing &rarr;
+      </a>
+    )}
+  </section>
+
+  {travel.length > 0 && (
+    <section class="py-6">
+      <h2 class="border-b border-border pb-2 text-sm font-medium uppercase tracking-wide text-muted">
+        Travel
+      </h2>
+      <div class="divide-y divide-border">
+        {travel.map((post) => <PostListItem entry={post} basePath="/travel" />)}
+      </div>
+      <a href="/travel" class="mt-2 inline-block text-sm text-accent underline underline-offset-4">
+        All travel &rarr;
+      </a>
+    </section>
+  )}
+</BaseLayout>

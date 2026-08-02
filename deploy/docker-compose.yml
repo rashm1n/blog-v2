@@ -1,0 +1,52 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web
+
+  blog:
+    image: ghcr.io/rashm1n/blog:latest
+    restart: unless-stopped
+    networks:
+      - web
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD}@umami-db:5432/umami
+      APP_SECRET: ${APP_SECRET}
+    depends_on:
+      - umami-db
+    networks:
+      - web
+
+  umami-db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - umami_db_data:/var/lib/postgresql/data
+    networks:
+      - web
+
+networks:
+  web:
+
+volumes:
+  caddy_data:
+  caddy_config:
+  umami_db_data:
