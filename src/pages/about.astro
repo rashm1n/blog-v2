@@ -42,9 +42,9 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
           <a
             href={link.url}
             rel="me"
-            class={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-10 px-3.5')}
+            class={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-10 gap-1.5 px-3.5')}
           >
-            {link.label}
+            <span>{link.label}</span>
             <span class="text-primary transition-transform group-hover/button:translate-x-0.5">
               →
             </span>

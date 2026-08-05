@@ -6,8 +6,15 @@ functional-but-generic first-pass styling.
 
 The audience is software engineers. That drives essentially every choice below: minimal
 chrome, high information density in list views, code treated as a first-class content type,
-and a handful of details that reward people who notice detail. It also rules a lot out —
-no gradients-as-decoration, no illustration, no marketing-site motion, no card grids.
+and a handful of details that reward people who notice detail.
+
+> [!IMPORTANT]
+> Phase 12 moved the whole surface onto **shadcn/ui** and deliberately reversed several of
+> the restrictions this document originally set out — the page now carries a gradient wash,
+> list rows are cards, and headings are gradient-filled. Read
+> [Additions from Phase 12](#additions-from-phase-12) before treating anything below as
+> current. The token names in the table further down are **retired**; the mapping to their
+> replacements is in that section.
 
 ## The organising idea
 
@@ -213,3 +220,105 @@ changelog-style list — dates in `MM/DD` mono, reading time right-aligned. A "R
 scored by shared tags sits above the chronological prev/next pair, with prev/next excluded from
 it so the two never show the same post. The homepage ends with a "Topics" row of the eight
 most-used tags.
+
+## Additions from Phase 12
+
+The site moved onto [shadcn/ui](https://ui.shadcn.com). Two things drove it: the palette had
+only ever had one flat page colour to work with, and list rows were text and nothing else —
+there was no vocabulary for material that floats above the page. shadcn supplies both, plus
+component recipes that are already accessible.
+
+### shadcn on a zero-JS site
+
+shadcn's components are React, so `@astrojs/react` is now an integration. **No component is
+given a `client:` directive**, so Astro renders them to static HTML at build time and the
+React runtime is never referenced by any page — the script payload over the wire is unchanged.
+(The bundle is still *emitted* into `dist/_astro/`; nothing links to it. It would start being
+fetched the moment any component gets a `client:` directive.)
+
+Link- and badge-shaped elements use the `cva` variant functions — `buttonVariants({ … })`,
+`badgeVariants({ … })` — as class strings on plain `<a>` elements, rather than the components
+with `asChild`. That is shadcn's own documented pattern for links, and it sidesteps Radix's
+`Slot` entirely.
+
+**Two traps worth knowing, both of which fail quietly or confusingly:**
+
+*React context does not cross the Astro slot boundary.* Astro renders each child of a React
+component as its own React root and splices the HTML into the parent's slot. Radix primitives
+pass state from Root to child through context, so composing `<Avatar><AvatarFallback/></Avatar>`
+in a `.astro` file fails the build with "`AvatarFallback` must be used within `Avatar`".
+`src/components/AuthorAvatar.tsx` exists purely to keep that subtree inside one React render.
+Any other context-based component (Tabs, Accordion, Select, …) needs the same wrapper.
+
+*A variant-prefixed utility always beats an unprefixed one.* Avatar sizes itself with
+`data-[size=lg]:size-10`; passing a plain `size-14` does not override it, and tailwind-merge
+won't dedupe across that boundary because the two aren't equivalent. The override has to carry
+the same variant — `data-[size=lg]:size-14`. This one produces no error at all, just an element
+at the wrong size.
+
+`astro-slot, astro-static-slot { display: contents }` sits in the base layer. Astro strips the
+static wrapper from output today, so it only matters once something is hydrated — but there it
+prevents an inline wrapper from landing between a `Card` and its `CardHeader` and quietly
+breaking every flex layout in the library.
+
+### Tokens
+
+shadcn's semantic variables are now the single source of truth, and the old set is retired:
+
+| Retired | Replacement | Note |
+| --- | --- | --- |
+| `--color-bg` | `--background` | |
+| `--color-fg` | `--foreground` | |
+| `--color-surface` | `--muted` | inset surfaces, code blocks |
+| `--color-muted` | `--muted-foreground` | secondary **text** |
+| `--color-border` | `--border` | |
+| `--color-hairline` | `--hairline` | kept; outside shadcn's vocabulary |
+| `--color-accent` | `--primary` | the brand violet |
+| `--color-accent-soft` | `--primary-subtle` | search `<mark>` background |
+| `--color-accent-fg` | `--primary-foreground` | |
+| — | `--card` | new: material above the page |
+| — | `--accent` | new: **hover surface, not the brand colour** |
+
+That last row is the one that catches people. In shadcn's vocabulary `accent` is what a row
+fills with under the cursor; the brand colour is `primary`. The old palette used `accent` for
+exactly the opposite thing, so any `text-accent` in an old snippet means `text-primary` now.
+
+Values moved to OKLCH but the audited contrast ratios came across unchanged — `primary`
+≈5.7:1 light / ≈7.2:1 dark on the page, `muted-foreground` ≈5.7:1 / ≈6.1:1. Both carry real
+text, so both still have to clear 4.5:1. The four callout hues were left alone.
+
+### What changed on screen
+
+**An aurora wash.** `body::before` draws two soft radial gradients — brand violet and a cooler
+blue — across the top 75vh, blurred and drifting on a 60s loop. It sits at `z-index: -2`, under
+the existing engineering grid (now `body::after`). Both are `position: fixed`, so neither costs
+anything on scroll. This is the reversal of the original "no gradients-as-decoration" rule: the
+page had no depth to trade on, and a wash that most readers won't consciously notice buys more
+than another hairline would.
+
+**Post rows are cards.** `PostCard.astro` replaces `PostListItem.astro`. At rest it is a quiet
+bordered row on a translucent `card` background; on hover `.card-interactive` lifts it 2px,
+tints the border toward `primary`, drops a brand-tinted shadow and draws a 2px brand hairline
+down the leading edge. Tags are `secondary` badges, the meta line stays mono. The lift is
+disabled under `prefers-reduced-motion`; the colour changes are not, since they carry the
+affordance.
+
+**Gradient headings.** `.text-gradient` fills large headings with a gradient that warms toward
+the brand hue at the end of the line. It degrades to a flat colour without `background-clip:
+text`, and the print block puts solid ink back — a clipped gradient prints as nothing at all.
+
+**Header and hero.** The search trigger is now shadcn's command-menu button (outline variant
+carrying its own `⌘K` chip) instead of a bare icon; nav items get a `muted` pill when active.
+The hero leads with a monogram avatar and status dot, a role badge, a gradient name, and a real
+button row. `.reveal` picked up a `--reveal-delay` custom property so list entrances stagger
+without a keyframe per position.
+
+### Implementation map (Phase 12 delta)
+
+| File | Role |
+| --- | --- |
+| `components.json` | shadcn CLI config — style `radix-nova`, `@/*` alias |
+| `src/lib/utils.ts` | `cn()` — clsx + tailwind-merge |
+| `src/components/ui/*.tsx` | Vendored shadcn components (button, card, badge, separator, avatar) |
+| `src/components/AuthorAvatar.tsx` | Avatar subtree kept in one React render (see traps above) |
+| `src/components/PostCard.astro` | The list row, now a card — replaces `PostListItem.astro` |

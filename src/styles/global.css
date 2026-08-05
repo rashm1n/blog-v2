@@ -123,8 +123,8 @@
   --hairline: oklch(0.9739 0.0022 106.42);
   --primary-subtle: oklch(0.9502 0.0272 293.6);
   --grid-line: rgb(0 0 0 / 0.055);
-  --aurora-a: oklch(0.5083 0.2129 293.6 / 0.13);
-  --aurora-b: oklch(0.63 0.15 220 / 0.09);
+  --aurora-a: oklch(0.5083 0.2129 293.6 / 0.2);
+  --aurora-b: oklch(0.63 0.15 220 / 0.13);
   --card-shadow: 0 1px 2px oklch(0.19 0.0075 285.9 / 0.05);
   --card-shadow-lifted: 0 8px 24px -8px oklch(0.5083 0.2129 293.6 / 0.16);
 }
@@ -154,8 +154,8 @@
   --hairline: oklch(0.1919 0.0038 285.9);
   --primary-subtle: oklch(0.2513 0.0546 292.5);
   --grid-line: rgb(255 255 255 / 0.042);
-  --aurora-a: oklch(0.7137 0.1434 292.5 / 0.14);
-  --aurora-b: oklch(0.68 0.12 220 / 0.08);
+  --aurora-a: oklch(0.7137 0.1434 292.5 / 0.22);
+  --aurora-b: oklch(0.68 0.12 220 / 0.12);
   --card-shadow: 0 1px 2px oklch(0 0 0 / 0.4);
   --card-shadow-lifted: 0 8px 28px -10px oklch(0.7137 0.1434 292.5 / 0.28);
 }
@@ -371,19 +371,34 @@
 
   /* Headline treatment: text filled by a gradient that warms toward the brand
      hue at the end of the line. Falls back to a flat colour where
-     background-clip: text isn't supported. */
+     background-clip: text isn't supported.
+
+     The ramp starts a quarter of the way in and travels far enough to actually
+     be visible — an earlier version stopped at 62% foreground and read as flat
+     black on screen, which is the same as not having done it. The end colour is
+     still ~7:1 on the page in both themes; headings are text, not decoration. */
   .text-gradient {
     background: linear-gradient(
-      120deg,
+      110deg,
       var(--foreground) 0%,
-      var(--foreground) 45%,
-      color-mix(in oklab, var(--foreground) 62%, var(--primary)) 100%
+      var(--foreground) 25%,
+      color-mix(in oklab, var(--foreground) 45%, var(--primary)) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     /* Descenders get clipped without a little breathing room. */
     padding-bottom: 0.06em;
+
+    /* The gradient is painted across the element's box, but `background-clip:
+       text` only reveals it where glyphs are. A block-level heading is as wide
+       as its container, so a short title like a one-word name sits entirely in
+       the first third of the ramp and renders flat — which is exactly how this
+       looked before. Shrinking the box to the text makes the ramp span the
+       glyphs instead. Multi-line headings are unaffected: fit-content resolves
+       to the available width once the text no longer fits on one line. */
+    width: fit-content;
+    max-width: 100%;
   }
 
   /* Interactive card. At rest it is a plain bordered row; on hover it lifts,

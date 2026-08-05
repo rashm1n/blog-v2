@@ -107,10 +107,12 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
           href="/blog"
           class={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'mt-4 -ml-2.5 font-mono text-muted-foreground'
+            'mt-4 -ml-2.5 gap-1.5 font-mono text-muted-foreground'
           )}
         >
-          All writing
+          {/* Explicit span, not a bare text node: a bare run becomes an
+              anonymous flex item and the arrow ends up sitting on the "g". */}
+          <span>All writing</span>
           <span class="text-primary transition-transform group-hover/button:translate-x-0.5">
             →
           </span>
@@ -132,10 +134,10 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
           href="/travel"
           class={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'mt-4 -ml-2.5 font-mono text-muted-foreground'
+            'mt-4 -ml-2.5 gap-1.5 font-mono text-muted-foreground'
           )}
         >
-          All travel
+          <span>All travel</span>
           <span class="text-primary transition-transform group-hover/button:translate-x-0.5">→</span>
         </a>
       </section>
