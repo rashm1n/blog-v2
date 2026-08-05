@@ -29,13 +29,26 @@ partially done; see the note there.
 
 ## 2. GitHub repo
 
-- `gh repo create` (public — required for giscus and for a credential-free GHCR pull on the VPS).
-- `git remote add origin ...` + `git push -u origin main`.
-- Enable Discussions, create a `Comments` category, install the giscus GitHub App, configure
-  giscus at giscus.app, set `GISCUS_*` repo variables.
-- Set repo secrets: `VPS_HOST`, `VPS_USER`, `SSH_PRIVATE_KEY` (a deploy-only keypair, not a
-  personal key).
-- Set repo variables: `UMAMI_WEBSITE_ID`, `UMAMI_SCRIPT_URL` (once Umami is running, step 4).
+**Mostly done.** Verified against the live repo in Phase 11:
+
+- ~~`gh repo create`, remote, first push.~~ Done — `github.com/rashm1n/blog-v2`, public.
+- ~~Discussions, giscus app, `GISCUS_*` repo variables.~~ Done — all four variables are set
+  (`gh variable list`) and a giscus iframe renders on live post pages.
+- ~~Repo secrets `VPS_HOST` / `VPS_USER` / `SSH_PRIVATE_KEY`.~~ Done — deploys run green
+  end-to-end, which they couldn't without all three.
+- **`UMAMI_WEBSITE_ID` is still unset, so the blog reports nothing.** This is the one item
+  here that is genuinely outstanding, and it looks fine from every angle except the one that
+  matters: the Umami container is up, `analytics.rashmin.dev` resolves, and
+  `https://rashmin.dev/stats.js` returns `200 application/javascript` — but `BaseHead` only
+  emits the tracking tag when `UMAMI_WEBSITE_ID` is non-empty, and no such repo variable
+  exists. Live pages contain no `data-website-id` script at all.
+
+  To fix: log in to `analytics.rashmin.dev`, add the site, copy its website ID, then
+  `gh variable set UMAMI_WEBSITE_ID --body '<id>'` and redeploy. `UMAMI_SCRIPT_URL` can stay
+  unset — it defaults to `/stats.js`, which is already proxied correctly.
+
+  Note the default `admin`/`umami` login still hasn't been changed (see step 4), so that
+  wants doing first, in the same sitting.
 
 ## 3. VPS prep
 
@@ -69,38 +82,42 @@ partially done; see the note there.
 
 ## 5. Manual QA
 
-Phase 7 covered part of this with screenshots from Windows Chrome — 1280px and 1700px in both
-themes, 375px measured for overflow, and search exercised against a built index. That bridge is
-screenshot-only (no CDP from WSL), so anything needing input, hover or focus is still open:
+**Mostly closed in Phase 11.** A headless Chromium is now driveable from the dev environment,
+so the "screenshot-only, no input events" limitation this section was written around is gone.
+Done — see the Phase 11 verification list in [`implementation-log.md`](./implementation-log.md):
 
-- Responsive check at 768 / 1440px — no horizontal scroll on tables, code blocks, images.
-  (375px and 1280px+ verified; see the implementation log, and note that Chrome clamps
-  `--window-size` to 500px minimum, so screenshots below that width lie.)
-- Hover and focus states across nav, post rows, tag chips, ToC, prev/next cards.
-- Keyboard-only pass: nav → search (`⌘K`, arrows, `↵`, `esc`) → post → comments, visible focus
-  rings, `prefers-reduced-motion` honored.
-- Dark mode: click the toggle, hard-reload, confirm no flash of the wrong theme.
-- Code-block copy button — needs a secure context, so test over HTTPS or `localhost`, not a
-  LAN IP.
-- Lighthouse on a built post — target 100/100/100/100, investigate anything under 95.
-- Social preview: paste a post URL into the X and LinkedIn debuggers, confirm the OG image.
-- `/rss.xml` through the W3C feed validator.
-- A post URL through Google's Rich Results Test and the Schema.org validator. The graph was
-  read and checked by hand against the built HTML (see the implementation log), but neither
-  validator has seen it, and Rich Results needs a public URL.
-- `curl -I` a `/blog/<slug>.md` on the live site and confirm `Content-Type: text/plain`. The
-  Caddy rule that pins this is in `docker/site.Caddyfile` and has never run — Docker isn't
-  installed in the dev environment, so it's unverified like the rest of the container config.
-  If it silently fails, browsers will download the file instead of rendering it.
+- ~~Responsive / overflow~~ — `scrollWidth === clientWidth` asserted at 390px on every page,
+  measured rather than eyeballed, plus 1280px in both themes.
+- ~~Keyboard pass and focus management~~ — ⌘K, arrows, `↵`, `esc`, and a focus-trap assertion
+  (Tab twelve times, focus never leaves the dialog; returns to the trigger on close).
+- ~~Dark-mode toggle interaction~~ — click path and the `localStorage` round-trip exercised.
+- ~~Code-block copy button~~ — exercised over `localhost` (a secure context).
+- ~~`/blog/<slug>.md` content type~~ — confirmed on the live site:
+  `content-type: text/plain; charset=utf-8`. The Caddy rule works.
+
+Still open, and all of it needs either a human eye or a third-party service:
+
+- **Lighthouse on a live post** — target 100/100/100/100. Nothing measured performance this
+  session; the new work is close to free (the only added JS is the lightbox and share
+  handlers, and view transitions ship zero bytes), but "should be fine" is not a number.
+- **Social preview** — paste a post URL into the X and LinkedIn debuggers. The OG images
+  generate and were inspected, but no crawler has fetched one.
+- **`/rss.xml` through the W3C feed validator**, now that it carries full `<content:encoded>`
+  rather than summaries — worth re-checking specifically because that changed.
+- **Rich Results Test + Schema.org validator** on a live post URL.
+- **Hover states** — exercised implicitly but not reviewed by eye at every breakpoint.
 
 ## 6. Content
 
-- Replace the placeholder gradient hero image (`src/assets/posts/sample-hero.png`) on
-  "Setting up this blog" with a real image, or remove the `heroImage` frontmatter.
-- Decide whether the 3 sample posts stay, get rewritten, or get deleted once real posts exist.
-  [`growth.md`](./growth.md) argues this is blocking rather than optional — "Setting up this
-  blog" is the most-written post on the internet and reads as *nothing here yet* to a first-time
-  visitor. That file also carries a list of post ideas to replace them with.
+The three sample posts are already gone; `src/content/posts/` holds one real post (Omarchy).
+`sample-hero.png` is still in `src/assets/posts/` but is no longer referenced by anything and
+can be deleted.
+
+**This is now the binding constraint on the site, and it's the only one.** Everything
+structural is done — search, feeds, comments, analytics plumbing, OG cards, archive, tags,
+related posts. A first-time visitor lands on a homepage with a single entry under "Writing".
+[`growth.md`](./growth.md) carries the post ideas; nothing in the codebase is blocking any of
+them, and no code change is needed to publish.
 
 ## Deferred by choice, not blocking
 
