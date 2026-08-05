@@ -52,38 +52,40 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-
       # The edge Caddyfile is bind-mounted from /srv/blog and used to be updated
       # only by hand, so security-header changes committed here silently never
-      # reached production — the deploy step below restarts `blog` and nothing
-      # else. Staged to a scratch path first and validated in a throwaway
-      # container, so a config that doesn't parse can never be left in place
-      # where it would stop Caddy coming back up after a reboot.
-      - name: Stage edge Caddyfile
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: deploy/Caddyfile
-          target: /srv/blog/staging
-          strip_components: 1
-          overwrite: true
-
-      - name: Validate and reload Caddy
+      # reached production — the step below restarts `blog` and nothing else.
+      #
+      # The VPS fetches the file itself rather than receiving it over scp.
+      # appleboy/scp-action inspects the output of a probe command to decide how
+      # to talk to the host, and this box prints `docker compose` output on
+      # login — enough noise that scp-action concluded "remote server os type is
+      # windows" and failed. ssh-action doesn't parse output that way, and the
+      # repo is public, so a plain curl needs no credentials. Pinning to the
+      # pushed SHA also guarantees the deployed file is exactly the reviewed one,
+      # which `main` alone wouldn't.
+      - name: Update and reload the edge Caddyfile
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -e
+            set -eu
             cd /srv/blog
-            # DOMAIN is interpolated by the Caddyfile; compose reads .env on its
-            # own but a bare `docker run` does not.
+            mkdir -p staging
+
+            curl -fsSL \
+              "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/deploy/Caddyfile" \
+              -o staging/Caddyfile
+
+            # DOMAIN is interpolated by the Caddyfile. Compose reads .env by
+            # itself; a bare `docker run` does not.
             set -a; . ./.env; set +a
 
+            # Validated before it is moved into place, so a config that doesn't
+            # parse can never be left where it would stop Caddy coming back up
+            # after a reboot.
             docker run --rm \
               -e DOMAIN="$DOMAIN" \
               -v /srv/blog/staging/Caddyfile:/etc/caddy/Caddyfile:ro \
