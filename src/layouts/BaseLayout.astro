@@ -13,9 +13,13 @@ interface Props {
   article?: boolean;
   jsonLd?: JsonLdNode[];
   markdownPath?: string;
+  published?: Date;
+  updated?: Date;
+  tags?: string[];
 }
 
-const { title, description, image, article, jsonLd, markdownPath } = Astro.props;
+const { title, description, image, article, jsonLd, markdownPath, published, updated, tags } =
+  Astro.props;
 ---
 
 <html lang="en">
@@ -27,6 +31,9 @@ const { title, description, image, article, jsonLd, markdownPath } = Astro.props
       article={article}
       jsonLd={jsonLd}
       markdownPath={markdownPath}
+      published={published}
+      updated={updated}
+      tags={tags}
     />
   </head>
   <!-- No background on <body>: <html> owns it, so the decorative grid drawn by

@@ -80,6 +80,37 @@ For links and other non-`<button>` elements, use the `cva` variant functions
 (`buttonVariants({ … })`, `badgeVariants({ … })`) as a class string on a plain `<a>` rather
 than the component with `asChild`.
 
+## Social cards
+
+Every page carries a 1200×630 PNG rendered at build time by
+[`src/utils/og.ts`](./src/utils/og.ts) — one per post at `/og/<slug>.png`, plus
+`/og-default.png` behind everything else. Nothing to add per post: the route reads the
+entry's date, reading time and tags, so the card shows what the post itself shows.
+
+The card is deliberately the page in miniature — same aurora, same 48px grid, same gradient
+headline, same mono labels — and it reads those values from the same oklch the palette is
+authored in, rather than a hand-copied hex set that drifts. The second aurora light is hued
+from the slug, so cards differ from each other without ever leaving the brand.
+
+Both typefaces are vendored as static TTFs in `src/assets/fonts/` because satori reads font
+files directly and cannot decode the woff2 Fontsource ships. See the
+[README there](./src/assets/fonts/README.md).
+
+Four satori behaviours worth knowing before editing a card, three of which fail *silently*:
+
+- **`oklch()` is not supported.** Colours are converted in-file; mixing happens in oklab,
+  not oklch, or a foreground↔primary blend detours through cyan.
+- **Multi-position gradient stops are ignored.** `linear-gradient(c 0 1px, transparent 1px 48px)`
+  parses without complaint and fills the element flat. Use the two-stop form plus
+  `backgroundSize`, exactly as `global.css` writes it.
+- **An explicit `undefined` in a style object throws.** A conditional property has to be
+  spread in or left out, never set to `undefined`.
+- **`text-wrap: balance` can clip.** It narrows the box to the balanced measure, so on an
+  element sized to its content a longer unbreakable word overflows and is cut mid-glyph.
+
+`BaseHead.astro` emits the rest of what a crawler wants: `og:image:width`/`height`/`type`/`alt`,
+`twitter:image:alt`, `og:locale`, and `article:published_time`/`modified_time`/`tag` on posts.
+
 ## Security headers
 
 The policy is split across two files, and they are meant to be read together:
