@@ -103,6 +103,11 @@ export default defineConfig({
       styleDirective: {
         resources: [
           "'self'",
+          // giscus's client.js injects <link rel="stylesheet"> pointing at its
+          // own default.css into *this* document, not just into its iframe.
+          // Caught only in production, since the giscus build vars are unset
+          // locally and the component renders a placeholder without them.
+          'https://giscus.app',
           // Shiki writes per-token colours as inline style attributes, as do
           // the view-transition names. Those can't be hashed — but scoping the
           // exemption to `style-src-attr` keeps it away from <style> elements,
