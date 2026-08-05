@@ -395,10 +395,11 @@ export async function renderOgCard({
 
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
 
-  return new Response(new Uint8Array(png), {
-    headers: {
-      'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=31536000, immutable',
-    },
-  });
+  /* Only the body of this response reaches disk — a static build discards the
+   * headers, and Caddy serves the .png by extension (see docker/site.Caddyfile,
+   * which does the same reasoning for /feed.json). Caching therefore belongs to
+   * the edge, and it should stay short: unlike /_astro/*, these filenames are
+   * not content-hashed, so an `immutable` card would outlive the post title
+   * printed on it. */
+  return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });
 }
