@@ -89,8 +89,35 @@ blocked resource is silent everywhere else.
 
 See `Dockerfile` and `docker/site.Caddyfile` for the app container, and `deploy/` for the
 VPS-side `docker-compose.yml` and edge `Caddyfile` (Caddy + blog + Umami + Postgres).
-`.github/workflows/deploy.yml` builds and pushes to GHCR, then SSHes into the VPS to pull
-and restart just the `blog` service.
+`.github/workflows/deploy.yml` builds and pushes to GHCR, then SSHes into the VPS.
+
+### The deploy key runs a forced command — read this before editing the workflow
+
+The CI key is registered in the VPS's `~/.ssh/authorized_keys` as:
+
+```
+restrict,command="/home/rush/bin/gh-deploy.sh" ssh-ed25519 AAAA...
+```
+
+so **sshd ignores whatever command the workflow sends and runs that script instead**, putting
+the sent command in `$SSH_ORIGINAL_COMMAND`. The key can do nothing else — no interactive
+shell, no arbitrary commands — which is a good property worth keeping.
+
+The consequence: **the real deploy logic is `deploy/gh-deploy.sh`, not the workflow.** Editing
+the workflow's `script:` block changes nothing in production. This went unnoticed for a long
+time because the workflow's script happened to be character-for-character what the forced
+command does, so deploys looked like they were running it.
+
+`deploy/gh-deploy.sh` is the version-controlled copy. Changing it requires a human on the box:
+
+```
+install -m 700 deploy/gh-deploy.sh /home/rush/bin/gh-deploy.sh
+```
+
+The workflow now sends only the commit SHA; `gh-deploy.sh` accepts it only if it matches
+exactly 40 hex characters (falling back to `main`) and uses it to fetch the matching
+`deploy/Caddyfile`, validate it in a throwaway `caddy` container, and reload — so edge-config
+changes reach production the same way app changes do.
 
 TLS is **not** handled by Let's Encrypt/ACME — the edge Caddyfile loads a static certificate
 from `/certs` instead (see the `tls` directive on each site block). This is a deliberate choice

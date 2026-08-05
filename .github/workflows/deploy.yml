@@ -52,63 +52,26 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-24.04
     steps:
-      # The edge Caddyfile is bind-mounted from /srv/blog and used to be updated
-      # only by hand, so security-header changes committed here silently never
-      # reached production — the step below restarts `blog` and nothing else.
+      # ---------------------------------------------------------------------
+      # THIS SCRIPT IS NOT WHAT RUNS ON THE VPS.
       #
-      # The VPS fetches the file itself rather than receiving it over scp.
-      # appleboy/scp-action inspects the output of a probe command to decide how
-      # to talk to the host, and this box prints `docker compose` output on
-      # login — enough noise that scp-action concluded "remote server os type is
-      # windows" and failed. ssh-action doesn't parse output that way, and the
-      # repo is public, so a plain curl needs no credentials. Pinning to the
-      # pushed SHA also guarantees the deployed file is exactly the reviewed one,
-      # which `main` alone wouldn't.
-      - name: Update and reload the edge Caddyfile
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            set -eu
-            cd /srv/blog
-            mkdir -p staging
-
-            curl -fsSL \
-              "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/deploy/Caddyfile" \
-              -o staging/Caddyfile
-
-            # DOMAIN is interpolated by the Caddyfile. Compose reads .env by
-            # itself; a bare `docker run` does not.
-            set -a; . ./.env; set +a
-
-            # Validated before it is moved into place, so a config that doesn't
-            # parse can never be left where it would stop Caddy coming back up
-            # after a reboot.
-            docker run --rm \
-              -e DOMAIN="$DOMAIN" \
-              -v /srv/blog/staging/Caddyfile:/etc/caddy/Caddyfile:ro \
-              -v /srv/blog/certs:/certs:ro \
-              caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
-
-            if cmp -s staging/Caddyfile Caddyfile; then
-              echo "Caddyfile unchanged"
-            else
-              cp Caddyfile "Caddyfile.bak.$(date +%s)"
-              mv staging/Caddyfile Caddyfile
-              # Atomic: Caddy rejects a bad config and keeps serving the old one.
-              docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
-              echo "Caddyfile updated and reloaded"
-            fi
-
+      # The deploy key is registered in the VPS's authorized_keys as
+      #   restrict,command="/home/rush/bin/gh-deploy.sh" ssh-ed25519 AAAA...
+      # so sshd ignores whatever command arrives and runs that file instead,
+      # putting what we send in $SSH_ORIGINAL_COMMAND. The key can do nothing
+      # else, which is the point — but it also means the real deploy logic
+      # lives in `deploy/gh-deploy.sh` (the version-controlled copy of that
+      # file), and editing the block below changes nothing in production.
+      #
+      # This was not obvious: the previous script here happened to be
+      # character-for-character what gh-deploy.sh does, so deploys looked like
+      # they were running it for months. What we send is now just the commit
+      # SHA, which gh-deploy.sh validates as 40 hex chars and uses to fetch the
+      # matching deploy/Caddyfile.
+      # ---------------------------------------------------------------------
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /srv/blog
-            docker compose pull blog
-            docker compose up -d blog
-            docker image prune -f
+          script: ${{ github.sha }}
