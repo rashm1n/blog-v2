@@ -18,6 +18,13 @@
   --color-accent-soft: #f0ebfd;
   --color-accent-fg: #ffffff;
 
+  /* Semantic hues, used only by callouts. Each is ≥5:1 on --color-bg, because
+     callout titles are text, not decoration. */
+  --color-info: #0b62d6;
+  --color-success: #0f7a4d;
+  --color-warning: #a35a00;
+  --color-danger: #c02626;
+
   --breakpoint-xs: 30rem;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
@@ -42,6 +49,10 @@
   --color-accent: #a78bfa;
   --color-accent-soft: #1c1730;
   --color-accent-fg: #0c0c0e;
+  --color-info: #7ab0f5;
+  --color-success: #57d6a0;
+  --color-warning: #f0b429;
+  --color-danger: #f47272;
   --grid-line: rgb(255 255 255 / 0.05);
 }
 
@@ -142,6 +153,40 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* ------------------------------------------------------- view transitions */
+
+/* Native cross-document transitions — no router, no client JS, no bundle cost.
+   Browsers without support just navigate normally. */
+@view-transition {
+  navigation: auto;
+}
+
+/* The chrome is identical on every page, so let it sit still while the content
+   under it cross-fades. Without a name it would fade out and back in too. */
+#site-header {
+  view-transition-name: site-header;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: var(--ease-out-quint);
+}
+
+/* Post titles morph from the list row into the article heading. The name is
+   derived from the slug in PostListItem/PostLayout, so the pairing is automatic
+   and stays unique within each document. */
+::view-transition-group(.post-title) {
+  animation-duration: 0.32s;
+  animation-timing-function: var(--ease-out-quint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
   }
 }
 
@@ -265,6 +310,18 @@
     text-decoration-color: var(--color-accent);
   }
 
+  /* Outbound links say so before they're clicked. `inline-block` keeps the
+     glyph out of the parent's underline run. */
+  .prose a[data-external]::after {
+    content: '↗';
+    display: inline-block;
+    margin-left: 0.1em;
+    font-size: 0.8em;
+    vertical-align: 0.15em;
+    text-decoration: none;
+    opacity: 0.65;
+  }
+
   .prose strong {
     font-weight: 600;
     color: var(--color-fg);
@@ -275,6 +332,83 @@
     padding-left: 1.15rem;
     color: var(--color-muted);
     font-style: normal;
+  }
+
+  /* --------------------------------------------------------------- callouts */
+
+  /* The one place the single-accent rule bends: a warning that isn't amber and
+     a caution that isn't red are worse than a slightly wider palette. Each type
+     sets `--callout` and everything else derives from it. */
+  .callout {
+    --callout: var(--color-accent);
+    border-left: 2px solid var(--callout);
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 0.875rem 1.15rem;
+    background: color-mix(in oklab, var(--callout) 7%, transparent);
+  }
+
+  .callout > * + * {
+    margin-top: 0.85em;
+  }
+
+  .callout__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--callout);
+  }
+
+  .callout__title::before {
+    content: '';
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
+    background: var(--callout);
+    -webkit-mask: var(--callout-icon) center / contain no-repeat;
+    mask: var(--callout-icon) center / contain no-repeat;
+  }
+
+  .callout blockquote {
+    border-left-color: var(--callout);
+  }
+
+  .callout a {
+    color: var(--callout);
+    text-decoration-color: color-mix(in oklab, var(--callout) 35%, transparent);
+  }
+
+  .callout a:hover {
+    text-decoration-color: var(--callout);
+  }
+
+  .callout[data-callout='note'] {
+    --callout: var(--color-info);
+    --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E");
+  }
+
+  .callout[data-callout='tip'] {
+    --callout: var(--color-success);
+    --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 14c.2-1 .7-1.7 1.5-2.5A5.8 5.8 0 0 0 18 7.5a6 6 0 0 0-12 0c0 1.2.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5'/%3E%3Cpath d='M9 18h6M10 22h4'/%3E%3C/svg%3E");
+  }
+
+  .callout[data-callout='important'] {
+    --callout: var(--color-accent);
+    --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
+  }
+
+  .callout[data-callout='warning'] {
+    --callout: var(--color-warning);
+    --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");
+  }
+
+  .callout[data-callout='caution'] {
+    --callout: var(--color-danger);
+    --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.6 2h6.8L22 8.6v6.8L15.4 22H8.6L2 15.4V8.6z'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E");
   }
 
   /* Preflight strips list markers from every ol/ul, so decimals have to come back. */
@@ -333,6 +467,113 @@
     border: 1px solid var(--color-border);
     max-width: 100%;
     height: auto;
+  }
+
+  /* ---------------------------------------------------------------- figures */
+
+  /* Built at runtime by PostImages.astro. */
+  .figure__zoom {
+    display: block;
+    width: 100%;
+    cursor: zoom-in;
+    border-radius: 0.625rem;
+    /* The image already carries the border; a ring here would double it. */
+    transition: opacity 0.2s ease;
+  }
+
+  .figure__zoom:hover {
+    opacity: 0.9;
+  }
+
+  .figure__caption {
+    margin-top: 0.65rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    text-align: center;
+  }
+
+  /* --------------------------------------------------------------- lightbox */
+
+  /* Sized explicitly rather than leaning on the UA's dialog defaults, so the
+     figure below has a definite height to fit the image into. */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    max-width: none;
+    max-height: none;
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 0.88);
+    backdrop-filter: blur(8px);
+  }
+
+  .lightbox__figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    width: 100%;
+    height: 100%;
+    padding: 3.5rem 1.5rem 2rem;
+    /* The padding is part of the click-to-close surface. */
+    cursor: zoom-out;
+  }
+
+  .lightbox__figure img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    cursor: default;
+  }
+
+  .lightbox__caption {
+    flex-shrink: 0;
+    max-width: 46rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    text-align: center;
+    /* Fixed light-on-dark: the backdrop is dark in both themes. */
+    color: rgb(255 255 255 / 0.72);
+  }
+
+  .lightbox__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    height: 2.25rem;
+    width: 2.25rem;
+    border-radius: 0.5rem;
+    color: rgb(255 255 255 / 0.7);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .lightbox__close svg {
+    height: 1.125rem;
+    width: 1.125rem;
+  }
+
+  .lightbox__close:hover {
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
   }
 
   .prose :not(pre) > code {
@@ -456,6 +697,39 @@
   }
 
   /* ---------------------------------------------------------------- search */
+
+  /* Sized and positioned here rather than with utilities, because the UA's
+     dialog defaults (auto width, centred margins, max-height) all have to be
+     unset before the palette can sit near the top of the viewport. */
+  .search-dialog {
+    position: fixed;
+    inset: 0;
+    display: none;
+    max-width: none;
+    max-height: none;
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    padding: 12vh 1rem 1rem;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .search-dialog[open] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .search-dialog::backdrop {
+    background: rgb(0 0 0 / 0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  :root.dark .search-dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
 
   .search-result {
     display: block;

@@ -159,3 +159,62 @@ over.
   deferred to the VPS, which already has Docker.
 - **GitHub remote**: repo is `git init`'d locally only, no remote pushed yet. giscus and the
   GHCR deploy workflow are written but can't be verified end-to-end until a remote exists.
+
+## Reading experience & hardening
+
+> Added in Phase 11. Implementation detail and what was verified is in
+> [`implementation-log.md`](./implementation-log.md#phase-11--reading-experience-feeds-and-a-real-csp).
+
+**CSS view transitions, not Astro's `<ClientRouter />`.**
+Cross-document transitions are declared with `@view-transition { navigation: auto }` in
+`global.css`. The router alternative would have required re-initialising every top-level script
+on `astro:page-load` — a large surface area of subtle lifecycle bugs — to buy an effect the
+browser now performs natively for three lines of CSS and no JavaScript. Browsers without
+support navigate normally, which is the same experience the site had before.
+
+**Two hand-written markdown plugins instead of the usual dependencies.**
+Callouts would normally mean `remark-directive` + `unist-util-visit`; external-link handling
+would mean `rehype-external-links`. Both are replaced by ~40-line local plugins sharing a
+four-line tree walker. For a tree this small the dependency is the more expensive option, and
+GitHub's `> [!NOTE]` syntax was chosen specifically so posts still read correctly as plain
+Markdown on GitHub and in the `/blog/<slug>.md` twins.
+
+**Callouts are the one place the single-accent rule bends.**
+Four semantic colours (`info`, `success`, `warning`, `danger`) were added as tokens. A warning
+that isn't amber and a caution that isn't red communicate worse than a wider palette does, and
+these are the only components allowed to use them. Each is ≥5:1 on its background, checked the
+same way the accent was — callout titles are text, not decoration.
+
+**Native `<dialog>` for search and the lightbox.**
+The search overlay previously declared `role="dialog" aria-modal="true"` on a div, which is a
+claim about behaviour rather than the behaviour itself — Tab escaped to the page behind it.
+`showModal()` supplies the focus trap, Esc handling, background inertness and top-layer
+stacking natively. Less code than the version that didn't work.
+
+**Image and figure enhancement client-side, not via rehype.**
+`PostImages.astro` wraps prose images at runtime, following the pattern `CodeBlocks.astro`
+already established. A rehype plugin would have to run in a defined order relative to Astro's
+own image handling, which is a fight with no upside here; the unenhanced state (a plain
+bordered image) is already fine.
+
+**A build-time CSP check, because a stale hash has no symptom.**
+Astro's `security.csp` hashes the scripts it bundles but not `is:inline` ones. The site was
+reduced to a single inline script (the theme anti-flash script, which must run before paint)
+with its hash pinned by hand; everything else was either bundled or moved to `public/`.
+`scripts/check-csp.mjs` fails the build if any inline script isn't covered. This is not
+belt-and-braces: an invalidated hash produces no error, no console message and no report —
+just a feature that silently stops running for every visitor. It caught the 404 page's script
+on its first run.
+
+**`style-src-attr 'unsafe-inline'`, scoped deliberately.**
+Shiki emits per-token colours as inline style attributes and cannot be made to stop. The
+exemption is confined to the `-attr` variant so `<style>` elements remain hash-only, and unlike
+a script, a style attribute has no execution capability.
+
+**Full-content feeds, generated from one source.**
+RSS gained `<content:encoded>` and a JSON Feed was added at `/feed.json`; both are built from a
+single `feedItems()` helper so the two can never disagree. Content is rendered through the
+container API rather than a second Markdown renderer, so callouts and syntax highlighting reach
+subscribers exactly as they appear on the site. Not re-sanitised: this is first-party content
+already served as HTML from this origin, so a sanitiser would add a dependency without removing
+a threat.

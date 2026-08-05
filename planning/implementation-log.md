@@ -419,3 +419,102 @@ to drive input events, hover states, or focus. Still needs a manual pass:
 - `prefers-reduced-motion`.
 - Lighthouse scores.
 - Social preview cards (X/LinkedIn debuggers) — needs a public URL anyway.
+
+## Phase 11 — Reading experience, feeds, and a real CSP
+
+A features-and-hardening pass, done against a headless Chromium driven from this environment —
+which closes most of the "known gap" above, since input, focus and hover are all reachable now.
+
+### View transitions without a router
+
+Cross-document transitions are declared in CSS (`@view-transition { navigation: auto }`), not
+with Astro's `<ClientRouter />`. The router would have meant re-initialising every top-level
+script on `astro:page-load` — seven components' worth of listeners — to buy an effect the
+browser now does natively for three lines of CSS and zero bytes of JavaScript. Firefox and
+anything older simply navigates normally.
+
+Post titles morph from list row to article heading because both carry the same
+`view-transition-name`, derived from the entry id by `titleTransitionName()`. Since ids are
+unique per document, the pairing needs no runtime bookkeeping.
+
+### Callouts and external links: two small plugins, no dependencies
+
+`remark-callouts.mjs` recognises GitHub's `> [!NOTE]` syntax; `rehype-external-links.mjs` pins
+`rel="noopener noreferrer"` on outbound links and marks them for the ↗ affordance. Both walk
+the tree with a four-line recursive function rather than pulling in `unist-util-visit`.
+
+Verified against a temporary fixture post covering all five callout types, a custom title, a
+multi-paragraph body, a plain blockquote, and an unknown `[!BOGUS]` type (must stay a
+blockquote). Fixture deleted afterwards; the syntax is documented in `README.md` instead.
+
+`markdown.remarkPlugins` / `rehypePlugins` are deprecated in Astro 7 — plugins now go through
+`unified()` from `@astrojs/markdown-remark`, which had to be added as a direct dependency
+because pnpm's strict layout doesn't expose transitive packages to the config file.
+
+### Native `<dialog>` for both overlays
+
+Search was an `aria-modal="true"` div, which is a claim rather than a behaviour: Tab escaped to
+the page behind it. It and the new image lightbox are both `<dialog>` + `showModal()` now,
+which supplies the focus trap, Esc handling, background inertness and top-layer stacking for
+free. Confirmed by pressing Tab twelve times and asserting `document.activeElement` never left
+the dialog, and that focus returns to `#search-trigger` on close.
+
+The lightbox zoom reuses `document.startViewTransition()`: the thumbnail and the full-size
+image swap a shared `view-transition-name` inside the update callback, so the two never hold it
+simultaneously. No animation library involved.
+
+### The CSP, and why it needed a build-time check
+
+`security.csp` in Astro 7 hashes every inline script it emits and writes a per-page
+`<meta http-equiv>`. It does **not** hash `is:inline` scripts — those are passed through
+untouched by design. That left four unhashed scripts, all silently non-functional under
+enforcement.
+
+Three were fixed by removing the reason they were inline:
+
+- Header and ThemeToggle became ordinary bundled scripts (neither needed to run before paint).
+- The Pagefind loader moved to `public/pagefind-loader.js`. It was `is:inline` because Vite
+  constant-folds dynamic import specifiers (see Phase 7); a file in `public/` isn't seen by
+  Vite *and* is covered by `script-src 'self'`, so one move solved both problems.
+
+The fourth — the theme anti-flash script — genuinely must be inline and blocking, so its hash
+is pinned by hand. `scripts/check-csp.mjs` runs in `postbuild` and fails if any inline script's
+hash is missing from its page's policy. **It immediately caught a fifth script nobody had
+thought about: the 404 page's path-substitution script**, which would have shipped broken.
+That is the entire argument for the check — a stale hash has no symptom other than a feature
+quietly not running, on a site with no `report-uri` to report it.
+
+Two accommodations the policy needs, both deliberate:
+
+- `style-src-attr 'unsafe-inline'` — Shiki writes per-token colours as inline style
+  attributes, and so do the view-transition names. Scoped to `-attr` so `<style>` elements
+  stay hash-only; a style attribute can't execute anything.
+- `'wasm-unsafe-eval'` in `script-src` — Pagefind's index reader is WebAssembly.
+
+`img-src` initially read `https: data:` and blocked the site's own images over plain HTTP,
+which is how the local preview serves them. `'self'` has to be listed explicitly.
+
+### Full-content feeds
+
+RSS now carries `<content:encoded>` and there's a JSON Feed 1.1 at `/feed.json`, both built
+from one `feedItems()` helper so they can't disagree. The HTML comes from the container API
+(`experimental_AstroContainer`), i.e. the same component pipeline the pages use — so callouts
+and syntax highlighting reach the feed exactly as they appear on the site. Root-relative URLs
+are rewritten to absolute, since a reader resolves them against its own origin otherwise.
+
+### Verified this phase
+
+Headless Chromium, both colour schemes, 1280px and 390px:
+
+- Zero console errors and zero CSP violations across home, post, archive, tags, about, 404.
+- Theme toggle click path and the `localStorage` round-trip — previously untested.
+- Search: ⌘K, typing, result rendering with `<mark>`, focus trap, focus restoration.
+- Lightbox: open, caption from the Markdown image title, Esc close.
+- Copy-link button (secure context — `localhost` qualifies).
+- Code-block chrome and Shiki token colours under the enforced policy.
+- `scrollWidth === clientWidth` at 390px on every page — no horizontal overflow.
+- `rss.xml` and `sitemap-index.xml` parse as XML; `feed.json` parses as JSON.
+- `deploy/Caddyfile` adapted to JSON by the real `caddy` binary in Docker, and the resulting
+  header set asserted — the first time anything in `deploy/` has been machine-checked.
+
+Still not done: Lighthouse, and the social-preview debuggers (both need the public URL).

@@ -1,0 +1,137 @@
+---
+// Progressive enhancement for prose images, in the same spirit as CodeBlocks:
+// a zero-dependency client layer over Astro's default markdown pipeline rather
+// than a rehype plugin fighting Astro's own image handling.
+//
+// Wraps each image in a <figure>, promotes a Markdown image title
+// (`![alt](src "title")`) to a caption, and makes the image open full-size in a
+// native <dialog> — which brings focus trapping, Esc-to-close, inert background
+// and top-layer stacking for free.
+---
+
+<dialog id="lightbox" class="lightbox" aria-label="Expanded image">
+  <button type="button" class="lightbox__close" aria-label="Close image" data-close>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      aria-hidden="true"
+    >
+      <path d="M18 6 6 18M6 6l12 12"></path>
+    </svg>
+  </button>
+  <figure class="lightbox__figure">
+    <img id="lightbox-image" alt="" />
+    <figcaption id="lightbox-caption" class="lightbox__caption"></figcaption>
+  </figure>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('lightbox') as HTMLDialogElement | null;
+  const full = document.getElementById('lightbox-image') as HTMLImageElement | null;
+  const caption = document.getElementById('lightbox-caption');
+
+  // `startViewTransition` drives the zoom; without it (or under reduced motion)
+  // the dialog just appears, which is a perfectly fine unenhanced state.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const canMorph = () => typeof document.startViewTransition === 'function' && !reduced.matches;
+
+  const NAME = 'lightbox-media';
+  let source: HTMLImageElement | null = null;
+
+  function transition(update: () => void) {
+    if (!canMorph()) {
+      update();
+      return Promise.resolve();
+    }
+    return document.startViewTransition(update).finished.catch(() => {});
+  }
+
+  function open(image: HTMLImageElement) {
+    if (!dialog || !full || !caption) return;
+    source = image;
+
+    // Both elements can't carry the name at once, so the handoff happens inside
+    // the callback: old state is captured from the thumbnail, new from the dialog.
+    image.style.viewTransitionName = NAME;
+    transition(() => {
+      image.style.viewTransitionName = '';
+      full.style.viewTransitionName = NAME;
+      full.src = image.currentSrc || image.src;
+      full.alt = image.alt;
+      const text = image.dataset.caption ?? '';
+      caption.textContent = text;
+      caption.hidden = text === '';
+      dialog.showModal();
+    });
+  }
+
+  function close() {
+    if (!dialog || !full || !dialog.open) return;
+    const image = source;
+    transition(() => {
+      full.style.viewTransitionName = '';
+      if (image) image.style.viewTransitionName = NAME;
+      dialog.close();
+    }).then(() => {
+      if (image) image.style.viewTransitionName = '';
+    });
+    source = null;
+  }
+
+  if (dialog) {
+    // Esc fires `cancel` before the native close, so intercepting here keeps the
+    // keyboard path on the same animated exit as the button and the backdrop.
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close();
+    });
+
+    dialog.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      if (target === dialog || target.closest('[data-close]') || target.tagName === 'FIGURE') {
+        close();
+      }
+    });
+  }
+
+  for (const image of document.querySelectorAll<HTMLImageElement>('.prose img')) {
+    if (image.closest('a') || image.closest('.figure')) continue;
+
+    const figure = document.createElement('figure');
+    figure.className = 'figure';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'figure__zoom';
+    button.setAttribute('aria-label', image.alt ? `Expand image: ${image.alt}` : 'Expand image');
+
+    // `title` would otherwise surface as a hover tooltip duplicating the caption.
+    const text = image.title.trim();
+    image.removeAttribute('title');
+    if (text) image.dataset.caption = text;
+
+    // Markdown wraps a standalone image in its own <p>. Replacing that <p>
+    // rather than the <img> keeps <figure> a direct child of .prose — both so
+    // it isn't nested in a paragraph, and so `.prose > * + *` still spaces it.
+    const paragraph = image.parentElement;
+    const standalone =
+      paragraph?.tagName === 'P' && paragraph.childNodes.length === 1 && paragraph.parentElement;
+
+    (standalone ? paragraph : image).replaceWith(figure);
+    button.append(image);
+    figure.append(button);
+
+    if (text) {
+      const figcaption = document.createElement('figcaption');
+      figcaption.className = 'figure__caption';
+      figcaption.textContent = text;
+      figure.append(figcaption);
+    }
+
+    button.addEventListener('click', () => open(image));
+  }
+</script>

@@ -1,0 +1,63 @@
+---
+// Appears once the reader is a screen or so down the page. Rendered hidden so
+// it never flashes on short pages that will never scroll far enough to show it.
+---
+
+<button
+  id="back-to-top"
+  type="button"
+  aria-label="Back to top"
+  class="fixed bottom-5 right-5 z-40 grid h-9 w-9 translate-y-2 place-items-center rounded-full border border-border bg-bg/85 text-muted opacity-0 backdrop-blur-md transition-[opacity,transform,color] duration-200 hover:text-fg data-[visible]:translate-y-0 data-[visible]:opacity-100"
+  hidden
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="h-4 w-4"
+    aria-hidden="true"
+  >
+    <path d="M12 19V5M5 12l7-7 7 7"></path>
+  </svg>
+</button>
+
+<script>
+  const button = document.getElementById('back-to-top');
+
+  if (button) {
+    button.hidden = false;
+    let ticking = false;
+
+    const sync = () => {
+      ticking = false;
+      if (window.scrollY > window.innerHeight) button.setAttribute('data-visible', '');
+      else button.removeAttribute('data-visible');
+    };
+
+    sync();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(sync);
+      },
+      { passive: true }
+    );
+
+    button.addEventListener('click', () => {
+      // An explicit `behavior` wins over the CSS `scroll-behavior` the
+      // reduced-motion block in global.css sets, so check the query here too.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+
+      // Send keyboard and screen-reader focus back with the viewport, otherwise
+      // it stays on a button that is now off-screen.
+      document.getElementById('content')?.focus();
+    });
+  }
+</script>

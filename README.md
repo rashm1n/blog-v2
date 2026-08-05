@@ -21,15 +21,62 @@ on a Hetzner VPS via GitHub Actions.
 | :------------------------ | :----------------------------------------------- |
 | `pnpm install`             | Install dependencies                             |
 | `pnpm dev`                 | Start local dev server at `localhost:4321`       |
-| `pnpm build`                | Build production site to `./dist/` (runs Pagefind postbuild) |
+| `pnpm build`                | Build production site to `./dist/` (runs Pagefind + CSP check as postbuild) |
 | `pnpm preview`             | Preview the production build locally             |
 | `pnpm astro check`         | Type-check the project                           |
+| `pnpm check:csp`           | Verify every inline script is covered by the CSP |
 
 ## Content
 
 - `src/content/posts/` — technical writing
 - `src/content/travel/` — travel notes (empty for now, wired up and ready)
 - Frontmatter: `title`, `description`, `pubDate`, optional `updatedDate`, `tags`, `draft`, optional `heroImage`
+
+### Authoring extras
+
+**Callouts.** GitHub's blockquote syntax, so a post still reads correctly as plain Markdown
+on GitHub and in the `/blog/<slug>.md` twins. Types: `NOTE`, `TIP`, `IMPORTANT`, `WARNING`,
+`CAUTION`. Anything after the marker on the same line replaces the default title; an
+unrecognised type is left as an ordinary blockquote.
+
+```markdown
+> [!WARNING] This is optional
+> Body text, **formatting** and [links](https://example.com) all work.
+```
+
+**Image captions.** The Markdown image *title* (the quoted third argument) becomes a visible
+caption. `alt` stays alt — it describes the image for screen readers and is not displayed.
+
+```markdown
+![Alt text for screen readers](./shot.png 'Caption shown under the image.')
+```
+
+Every image in a post is click-to-zoom, opening in a lightbox. Nothing to add per image.
+
+**External links** in post content automatically get `rel="noopener noreferrer"`,
+`target="_blank"` and a small ↗ marker.
+
+## Security headers
+
+The policy is split across two files, and they are meant to be read together:
+
+- **`astro.config.mjs` (`security.csp`)** generates the `script-src` / `style-src` /
+  `img-src` policy per page and emits it as a `<meta http-equiv>`. It has to live there
+  because only the build knows the SHA-256 of each page's inline scripts.
+- **`deploy/Caddyfile`** carries what a `<meta>` element cannot express — `frame-ancestors`,
+  HSTS, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, `X-Content-Type-Options`.
+
+Astro hashes the scripts it bundles, but **not** `is:inline` ones. Exactly one inline script
+remains — the theme anti-flash script in `BaseHead.astro`, which must run before first paint —
+and its hash is pinned by hand in `security.csp.scriptDirective.hashes`.
+
+`pnpm check:csp` (run automatically in `postbuild`) walks the built HTML and fails if any
+inline script's hash is missing from that page's policy, printing the value to paste in. Without
+it, editing an inline script by one character silently breaks that feature in every browser
+that enforces the policy — with no error anywhere, since the site sets no `report-uri`.
+
+Prefer a bundled `<script>` over `is:inline` unless the script genuinely must run before
+paint; bundled scripts are hashed automatically and need no maintenance.
 
 ## Deployment
 

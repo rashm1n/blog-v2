@@ -1,32 +1,27 @@
 import rss from '@astrojs/rss';
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_URL } from '../consts';
+import { feedItems } from '../utils/feed';
 
 export const GET: APIRoute = async (context) => {
-  const draftFilter = ({ data }: { data: { draft: boolean } }) =>
-    import.meta.env.PROD ? data.draft !== true : true;
-
-  const [posts, travel] = await Promise.all([
-    getCollection('posts', draftFilter),
-    getCollection('travel', draftFilter),
-  ]);
-
-  const items = [
-    ...posts.map((entry) => ({ entry, basePath: '/blog' })),
-    ...travel.map((entry) => ({ entry, basePath: '/travel' })),
-  ].sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+  const site = context.site ?? new URL(SITE_URL);
+  const items = await feedItems(site);
 
   return rss({
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    site: context.site!,
-    items: items.map(({ entry, basePath }) => ({
+    site,
+    // Full text, not a teaser: the point of subscribing in a reader is to read
+    // there. `content` becomes <content:encoded>, which readers prefer over
+    // <description> when both are present.
+    items: items.map(({ entry, path, html }) => ({
       title: entry.data.title,
       description: entry.data.description,
       pubDate: entry.data.pubDate,
-      link: `${basePath}/${entry.id}/`,
+      link: path,
       categories: entry.data.tags,
+      ...(html ? { content: html } : {}),
     })),
+    customData: '<language>en</language>',
   });
 };

@@ -2,10 +2,20 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostListItem from '../components/PostListItem.astro';
 import { AUTHOR_NAME, AUTHOR_ROLE, SITE_LEAD, SOCIAL_LINKS } from '../consts';
-import { getPublished } from '../utils/posts';
+import { allTags, getPublished } from '../utils/posts';
 
-const posts = (await getPublished('posts')).slice(0, 5);
-const travel = (await getPublished('travel')).slice(0, 3);
+const allPosts = await getPublished('posts');
+const allTravel = await getPublished('travel');
+const posts = allPosts.slice(0, 5);
+const travel = allTravel.slice(0, 3);
+
+// Most-used tags first, so the row reads as "what this site is about" rather
+// than as an alphabetical index — /tags already does the exhaustive version.
+const entries = [...allPosts, ...allTravel];
+const topics = allTags(entries)
+  .map((tag) => ({ tag, count: entries.filter((e) => e.data.tags.includes(tag)).length }))
+  .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
+  .slice(0, 8);
 ---
 
 <BaseLayout>
@@ -79,6 +89,27 @@ const travel = (await getPublished('travel')).slice(0, 3);
           All travel
           <span class="text-accent transition-transform group-hover:translate-x-0.5">→</span>
         </a>
+      </section>
+    )
+  }
+
+  {
+    topics.length > 0 && (
+      <section class="py-6 pb-16">
+        <h2 class="rule-heading label">Topics</h2>
+        <div class="mt-4 flex flex-wrap gap-2">
+          {topics.map(({ tag, count }) => (
+            <a
+              href={`/tags/${tag}`}
+              class="group inline-flex items-center gap-2 rounded-md border border-border px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+            >
+              #{tag}
+              <span class="tabular-nums text-muted/60 transition-colors group-hover:text-accent/70">
+                {count}
+              </span>
+            </a>
+          ))}
+        </div>
       </section>
     )
   }

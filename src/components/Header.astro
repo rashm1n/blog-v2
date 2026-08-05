@@ -66,23 +66,22 @@ const { pathname } = Astro.url;
   </div>
 </header>
 
-<script is:inline>
-  (() => {
-    const header = document.getElementById('site-header');
-    if (header) {
-      const sync = () => {
-        if (window.scrollY > 8) header.setAttribute('data-scrolled', '');
-        else header.removeAttribute('data-scrolled');
-      };
-      sync();
-      window.addEventListener('scroll', sync, { passive: true });
-    }
+<!-- Bundled rather than is:inline so Astro can hash it for the CSP. -->
+<script>
+  const header = document.getElementById('site-header');
+  if (header) {
+    const sync = () => {
+      if (window.scrollY > 8) header.setAttribute('data-scrolled', '');
+      else header.removeAttribute('data-scrolled');
+    };
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+  }
 
-    // Windows/Linux users press Ctrl, not Cmd — show them the key they actually have.
-    if (!/Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent)) {
-      for (const hint of document.querySelectorAll('[data-shortcut-hint]')) {
-        hint.textContent = 'Ctrl K';
-      }
+  // Windows/Linux users press Ctrl, not Cmd — show them the key they actually have.
+  if (!/Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent)) {
+    for (const hint of document.querySelectorAll('[data-shortcut-hint]')) {
+      hint.textContent = 'Ctrl K';
     }
-  })();
+  }
 </script>

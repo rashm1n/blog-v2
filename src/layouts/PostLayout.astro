@@ -5,8 +5,19 @@ import BaseLayout from './BaseLayout.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import Comments from '../components/Comments.astro';
 import CodeBlocks from '../components/CodeBlocks.astro';
+import PostImages from '../components/PostImages.astro';
 import ReadingProgress from '../components/ReadingProgress.astro';
-import { formatDate, readingTime, sectionFor, wordCount } from '../utils/posts';
+import RelatedPosts from '../components/RelatedPosts.astro';
+import PostActions from '../components/PostActions.astro';
+import {
+  formatDate,
+  getPublished,
+  readingTime,
+  relatedTo,
+  sectionFor,
+  titleTransitionName,
+  wordCount,
+} from '../utils/posts';
 import { markdownPath } from '../utils/markdown';
 import { articleNodes } from '../utils/schema';
 import { SITE_URL } from '../consts';
@@ -29,6 +40,19 @@ const { entry, headings, body, prev, next } = Astro.props;
 const { title, description, pubDate, updatedDate, tags, heroImage } = entry.data;
 const minutes = readingTime(body);
 const ogImage = `/og/${entry.id}.png`;
+
+// Computed here rather than in each route's getStaticPaths so `/blog` and
+// `/travel` can't drift apart on how "related" is defined. The prev/next pair
+// is excluded because it is already rendered a few rows further down — on a
+// small corpus every "related" post would otherwise be one of those two.
+const [allPosts, allTravel] = await Promise.all([getPublished('posts'), getPublished('travel')]);
+const adjacent = new Set([prev?.href, next?.href].filter(Boolean));
+const related = relatedTo(
+  entry,
+  [...allPosts, ...allTravel].filter(
+    (candidate) => !adjacent.has(`${sectionFor(candidate.collection).path}/${candidate.id}`)
+  )
+);
 
 // Built here rather than in BaseHead so the article nodes see the entry. The
 // canonical expression matches BaseHead's exactly — the schema's `url` and the
@@ -73,7 +97,10 @@ const jsonLd = articleNodes({
         }
       </div>
 
-      <h1 class="mt-4 text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-fg sm:text-4xl">
+      <h1
+        class="mt-4 text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-fg sm:text-4xl"
+        style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
+      >
         {title}
       </h1>
 
@@ -115,6 +142,10 @@ const jsonLd = articleNodes({
       <slot />
     </div>
 
+    <PostActions title={title} path={Astro.url.pathname} />
+
+    <RelatedPosts entries={related} />
+
     {
       (prev || next) && (
         <nav class="mt-16 grid grid-cols-1 gap-3 border-t border-border pt-8 sm:grid-cols-2">
@@ -155,6 +186,7 @@ const jsonLd = articleNodes({
   </article>
 
   <CodeBlocks />
+  <PostImages />
 
   <script>
     // Give every prose heading a clickable anchor. Cheaper than pulling in

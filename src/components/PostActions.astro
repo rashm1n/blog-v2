@@ -1,0 +1,135 @@
+---
+import { SITE_URL } from '../consts';
+
+interface Props {
+  title: string;
+  path: string;
+}
+
+const { title, path } = Astro.props;
+
+const url = new URL(path, Astro.site ?? SITE_URL).href;
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+// Static hrefs so the whole row works without JavaScript; the copy button and
+// the native share sheet are the only enhanced parts.
+const targets = [
+  {
+    label: 'X',
+    href: `https://x.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+  },
+  {
+    label: 'Hacker News',
+    href: `https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`,
+  },
+  {
+    label: 'LinkedIn',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  },
+];
+---
+
+<div
+  class="mt-12 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-6 font-mono text-xs"
+  data-post-actions
+  data-url={url}
+  data-title={title}
+>
+  <span class="label">Share</span>
+
+  <button
+    type="button"
+    data-copy-link
+    class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted transition-colors hover:bg-surface hover:text-fg"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="h-3.5 w-3.5"
+      aria-hidden="true"
+    >
+      <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path>
+      <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path>
+    </svg>
+    <span data-copy-label>Copy link</span>
+  </button>
+
+  <!-- Replaced by the native share sheet where one exists. -->
+  <button
+    type="button"
+    data-native-share
+    hidden
+    class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted transition-colors hover:bg-surface hover:text-fg"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="h-3.5 w-3.5"
+      aria-hidden="true"
+    >
+      <path d="M12 3v13M8 7l4-4 4 4"></path>
+      <path d="M20 14v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5"></path>
+    </svg>
+    Share
+  </button>
+
+  {
+    targets.map((target) => (
+      <a
+        href={target.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rounded-md px-1.5 py-1 text-muted transition-colors hover:bg-surface hover:text-fg"
+      >
+        {target.label}
+      </a>
+    ))
+  }
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-post-actions]');
+  if (root) {
+    const url = root.dataset.url ?? location.href;
+    const title = root.dataset.title ?? document.title;
+
+    const copyButton = root.querySelector<HTMLButtonElement>('[data-copy-link]');
+    const copyLabel = root.querySelector<HTMLElement>('[data-copy-label]');
+
+    let resetTimer: ReturnType<typeof setTimeout>;
+    copyButton?.addEventListener('click', async () => {
+      if (!copyLabel) return;
+      try {
+        // Requires a secure context; falls back to a hint rather than failing silently.
+        await navigator.clipboard.writeText(url);
+        copyLabel.textContent = 'Copied';
+      } catch {
+        copyLabel.textContent = 'Copy failed';
+      }
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        copyLabel.textContent = 'Copy link';
+      }, 1600);
+    });
+
+    const shareButton = root.querySelector<HTMLButtonElement>('[data-native-share]');
+    if (shareButton && typeof navigator.share === 'function') {
+      shareButton.hidden = false;
+      shareButton.addEventListener('click', async () => {
+        // An abort (user dismissed the sheet) is a normal outcome, not an error.
+        await navigator.share({ title, url }).catch(() => {});
+      });
+    }
+  }
+</script>

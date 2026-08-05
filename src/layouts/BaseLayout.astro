@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Search from '../components/Search.astro';
+import BackToTop from '../components/BackToTop.astro';
 import type { JsonLdNode } from '../utils/schema';
 
 interface Props {
@@ -40,11 +41,14 @@ const { title, description, image, article, jsonLd, markdownPath } = Astro.props
 
     <Header />
 
-    <main id="content" class="mx-auto w-full max-w-2xl flex-1 px-4 sm:px-6">
+    <!-- tabindex="-1" so the skip link and back-to-top can move focus here;
+         it stays out of the tab order. -->
+    <main id="content" tabindex="-1" class="mx-auto w-full max-w-2xl flex-1 px-4 sm:px-6 focus:outline-none">
       <slot />
     </main>
 
     <Footer />
     <Search />
+    <BackToTop />
   </body>
 </html>

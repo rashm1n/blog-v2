@@ -43,9 +43,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </div>
 
-  <script is:inline>
+  <script>
     // This page is served for any unmatched URL, so the real path is only known
     // at runtime — Astro.url.pathname would always render "/404" here.
+    // Assigned as textContent, never innerHTML: the path is attacker-controlled.
     const slot = document.getElementById('missing-path');
     if (slot) slot.textContent = location.pathname;
   </script>

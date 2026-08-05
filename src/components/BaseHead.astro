@@ -44,6 +44,7 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 <meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href="/rss.xml" />
+<link rel="alternate" type="application/feed+json" title={SITE_TITLE} href="/feed.json" />
 {
   markdownURL && (
     <link rel="alternate" type="text/markdown" href={markdownURL} title="Markdown source" />

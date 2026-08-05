@@ -1,16 +1,14 @@
 ---
 // Command-palette style search over the Pagefind index built in `postbuild`.
+//
+// A native <dialog> rather than a hand-rolled overlay: `showModal()` supplies
+// the focus trap, Esc handling, background inertness and top-layer stacking
+// that an `aria-modal` div only claims to have.
 ---
 
-<div
-  id="search-overlay"
-  class="fixed inset-0 z-50 hidden items-start justify-center bg-black/20 px-4 pt-[12vh] backdrop-blur-sm dark:bg-black/60"
->
+<dialog id="search-dialog" class="search-dialog" aria-label="Search">
   <div
     id="search-panel"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Search"
     class="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-bg shadow-2xl shadow-black/10 dark:shadow-black/50"
   >
     <div class="flex items-center gap-3 border-b border-border px-4">
@@ -35,12 +33,27 @@
         autocomplete="off"
         autocorrect="off"
         spellcheck="false"
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="search-results"
+        aria-autocomplete="list"
         class="w-full bg-transparent py-3.5 text-[0.9375rem] text-fg outline-none placeholder:text-muted"
       />
       <kbd class="kbd">esc</kbd>
     </div>
 
-    <div id="search-results" class="max-h-[52vh] overflow-y-auto p-2"></div>
+    <div
+      id="search-results"
+      role="listbox"
+      aria-label="Search results"
+      class="max-h-[52vh] overflow-y-auto p-2"
+    >
+    </div>
+
+    <!-- Counts are announced from here rather than from the list itself, so a
+         screen reader says "8 results" instead of re-reading every excerpt on
+         each keystroke. -->
+    <p id="search-status" role="status" aria-live="polite" class="sr-only"></p>
 
     <div
       class="flex items-center gap-4 border-t border-border bg-surface px-4 py-2.5 font-mono text-[0.6875rem] text-muted"
@@ -50,24 +63,12 @@
       <span class="flex items-center gap-1.5"><kbd class="kbd">↵</kbd> open</span>
     </div>
   </div>
-</div>
+</dialog>
 
-<script is:inline>
-  // is:inline on purpose — see the note in the module script below.
-  window.loadPagefind = () => {
-    window.__pagefind ??= import('/pagefind/pagefind.js')
-      .then(async (module) => {
-        await module.init?.();
-        return module;
-      })
-      .catch((error) => {
-        // Drop the cached rejection so a transient failure can be retried.
-        window.__pagefind = undefined;
-        throw error;
-      });
-    return window.__pagefind;
-  };
-</script>
+<!-- Served straight from public/ rather than bundled — see the file for why
+     Vite must not touch it. `is:inline` here means "don't process this tag";
+     it carries no inline code, so `script-src 'self'` covers it without a hash. -->
+<script is:inline src="/pagefind-loader.js"></script>
 
 <script>
   interface PagefindResult {
@@ -90,11 +91,11 @@
 
   let pagefind: Pagefind | null = null;
 
-  const overlay = document.getElementById('search-overlay')!;
+  const dialog = document.getElementById('search-dialog') as HTMLDialogElement;
   const input = document.getElementById('search-input') as HTMLInputElement;
   const results = document.getElementById('search-results')!;
+  const status = document.getElementById('search-status')!;
 
-  let lastFocused: HTMLElement | null = null;
   let selected = 0;
 
   const escapeHtml = (value: string) =>
@@ -104,8 +105,16 @@
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
     );
 
-  const message = (text: string) => {
-    results.innerHTML = `<p class="px-3 py-8 text-center text-sm text-muted">${text}</p>`;
+  // Built as a node with textContent rather than an HTML string: one caller
+  // passes the user's own query back, and this way no caller has to remember
+  // to escape it.
+  const message = (text: string, announce = '') => {
+    const paragraph = document.createElement('p');
+    paragraph.className = 'px-3 py-8 text-center text-sm text-muted';
+    paragraph.textContent = text;
+    results.replaceChildren(paragraph);
+    status.textContent = announce;
+    input.setAttribute('aria-expanded', 'false');
   };
 
   async function ensurePagefind() {
@@ -125,9 +134,9 @@
   }
 
   function open() {
-    lastFocused = document.activeElement as HTMLElement;
-    overlay.classList.remove('hidden');
-    overlay.classList.add('flex');
+    if (dialog.open) return;
+    dialog.showModal();
+    // The results list is the only thing that should scroll while this is up.
     document.body.style.overflow = 'hidden';
     input.value = '';
     message('Type to search.');
@@ -136,13 +145,14 @@
   }
 
   function close() {
-    overlay.classList.add('hidden');
-    overlay.classList.remove('flex');
-    document.body.style.overflow = '';
-    lastFocused?.focus();
+    if (dialog.open) dialog.close();
   }
 
-  const isOpen = () => !overlay.classList.contains('hidden');
+  // Fires for `close()`, Esc and the backdrop path alike, so the scroll lock is
+  // released in exactly one place. Focus returns to the trigger natively.
+  dialog.addEventListener('close', () => {
+    document.body.style.overflow = '';
+  });
 
   function items() {
     return [...results.querySelectorAll<HTMLAnchorElement>('[data-result]')];
@@ -154,27 +164,27 @@
     selected = (next + list.length) % list.length;
     list.forEach((el, i) => {
       el.toggleAttribute('data-selected', i === selected);
+      el.setAttribute('aria-selected', String(i === selected));
       if (i === selected) el.scrollIntoView({ block: 'nearest' });
     });
   }
 
   document.getElementById('search-trigger')?.addEventListener('click', open);
 
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) close();
+  // A click lands on the dialog itself only when it misses the panel inside it.
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) close();
   });
 
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      isOpen() ? close() : open();
+      dialog.open ? close() : open();
       return;
     }
-    if (!isOpen()) return;
+    if (!dialog.open) return;
 
-    if (e.key === 'Escape') {
-      close();
-    } else if (e.key === 'ArrowDown') {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
       highlight(selected + 1);
     } else if (e.key === 'ArrowUp') {
@@ -205,20 +215,25 @@
       const entries = await Promise.all(search.results.slice(0, 8).map((r) => r.data()));
 
       if (entries.length === 0) {
-        message(`No results for “${escapeHtml(query)}”.`);
+        message(`No results for “${query}”.`, 'No results');
         return;
       }
 
       results.innerHTML = entries
         .map(
+          // `excerpt` is the only field interpolated raw: Pagefind escapes the
+          // page text it indexed and adds just its own <mark> tags. Everything
+          // else goes through escapeHtml, including the URL in the href.
           (entry) => `
-            <a href="${entry.url}" data-result class="search-result">
+            <a href="${escapeHtml(entry.url)}" data-result role="option" aria-selected="false" class="search-result">
               <p class="text-sm font-medium text-fg">${escapeHtml(entry.meta.title ?? entry.url)}</p>
               <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">${entry.excerpt}</p>
               <p class="mt-1.5 font-mono text-[0.6875rem] text-muted/80">${escapeHtml(entry.url.replace(/\/$/, '') || '/')}</p>
             </a>`
         )
         .join('');
+      input.setAttribute('aria-expanded', 'true');
+      status.textContent = `${entries.length} result${entries.length === 1 ? '' : 's'}`;
       selected = -1;
       highlight(0);
     }, 120);

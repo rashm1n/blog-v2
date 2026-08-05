@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatDate, formatDateISO, readingTime } from '../utils/posts';
+import { formatDate, formatDateISO, readingTime, titleTransitionName } from '../utils/posts';
 
 interface Props {
   entry: CollectionEntry<'posts'> | CollectionEntry<'travel'>;
@@ -20,6 +20,7 @@ const minutes = readingTime(body);
   <div class="flex items-baseline justify-between gap-4">
     <h3
       class="text-[0.9375rem] font-medium leading-snug text-fg transition-colors group-hover:text-accent"
+      style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
     >
       {title}
     </h3>

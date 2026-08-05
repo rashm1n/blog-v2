@@ -8,6 +8,27 @@
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		X-Frame-Options "DENY"
+
+		# The full script/style/img policy is generated per page by Astro
+		# (security.csp in astro.config.mjs) and delivered as a <meta> element,
+		# because only Astro knows the hash of each page's inline scripts.
+		#
+		# frame-ancestors is ignored inside a <meta>, so it has to be a header —
+		# hence this second, deliberately narrow policy. Browsers enforce every
+		# policy they receive, so this adds a restriction without relaxing the
+		# generated one. X-Frame-Options above says the same thing for browsers
+		# predating frame-ancestors.
+		Content-Security-Policy "frame-ancestors 'none'"
+
+		# Nothing here uses any of these; a compromised dependency shouldn't be
+		# able to start. fullscreen stays on for the image lightbox.
+		Permissions-Policy "accelerometer=(), autoplay=(), browsing-topics=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()"
+
+		# Severs the window.opener relationship for anything this site opens.
+		# COEP/CORP are deliberately not set: COEP would break the giscus iframe,
+		# and CORP would stop other origins fetching the OG card images.
+		Cross-Origin-Opener-Policy "same-origin"
+
 		-Server
 	}
 

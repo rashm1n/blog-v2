@@ -168,3 +168,48 @@ needed on load. The click handler only flips the class and persists the choice.
   latency to a navigation that was already instant.
 - **No accent beyond one hue.** Tag chips, ToC states and links all share it. Adding a second
   colour would need a reason the content doesn't currently supply.
+
+## Additions from Phase 11
+
+**Semantic colours, callouts only.** Four tokens beyond the single accent —
+`--color-info`, `--color-success`, `--color-warning`, `--color-danger` — used by nothing except
+`.callout`. Each callout type sets `--callout` and the border, tint, title colour and icon all
+derive from it, so adding a type is one rule.
+
+| Token | Light | Dark | Contrast (light / dark) |
+| --- | --- | --- | --- |
+| `--color-info` | `#0b62d6` | `#7ab0f5` | ≈5.6:1 / ≈8.6:1 |
+| `--color-success` | `#0f7a4d` | `#57d6a0` | ≈5.3:1 / ≈10.7:1 |
+| `--color-warning` | `#a35a00` | `#f0b429` | ≈5.2:1 / ≈10.4:1 |
+| `--color-danger` | `#c02626` | `#f47272` | ≈5.9:1 / ≈7.0:1 |
+
+Callout icons are masked SVG data URIs (`-webkit-mask`/`mask` over a `background` of
+`--callout`), so one CSS rule recolours the icon with the type. No icon assets, no sprite.
+
+**Figures.** Prose images become `<figure>` at runtime with a mono, centred caption taken from
+the Markdown image *title* — `alt` stays alt. Images are click-to-zoom into a full-viewport
+`<dialog>` whose backdrop is a fixed dark blur in both themes (the lightbox is the one surface
+that ignores the theme, since a light overlay defeats the purpose).
+
+**Motion.** Two additions, both native and both `prefers-reduced-motion`-aware:
+
+- Cross-document view transitions, 220ms on the root cross-fade. `#site-header` carries its own
+  `view-transition-name` so the chrome sits still while content changes under it.
+- Post titles morph between list row and article heading (320ms) via a shared
+  `view-transition-name` derived from the entry id.
+
+The reduced-motion block turns navigation transitions off entirely (`navigation: none`) rather
+than shortening them. Note that an explicit `behavior: 'smooth'` in `scrollTo()` overrides the
+CSS `scroll-behavior` the same block sets — `BackToTop.astro` checks the media query in JS for
+that reason.
+
+**New chrome.** A back-to-top control (bottom-right, fades in past one viewport height, moves
+focus to `#content` so keyboard users travel with the viewport) and a post action row
+(mono, hairline-topped: copy link, native share where available, then X / Hacker News /
+LinkedIn as plain links that work without JavaScript).
+
+**New pages and sections.** `/archive` groups everything by year as a dense two-column
+changelog-style list — dates in `MM/DD` mono, reading time right-aligned. A "Read next" section
+scored by shared tags sits above the chronological prev/next pair, with prev/next excluded from
+it so the two never show the same post. The homepage ends with a "Topics" row of the eight
+most-used tags.
