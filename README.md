@@ -8,6 +8,7 @@ on a Hetzner VPS via GitHub Actions.
 
 - **Astro 7** — static output, content collections (`posts`, `travel`)
 - **Tailwind v4** via `@tailwindcss/vite`
+- **shadcn/ui** for the design system — rendered at build time, ships no JS (see below)
 - **Pagefind** for static search (⌘K)
 - **Satori** for build-time OG image generation
 - **giscus** for comments (GitHub Discussions-backed)
@@ -55,6 +56,29 @@ Every image in a post is click-to-zoom, opening in a lightbox. Nothing to add pe
 
 **External links** in post content automatically get `rel="noopener noreferrer"`,
 `target="_blank"` and a small ↗ marker.
+
+## shadcn/ui
+
+Components are vendored into `src/components/ui/` by the shadcn CLI (`pnpm dlx shadcn@latest
+add <name>`), configured by `components.json`. They are React, so `@astrojs/react` is an
+integration — but **nothing is given a `client:` directive**, so Astro renders them to static
+HTML at build time and no page references the React bundle. Adding a `client:` directive to
+any one of them is what would start shipping JavaScript.
+
+Two things that will bite you, both covered in more depth in
+[`planning/visual-design.md`](./planning/visual-design.md):
+
+- **React context doesn't cross the Astro slot boundary.** Astro renders each child of a React
+  component as its own React root, so composing a Radix primitive's parts in a `.astro`
+  file (`<Avatar><AvatarFallback/></Avatar>`) fails the build. Wrap the whole subtree in one
+  `.tsx` file instead — see `src/components/AuthorAvatar.tsx`.
+- **A variant-prefixed utility beats an unprefixed one.** Overriding a component's
+  `data-[size=lg]:size-10` needs `data-[size=lg]:size-14`, not `size-14`. This one fails
+  silently.
+
+For links and other non-`<button>` elements, use the `cva` variant functions
+(`buttonVariants({ … })`, `badgeVariants({ … })`) as a class string on a plain `<a>` rather
+than the component with `asChild`.
 
 ## Security headers
 
