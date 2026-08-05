@@ -148,7 +148,7 @@ const jsonLd = articleNodes({
 
     {
       (prev || next) && (
-        <nav class="mt-16 grid grid-cols-1 gap-3 border-t border-border pt-8 sm:grid-cols-2">
+        <nav data-noprint class="mt-16 grid grid-cols-1 gap-3 border-t border-border pt-8 sm:grid-cols-2">
           {prev ? (
             <a
               href={prev.href}
@@ -177,7 +177,7 @@ const jsonLd = articleNodes({
       )
     }
 
-    <section class="mt-16 pt-4">
+    <section data-noprint class="mt-16 pt-4">
       <h2 class="rule-heading label">Comments</h2>
       <div class="mt-5">
         <Comments />

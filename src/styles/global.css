@@ -818,6 +818,68 @@
   }
 }
 
+/* ------------------------------------------------------------------- print */
+
+/* Reference posts get printed and saved to PDF. Everything interactive is
+   marked `data-noprint` at the source, so this stays one rule plus typography. */
+@media print {
+  [data-noprint],
+  .heading-anchor,
+  .code-block__copy {
+    display: none !important;
+  }
+
+  /* Ink, not screen: the decorative grid and every themed colour go. */
+  html,
+  :root.dark {
+    --color-bg: #fff;
+    --color-fg: #000;
+    --color-muted: #444;
+    --color-border: #bbb;
+    --color-surface: #f6f6f6;
+    --color-hairline: #eee;
+    --color-accent: #000;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  .prose {
+    max-width: none;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+
+  /* A link is useless on paper unless the URL comes with it. Internal links are
+     left bare — the reader already has the page they point into. */
+  .prose a[data-external]::after {
+    content: ' (' attr(href) ')';
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    word-break: break-all;
+  }
+
+  .prose pre,
+  .figure,
+  .callout,
+  blockquote,
+  table {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* The inline card version; the fixed rail is hidden by data-noprint anyway. */
+  @page {
+    margin: 18mm;
+  }
+}
+
 /* Shiki dual-theme: follow the light/dark class instead of shipping two stylesheets.
    Only token colours are taken from the theme — the block background comes from the
    site surface so code sits in the same material as the rest of the page. */

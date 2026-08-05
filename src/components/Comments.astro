@@ -15,10 +15,15 @@ const configured = Boolean(repo && repoId && categoryId);
   configured ? (
     <div id="giscus-container" data-repo={repo} data-repo-id={repoId} data-category={category} data-category-id={categoryId} />
   ) : (
-    <p class="text-sm text-muted">
-      Comments aren't configured yet — set <code>GISCUS_REPO</code>, <code>GISCUS_REPO_ID</code>,
-      and <code>GISCUS_CATEGORY_ID</code> once the repo exists.
-    </p>
+    /* The build vars are absent in local dev, which is normal — so this hint is
+       for whoever is running the dev server, and must never reach a reader. In
+       a production build without them, the section renders empty instead. */
+    !import.meta.env.PROD && (
+      <p class="text-sm text-muted">
+        Comments aren't configured yet — set <code>GISCUS_REPO</code>, <code>GISCUS_REPO_ID</code>,
+        and <code>GISCUS_CATEGORY_ID</code> once the repo exists.
+      </p>
+    )
   )
 }
 

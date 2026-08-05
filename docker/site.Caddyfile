@@ -11,6 +11,12 @@
 	@plaintext path *.md *.txt
 	header @plaintext Content-Type "text/plain; charset=utf-8"
 
+	# A static build writes only the body of an endpoint to disk — the Response
+	# headers the route sets are discarded, so the type would fall back to
+	# application/json by extension. JSON Feed readers sniff for this one.
+	@jsonfeed path /feed.json
+	header @jsonfeed Content-Type "application/feed+json; charset=utf-8"
+
 	file_server
 
 	handle_errors {
