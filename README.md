@@ -78,6 +78,13 @@ that enforces the policy — with no error anywhere, since the site sets no `rep
 Prefer a bundled `<script>` over `is:inline` unless the script genuinely must run before
 paint; bundled scripts are hashed automatically and need no maintenance.
 
+**Third-party resources have to be added by hand.** giscus needs `https://giscus.app` in both
+`script-src` and `style-src` (its `client.js` injects a stylesheet into *this* document, not
+just its iframe) and in `frame-src`. Nothing warns you: the `GISCUS_*` build variables are
+unset in dev, so the component renders a placeholder locally and the violation only appears in
+production. **After any CSP change, load a real post in a browser and read the console** — a
+blocked resource is silent everywhere else.
+
 ## Deployment
 
 See `Dockerfile` and `docker/site.Caddyfile` for the app container, and `deploy/` for the

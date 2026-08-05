@@ -518,3 +518,30 @@ Headless Chromium, both colour schemes, 1280px and 390px:
   header set asserted — the first time anything in `deploy/` has been machine-checked.
 
 Still not done: Lighthouse, and the social-preview debuggers (both need the public URL).
+
+### What only the deploy could tell us
+
+Three things were invisible until the change was live, which is the argument for
+treating "pushed" and "verified" as separate states:
+
+1. **The edge Caddyfile was never deployed.** `deploy/Caddyfile` is bind-mounted from
+   `/srv/blog` and had only ever been updated by hand; the deploy job pulls the blog image and
+   restarts that one service. So the `frame-ancestors` / `Permissions-Policy` / COOP headers
+   went green through CI and then did nothing — `curl -I https://rashmin.dev` still showed the
+   old header set. Anything previously committed to that file was decorative too. CI now
+   stages the file, validates it in a throwaway `caddy` container against the real certs, and
+   only then moves it into place and reloads.
+
+2. **The giscus stylesheet was blocked.** `client.js` injects a `<link rel="stylesheet">` for
+   its own `default.css` into the *host* document, not only into its iframe, so the strict
+   `style-src` rejected it. This was structurally untestable locally: the `GISCUS_*` build
+   variables are unset in dev, so the component renders a placeholder and never loads the
+   script. Found by driving the live page in a real browser and reading the console.
+
+   The `giscus.app/api/discussions` 404 seen next to it is *not* a fault — giscus returns 404
+   until a post's discussion is created by its first comment.
+
+3. **`/feed.json` was served as `application/json`.** A static build writes only an endpoint's
+   response *body* to disk; the `Content-Type` the route sets is discarded, and Caddy then
+   types the file by extension. Pinned in `docker/site.Caddyfile`, the same way the Markdown
+   twins already were.
