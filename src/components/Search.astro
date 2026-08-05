@@ -9,7 +9,7 @@
 <dialog id="search-dialog" data-noprint class="search-dialog" aria-label="Search">
   <div
     id="search-panel"
-    class="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-bg shadow-2xl shadow-black/10 dark:shadow-black/50"
+    class="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-background shadow-2xl shadow-black/10 dark:shadow-black/50"
   >
     <div class="flex items-center gap-3 border-b border-border px-4">
       <svg
@@ -20,7 +20,7 @@
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"
-        class="h-4 w-4 shrink-0 text-muted"
+        class="h-4 w-4 shrink-0 text-muted-foreground"
         aria-hidden="true"
       >
         <circle cx="11" cy="11" r="7"></circle>
@@ -37,7 +37,7 @@
         aria-expanded="false"
         aria-controls="search-results"
         aria-autocomplete="list"
-        class="w-full bg-transparent py-3.5 text-[0.9375rem] text-fg outline-none placeholder:text-muted"
+        class="w-full bg-transparent py-3.5 text-[0.9375rem] text-foreground outline-none placeholder:text-muted-foreground"
       />
       <kbd class="kbd">esc</kbd>
     </div>
@@ -56,7 +56,7 @@
     <p id="search-status" role="status" aria-live="polite" class="sr-only"></p>
 
     <div
-      class="flex items-center gap-4 border-t border-border bg-surface px-4 py-2.5 font-mono text-[0.6875rem] text-muted"
+      class="flex items-center gap-4 border-t border-border bg-muted px-4 py-2.5 font-mono text-[0.6875rem] text-muted-foreground"
     >
       <span class="flex items-center gap-1.5"><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd>
         navigate</span>
@@ -110,7 +110,7 @@
   // to escape it.
   const message = (text: string, announce = '') => {
     const paragraph = document.createElement('p');
-    paragraph.className = 'px-3 py-8 text-center text-sm text-muted';
+    paragraph.className = 'px-3 py-8 text-center text-sm text-muted-foreground';
     paragraph.textContent = text;
     results.replaceChildren(paragraph);
     status.textContent = announce;
@@ -226,9 +226,9 @@
           // else goes through escapeHtml, including the URL in the href.
           (entry) => `
             <a href="${escapeHtml(entry.url)}" data-result role="option" aria-selected="false" class="search-result">
-              <p class="text-sm font-medium text-fg">${escapeHtml(entry.meta.title ?? entry.url)}</p>
-              <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">${entry.excerpt}</p>
-              <p class="mt-1.5 font-mono text-[0.6875rem] text-muted/80">${escapeHtml(entry.url.replace(/\/$/, '') || '/')}</p>
+              <p class="text-sm font-medium text-foreground">${escapeHtml(entry.meta.title ?? entry.url)}</p>
+              <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">${entry.excerpt}</p>
+              <p class="mt-1.5 font-mono text-[0.6875rem] text-muted-foreground/80">${escapeHtml(entry.url.replace(/\/$/, '') || '/')}</p>
             </a>`
         )
         .join('');

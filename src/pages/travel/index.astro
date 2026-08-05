@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import PostListItem from '../../components/PostListItem.astro';
+import PostCard from '../../components/PostCard.astro';
 import { getPublished } from '../../utils/posts';
 
 const posts = await getPublished('travel');
@@ -15,11 +15,11 @@ const description = 'Notes and photos from trips.';
     description={description}
   />
 
-  <div class="pb-8">
-    {posts.map((post) => <PostListItem entry={post} basePath="/travel" />)}
+  <div class="space-y-3 pb-8">
+    {posts.map((post, i) => <PostCard entry={post} basePath="/travel" index={i} />)}
     {
       posts.length === 0 && (
-        <p class="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-muted">
+        <p class="rounded-xl border border-dashed border-border bg-card/40 px-4 py-12 text-center text-sm text-muted-foreground backdrop-blur-sm">
           Nothing posted yet — coming soon.
         </p>
       )

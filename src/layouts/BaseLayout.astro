@@ -31,10 +31,10 @@ const { title, description, image, article, jsonLd, markdownPath } = Astro.props
   </head>
   <!-- No background on <body>: <html> owns it, so the decorative grid drawn by
        body::before (z-index -1) isn't painted over. -->
-  <body class="flex min-h-screen flex-col text-fg antialiased">
+  <body class="flex min-h-screen flex-col text-foreground antialiased">
     <a
       href="#content"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:border-border focus:bg-bg focus:px-3 focus:py-2 focus:text-sm"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:border-border focus:bg-background focus:px-3 focus:py-2 focus:text-sm"
     >
       Skip to content
     </a>

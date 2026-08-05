@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import PostListItem from '../../components/PostListItem.astro';
+import PostCard from '../../components/PostCard.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { getPublished, allTags } from '../../utils/posts';
 import type { CollectionEntry } from 'astro:content';
 
@@ -35,16 +37,19 @@ const total = posts.length + travel.length;
     description={`${total} ${total === 1 ? 'entry' : 'entries'} tagged #${tag}.`}
   />
 
-  <div class="pb-8">
-    {posts.map((post) => <PostListItem entry={post} basePath="/blog" />)}
-    {travel.map((post) => <PostListItem entry={post} basePath="/travel" />)}
+  <div class="space-y-3 pb-8">
+    {posts.map((post, i) => <PostCard entry={post} basePath="/blog" index={i} />)}
+    {travel.map((post, i) => <PostCard entry={post} basePath="/travel" index={i} />)}
   </div>
 
   <a
     href="/tags"
-    class="group inline-flex items-center gap-1.5 pb-8 font-mono text-xs text-muted transition-colors hover:text-fg"
+    class={cn(
+      buttonVariants({ variant: 'ghost', size: 'sm' }),
+      'mb-8 -ml-2.5 font-mono text-muted-foreground'
+    )}
   >
-    <span class="text-accent transition-transform group-hover:-translate-x-0.5">←</span>
+    <span class="text-primary transition-transform group-hover/button:-translate-x-0.5">←</span>
     All tags
   </a>
 </BaseLayout>

@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 ---
 
 <BaseLayout title="Photos" description="Photo gallery — coming soon.">
@@ -8,17 +10,25 @@ import PageHeader from '../components/PageHeader.astro';
 
   <div class="grid grid-cols-2 gap-3 pb-8 sm:grid-cols-3">
     {
-      Array.from({ length: 6 }).map(() => (
-        <div class="aspect-square rounded-lg border border-dashed border-border bg-surface/40" />
+      Array.from({ length: 6 }).map((_, i) => (
+        // Staggered pulse so the placeholder reads as "loading soon" rather
+        // than as six broken tiles.
+        <div
+          class="aspect-square animate-pulse rounded-xl border border-dashed border-border bg-muted/40"
+          style={`animation-delay: ${i * 120}ms; animation-duration: 3s`}
+        />
       ))
     }
   </div>
 
   <a
     href="/"
-    class="group inline-flex items-center gap-1.5 pb-8 font-mono text-xs text-muted transition-colors hover:text-fg"
+    class={cn(
+      buttonVariants({ variant: 'ghost', size: 'sm' }),
+      'mb-8 -ml-2.5 font-mono text-muted-foreground'
+    )}
   >
-    <span class="text-accent transition-transform group-hover:-translate-x-0.5">←</span>
+    <span class="text-primary transition-transform group-hover/button:-translate-x-0.5">←</span>
     Back home
   </a>
 </BaseLayout>

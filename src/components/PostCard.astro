@@ -1,0 +1,78 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { formatDate, formatDateISO, readingTime, titleTransitionName } from '../utils/posts';
+
+interface Props {
+  entry: CollectionEntry<'posts'> | CollectionEntry<'travel'>;
+  basePath: '/blog' | '/travel';
+  /** Staggers the entrance animation for above-the-fold lists. */
+  index?: number;
+}
+
+const { entry, basePath, index } = Astro.props;
+const { title, description, pubDate, tags } = entry.data;
+const { body = '' } = entry;
+const minutes = readingTime(body);
+
+// Only the first handful are worth staggering; past that the reader has
+// scrolled and the delay just looks like the page is slow.
+const delay = index !== undefined && index < 6 ? `${index * 60}ms` : '0s';
+---
+
+<a
+  href={`${basePath}/${entry.id}`}
+  class="reveal group block"
+  style={`--reveal-delay: ${delay}`}
+>
+  {/* `border ring-0` rather than shadcn's default ring: `.card-interactive`
+      animates border-color on hover, and a utility class for the colour would
+      sit in a later cascade layer and win. Leaving the colour to the base
+      `* { border-color }` rule lets the component layer drive it. */}
+  <Card
+    className="card-interactive gap-3 border bg-card/70 py-5 ring-0 backdrop-blur-sm"
+  >
+    <CardHeader className="gap-2">
+      <div class="label flex items-center gap-2.5">
+        <time datetime={pubDate.toISOString()} title={formatDate(pubDate)} class="tabular-nums">
+          {formatDateISO(pubDate)}
+        </time>
+        <span class="h-2.5 w-px bg-border" aria-hidden="true"></span>
+        <span>{minutes} min</span>
+      </div>
+
+      <CardTitle
+        className="text-base leading-snug tracking-tight transition-colors group-hover:text-primary sm:text-lg"
+      >
+        <span
+          style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
+        >
+          {title}
+        </span>
+      </CardTitle>
+    </CardHeader>
+
+    <CardContent className="space-y-3.5">
+      <p class="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+
+      {
+        tags.length > 0 && (
+          <div class="flex flex-wrap items-center gap-1.5">
+            {tags.slice(0, 3).map((tag: string) => (
+              // Spans, not links: the whole card is already an <a>, and an
+              // anchor inside an anchor is invalid HTML. /tags has the
+              // clickable version.
+              <Badge
+                variant="secondary"
+                className="font-mono text-[0.6875rem] font-normal text-muted-foreground transition-colors group-hover:text-foreground"
+              >
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+        )
+      }
+    </CardContent>
+  </Card>
+</a>

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import PostListItem from '../../components/PostListItem.astro';
+import PostCard from '../../components/PostCard.astro';
 import { getPublished } from '../../utils/posts';
 
 const posts = await getPublished('posts');
@@ -16,8 +16,8 @@ const description =
     description={description}
   />
 
-  <div class="pb-8">
-    {posts.map((post) => <PostListItem entry={post} basePath="/blog" />)}
-    {posts.length === 0 && <p class="py-8 text-sm text-muted">Nothing published yet.</p>}
+  <div class="space-y-3 pb-8">
+    {posts.map((post, i) => <PostCard entry={post} basePath="/blog" index={i} />)}
+    {posts.length === 0 && <p class="py-8 text-sm text-muted-foreground">Nothing published yet.</p>}
   </div>
 </BaseLayout>

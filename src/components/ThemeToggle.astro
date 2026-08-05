@@ -1,4 +1,7 @@
 ---
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
 // Icon state is driven entirely by the .dark class on <html>, so it renders
 // correctly on the very first paint — no flash, no JS needed to sync it.
 ---
@@ -7,7 +10,12 @@
   id="theme-toggle"
   type="button"
   aria-label="Toggle dark mode"
-  class="relative grid h-8 w-8 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-fg"
+  class={cn(
+    buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+    // `grid` so both icons stack in one cell and cross-fade; the variant's
+    // own `inline-flex` would lay them out side by side.
+    'grid place-items-center text-muted-foreground'
+  )}
 >
   <svg
     class="icon icon-sun"

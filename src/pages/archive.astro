@@ -33,11 +33,13 @@ const description = 'Everything published here, newest first.';
       years.map(([year, group]) => (
         <section class="mb-10">
           <div class="flex items-baseline gap-3">
-            <h2 class="font-mono text-sm font-medium tabular-nums text-fg">{year}</h2>
+            <h2 class="font-mono text-sm font-medium tabular-nums text-foreground">{year}</h2>
             <span class="label">
               {group.length} {group.length === 1 ? 'entry' : 'entries'}
             </span>
-            <span class="h-px flex-1 bg-border" />
+            {/* Same fading hairline as `.rule-heading`, which this row is a
+                variant of — it just leads with the year instead of a label. */}
+            <span class="h-px flex-1 bg-linear-to-r from-border to-transparent" />
           </div>
 
           <ul class="mt-1">
@@ -45,21 +47,21 @@ const description = 'Everything published here, newest first.';
               <li>
                 <a
                   href={`${sectionFor(entry.collection).path}/${entry.id}`}
-                  class="group -mx-3 flex flex-col gap-x-4 gap-y-0.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface xs:flex-row xs:items-baseline"
+                  class="group -mx-3 flex flex-col gap-x-4 gap-y-0.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent xs:flex-row xs:items-baseline"
                 >
                   <time
                     datetime={entry.data.pubDate.toISOString()}
                     title={formatDate(entry.data.pubDate)}
-                    class="shrink-0 font-mono text-xs tabular-nums text-muted xs:w-14"
+                    class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground xs:w-14"
                   >
                     {entry.data.pubDate.toISOString().slice(5, 10).replace('-', '/')}
                   </time>
 
-                  <span class="flex-1 text-sm leading-snug text-fg transition-colors group-hover:text-accent">
+                  <span class="flex-1 text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
                     {entry.data.title}
                   </span>
 
-                  <span class="shrink-0 font-mono text-xs tabular-nums text-muted">
+                  <span class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
                     {readingTime(entry.body ?? '')} min
                   </span>
                 </a>
@@ -69,6 +71,6 @@ const description = 'Everything published here, newest first.';
         </section>
       ))
     }
-    {entries.length === 0 && <p class="py-8 text-sm text-muted">Nothing published yet.</p>}
+    {entries.length === 0 && <p class="py-8 text-sm text-muted-foreground">Nothing published yet.</p>}
   </div>
 </BaseLayout>

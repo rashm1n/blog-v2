@@ -9,6 +9,8 @@ import { unified } from '@astrojs/markdown-remark';
 import remarkCallouts from './src/plugins/remark-callouts.mjs';
 import rehypeExternalLinks from './src/plugins/rehype-external-links.mjs';
 
+import react from '@astrojs/react';
+
 const SITE = 'https://rashmin.dev';
 
 // https://astro.build/config
@@ -22,6 +24,11 @@ export default defineConfig({
       // "coming soon" page as if it were content.
       filter: (page) => !page.includes('/photos'),
     }),
+    // shadcn/ui components are React. None of them are given a `client:`
+    // directive, so this renders them to static HTML at build time and ships
+    // no runtime — the site's script budget is unchanged. Adding a directive
+    // to any one of them is what would start costing bytes.
+    react(),
   ],
   vite: {
     plugins: [tailwindcss()],

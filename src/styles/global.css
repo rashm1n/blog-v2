@@ -1,25 +1,67 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 /* Class-based dark mode — the inline script in BaseHead sets .dark on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
+/* --------------------------------------------------------------- shadcn map */
+
+/* shadcn's semantic variables are the single source of truth for colour here.
+   `@theme inline` turns each one into a Tailwind utility that reads the var at
+   runtime, which is what lets the single `.dark` block below re-theme the whole
+   site without a second stylesheet.
+
+     background / foreground   the page
+     card                      material that floats above the page
+     muted / muted-foreground  inset surfaces, secondary text
+     primary                   the one brand colour (violet)
+     accent                    hover surface — NOT the brand colour
+
+   That last one is the name that trips you up coming from the old palette,
+   where `--color-accent` *was* the violet. Brand colour is `primary` now;
+   `accent` is what a row fills with under the cursor.
+
+   Fonts stay pointed at Astro's Fonts API variables rather than the
+   `@fontsource-variable/geist` import shadcn's init adds — the site already
+   self-hosts and preloads Geist through the config, and a second copy would
+   ship the same font twice. */
+@theme inline {
   --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-sans);
 
-  /* Light palette. Overridden wholesale under :root.dark below. */
-  --color-bg: #fdfdfc;
-  --color-surface: #f4f4f2;
-  --color-fg: #16161a;
-  --color-muted: #65656d;
-  --color-border: #e6e6e2;
-  --color-hairline: #efefec;
-  --color-accent: #6d46d9;
-  --color-accent-soft: #f0ebfd;
-  --color-accent-fg: #ffffff;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-  /* Semantic hues, used only by callouts. Each is ≥5:1 on --color-bg, because
-     callout titles are text, not decoration. */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@theme {
+  /* Semantic hues, used only by callouts. Each is ≥5:1 on the page background,
+     because callout titles are text, not decoration. */
   --color-info: #0b62d6;
   --color-success: #0f7a4d;
   --color-warning: #a35a00;
@@ -31,39 +73,101 @@
 
   /* Slower than the built-in `animate-ping` — a sign of life, not an alert. */
   --animate-ping-slow: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  /* Drifts the aurora wash behind the page so it isn't perfectly static.
+     60s and a couple of percent of travel: felt, not watched. */
+  --animate-drift: drift 60s ease-in-out infinite;
 }
 
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(-2%, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, -1.5%, 0) scale(1.06);
+  }
+}
+
+/* ------------------------------------------------------------------ palette */
+
+/* Two complete sets rather than a mathematical inversion, so light and dark can
+   diverge where they need to. The contrast ratios are carried over from the
+   pre-shadcn palette, where they were audited: primary ≈5.7:1 light / ≈7.2:1
+   dark against the page, muted-foreground ≈5.7:1 / ≈6.1:1. Both carry real
+   text, not decoration, so both have to clear 4.5:1. */
 :root {
   color-scheme: light;
-  --grid-line: rgb(0 0 0 / 0.08);
+
+  --background: oklch(0.9911 0.0021 106.42);
+  --foreground: oklch(0.1935 0.0075 285.9);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.1935 0.0075 285.9);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.1935 0.0075 285.9);
+  --primary: oklch(0.5083 0.2129 293.6);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.9643 0.0022 106.42);
+  --secondary-foreground: oklch(0.1935 0.0075 285.9);
+  --muted: oklch(0.9643 0.0022 106.42);
+  --muted-foreground: oklch(0.4952 0.0106 285.9);
+  --accent: oklch(0.9503 0.0055 286);
+  --accent-foreground: oklch(0.1935 0.0075 285.9);
+  --destructive: oklch(0.5606 0.1928 27.5);
+  --border: oklch(0.9203 0.0033 106.42);
+  --input: oklch(0.9203 0.0033 106.42);
+  --ring: oklch(0.5083 0.2129 293.6);
+  --radius: 0.625rem;
+
+  /* Site-specific extras, outside shadcn's vocabulary. */
+  --hairline: oklch(0.9739 0.0022 106.42);
+  --primary-subtle: oklch(0.9502 0.0272 293.6);
+  --grid-line: rgb(0 0 0 / 0.055);
+  --aurora-a: oklch(0.5083 0.2129 293.6 / 0.13);
+  --aurora-b: oklch(0.63 0.15 220 / 0.09);
+  --card-shadow: 0 1px 2px oklch(0.19 0.0075 285.9 / 0.05);
+  --card-shadow-lifted: 0 8px 24px -8px oklch(0.5083 0.2129 293.6 / 0.16);
 }
 
 :root.dark {
   color-scheme: dark;
-  --color-bg: #0c0c0e;
-  --color-surface: #151518;
-  --color-fg: #e9e9e7;
-  --color-muted: #8f8f96;
-  --color-border: #24242a;
-  --color-hairline: #1b1b20;
-  --color-accent: #a78bfa;
-  --color-accent-soft: #1c1730;
-  --color-accent-fg: #0c0c0e;
-  --color-info: #7ab0f5;
-  --color-success: #57d6a0;
-  --color-warning: #f0b429;
-  --color-danger: #f47272;
-  --grid-line: rgb(255 255 255 / 0.05);
+
+  --background: oklch(0.1499 0.0031 285.9);
+  --foreground: oklch(0.9263 0.0018 106.42);
+  --card: oklch(0.1919 0.0038 285.9);
+  --card-foreground: oklch(0.9263 0.0018 106.42);
+  --popover: oklch(0.1919 0.0038 285.9);
+  --popover-foreground: oklch(0.9263 0.0018 106.42);
+  --primary: oklch(0.7137 0.1434 292.5);
+  --primary-foreground: oklch(0.1499 0.0031 285.9);
+  --secondary: oklch(0.2417 0.0056 286);
+  --secondary-foreground: oklch(0.9263 0.0018 106.42);
+  --muted: oklch(0.2205 0.0055 286);
+  --muted-foreground: oklch(0.6413 0.0105 286);
+  --accent: oklch(0.2648 0.0064 286);
+  --accent-foreground: oklch(0.9263 0.0018 106.42);
+  --destructive: oklch(0.7042 0.1789 22.2);
+  --border: oklch(0.2648 0.0064 286);
+  --input: oklch(0.2891 0.007 286);
+  --ring: oklch(0.7137 0.1434 292.5);
+
+  --hairline: oklch(0.1919 0.0038 285.9);
+  --primary-subtle: oklch(0.2513 0.0546 292.5);
+  --grid-line: rgb(255 255 255 / 0.042);
+  --aurora-a: oklch(0.7137 0.1434 292.5 / 0.14);
+  --aurora-b: oklch(0.68 0.12 220 / 0.08);
+  --card-shadow: 0 1px 2px oklch(0 0 0 / 0.4);
+  --card-shadow-lifted: 0 8px 28px -10px oklch(0.7137 0.1434 292.5 / 0.28);
 }
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    border-color: var(--border);
   }
 
   html {
-    background: var(--color-bg);
-    color: var(--color-fg);
+    background: var(--background);
+    color: var(--foreground);
     scroll-behavior: smooth;
     /* Reserve the scrollbar track so short pages and the search modal (which
        locks body scroll) don't shift the layout sideways. */
@@ -77,9 +181,40 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Faint engineering grid, strongest at the top of the page and fading out.
-     Purely decorative and fixed, so it costs nothing on scroll. */
+  /* Children passed from a .astro file into a React component are wrapped in an
+     <astro-static-slot>, or an <astro-slot> once that component is hydrated.
+     Astro strips the static one from the output, so today this rule only
+     matters for the hydrated case — but there it matters a lot: the wrapper
+     defaults to display:inline and would sit between a shadcn <Card> and its
+     own CardHeader/CardContent, breaking every flex and grid layout in the
+     library. `display: contents` takes it out of layout entirely, so adding a
+     `client:` directive to a component can never silently wreck its layout. */
+  astro-slot,
+  astro-static-slot {
+    display: contents;
+  }
+
+  /* Two fixed decorative layers under the content, both `position: fixed` so
+     they cost nothing on scroll:
+       ::before  an aurora wash in the brand hue across the top of the page
+       ::after   the engineering grid, masked to fade out by mid-scroll
+     The aurora carries most of the site's depth; the grid keeps it honest. */
   body::before {
+    content: '';
+    position: fixed;
+    inset: -20% -10% auto -10%;
+    height: 75vh;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 45% 50% at 22% 12%, var(--aurora-a), transparent 70%),
+      radial-gradient(ellipse 40% 45% at 78% 4%, var(--aurora-b), transparent 70%);
+    filter: blur(28px);
+    animation: var(--animate-drift);
+    will-change: transform;
+  }
+
+  body::after {
     content: '';
     position: fixed;
     inset: 0;
@@ -115,12 +250,12 @@
   }
 
   ::selection {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
+    background: var(--primary);
+    color: var(--primary-foreground);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--ring);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -135,13 +270,13 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border: 3px solid var(--color-bg);
+    background: var(--border);
+    border: 3px solid var(--background);
     border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted);
+    background: var(--muted-foreground);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -177,7 +312,7 @@
 }
 
 /* Post titles morph from the list row into the article heading. The name is
-   derived from the slug in PostListItem/PostLayout, so the pairing is automatic
+   derived from the slug in PostCard/PostLayout, so the pairing is automatic
    and stays unique within each document. */
 ::view-transition-group(.post-title) {
   animation-duration: 0.32s;
@@ -200,7 +335,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
   }
 
   /* Section heading: mono label followed by a hairline that fills the row. */
@@ -210,11 +345,13 @@
     gap: 0.875rem;
   }
 
+  /* Fades out to the right rather than ruling the full width — same hairline,
+     less of the boxed-in feel. */
   .rule-heading::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--color-border);
+    background: linear-gradient(to right, var(--border), transparent);
   }
 
   .kbd {
@@ -223,18 +360,79 @@
     justify-content: center;
     min-width: 1.25rem;
     padding: 0.0625rem 0.3125rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     border-radius: 0.3125rem;
-    background: var(--color-bg);
+    background: var(--background);
     font-family: var(--font-mono);
     font-size: 0.6875rem;
     line-height: 1.4;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
   }
 
-  /* Entrance animation for above-the-fold content. */
+  /* Headline treatment: text filled by a gradient that warms toward the brand
+     hue at the end of the line. Falls back to a flat colour where
+     background-clip: text isn't supported. */
+  .text-gradient {
+    background: linear-gradient(
+      120deg,
+      var(--foreground) 0%,
+      var(--foreground) 45%,
+      color-mix(in oklab, var(--foreground) 62%, var(--primary)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Descenders get clipped without a little breathing room. */
+    padding-bottom: 0.06em;
+  }
+
+  /* Interactive card. At rest it is a plain bordered row; on hover it lifts,
+     the border picks up brand tint and a tinted shadow appears. The tint lives
+     in `--card-shadow-lifted` so light and dark can use different opacities. */
+  .card-interactive {
+    position: relative;
+    box-shadow: var(--card-shadow);
+    transition:
+      transform 0.25s var(--ease-out-quint),
+      box-shadow 0.25s var(--ease-out-quint),
+      border-color 0.25s ease,
+      background-color 0.25s ease;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+    box-shadow: var(--card-shadow-lifted);
+  }
+
+  /* A hairline of brand colour down the leading edge, drawn only on hover, so
+     the card still reads as a quiet list row at rest. */
+  .card-interactive::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    border-radius: inherit;
+    background: linear-gradient(to bottom, var(--primary), transparent);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .card-interactive:hover::before {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-interactive:hover {
+      transform: none;
+    }
+  }
+
+  /* Entrance animation for above-the-fold content. `--reveal-delay` lets a
+     caller stagger siblings without a keyframe per position. */
   .reveal {
     animation: reveal 0.5s var(--ease-out-quint) both;
+    animation-delay: var(--reveal-delay, 0s);
   }
 
   @keyframes reveal {
@@ -248,7 +446,7 @@
 
   .prose {
     max-width: 68ch;
-    color: var(--color-fg);
+    color: var(--foreground);
     font-size: 1.0625rem;
     line-height: 1.75;
   }
@@ -283,10 +481,12 @@
     width: 1.35em;
     font-family: var(--font-mono);
     font-weight: 400;
-    color: var(--color-border);
+    color: var(--border);
     text-decoration: none;
     opacity: 0;
-    transition: opacity 0.15s ease, color 0.15s ease;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease;
   }
 
   .prose :is(h2, h3, h4):hover .heading-anchor,
@@ -295,19 +495,19 @@
   }
 
   .heading-anchor:hover {
-    color: var(--color-accent);
+    color: var(--primary);
   }
 
   .prose a {
-    color: var(--color-accent);
+    color: var(--primary);
     text-decoration: underline;
     text-decoration-thickness: 1px;
-    text-decoration-color: color-mix(in oklab, var(--color-accent) 35%, transparent);
+    text-decoration-color: color-mix(in oklab, var(--primary) 35%, transparent);
     transition: text-decoration-color 0.15s ease;
   }
 
   .prose a:hover {
-    text-decoration-color: var(--color-accent);
+    text-decoration-color: var(--primary);
   }
 
   /* Outbound links say so before they're clicked. `inline-block` keeps the
@@ -324,13 +524,13 @@
 
   .prose strong {
     font-weight: 600;
-    color: var(--color-fg);
+    color: var(--foreground);
   }
 
   .prose blockquote {
-    border-left: 2px solid var(--color-accent);
+    border-left: 2px solid var(--primary);
     padding-left: 1.15rem;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
     font-style: normal;
   }
 
@@ -340,7 +540,7 @@
      a caution that isn't red are worse than a slightly wider palette. Each type
      sets `--callout` and everything else derives from it. */
   .callout {
-    --callout: var(--color-accent);
+    --callout: var(--primary);
     border-left: 2px solid var(--callout);
     border-radius: 0 0.5rem 0.5rem 0;
     padding: 0.875rem 1.15rem;
@@ -397,7 +597,7 @@
   }
 
   .callout[data-callout='important'] {
-    --callout: var(--color-accent);
+    --callout: var(--primary);
     --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
   }
 
@@ -433,7 +633,7 @@
     left: -1em;
     width: 0.3125rem;
     height: 1px;
-    background: var(--color-muted);
+    background: var(--muted-foreground);
   }
 
   .prose li {
@@ -441,7 +641,7 @@
   }
 
   .prose li::marker {
-    color: var(--color-muted);
+    color: var(--muted-foreground);
   }
 
   .prose ol > li::marker {
@@ -459,12 +659,12 @@
   .prose hr::before {
     content: '· · ·';
     letter-spacing: 0.6em;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
   }
 
   .prose img {
     border-radius: 0.625rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     max-width: 100%;
     height: auto;
   }
@@ -490,7 +690,7 @@
     font-family: var(--font-mono);
     font-size: 0.75rem;
     line-height: 1.6;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
     text-align: center;
   }
 
@@ -563,7 +763,9 @@
     border-radius: 0.5rem;
     color: rgb(255 255 255 / 0.7);
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
 
   .lightbox__close svg {
@@ -578,8 +780,8 @@
 
   .prose :not(pre) > code {
     font-size: 0.85em;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--muted);
+    border: 1px solid var(--border);
     padding: 0.1em 0.35em;
     border-radius: 0.3em;
     word-break: break-word;
@@ -595,13 +797,13 @@
 
   .prose th,
   .prose td {
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     padding: 0.55em 0.85em;
     text-align: left;
   }
 
   .prose th {
-    background: var(--color-surface);
+    background: var(--muted);
     font-weight: 600;
   }
 
@@ -612,8 +814,8 @@
   /* ------------------------------------------------------------ code block */
 
   .prose pre {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--muted);
+    border: 1px solid var(--border);
     border-radius: 0.625rem;
     padding: 1rem 1.15rem;
     overflow-x: auto;
@@ -625,9 +827,9 @@
   /* Wrapper added at runtime by CodeBlocks.astro. */
   .code-block {
     position: relative;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     border-radius: 0.625rem;
-    background: var(--color-surface);
+    background: var(--muted);
     overflow: hidden;
   }
 
@@ -638,8 +840,8 @@
     gap: 1rem;
     /* Left padding matches the <pre> below so the language label lines up with code. */
     padding: 0.4375rem 0.75rem 0.4375rem 1.15rem;
-    border-bottom: 1px solid var(--color-border);
-    background: color-mix(in oklab, var(--color-surface) 60%, var(--color-bg));
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in oklab, var(--muted) 60%, var(--background));
   }
 
   .code-block__lang {
@@ -647,7 +849,7 @@
     font-size: 0.6875rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
   }
 
   .code-block__copy {
@@ -658,12 +860,15 @@
     border-radius: 0.3125rem;
     font-family: var(--font-mono);
     font-size: 0.6875rem;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
     cursor: pointer;
     /* Dimmed rather than hidden: the chrome bar would otherwise look empty on
        blocks with no language label. */
     opacity: 0.5;
-    transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease,
+      background-color 0.15s ease;
   }
 
   .code-block:hover .code-block__copy,
@@ -673,12 +878,12 @@
   }
 
   .code-block__copy:hover {
-    color: var(--color-fg);
-    background: var(--color-border);
+    color: var(--foreground);
+    background: var(--accent);
   }
 
   .code-block__copy[data-copied='true'] {
-    color: var(--color-accent);
+    color: var(--primary);
   }
 
   /* The <pre> owns its own chrome elsewhere; inside a wrapper it goes bare. */
@@ -723,12 +928,12 @@
   }
 
   .search-dialog::backdrop {
-    background: rgb(0 0 0 / 0.2);
+    background: rgb(0 0 0 / 0.28);
     backdrop-filter: blur(4px);
   }
 
   :root.dark .search-dialog::backdrop {
-    background: rgb(0 0 0 / 0.6);
+    background: rgb(0 0 0 / 0.65);
   }
 
   .search-result {
@@ -740,13 +945,13 @@
 
   .search-result:hover,
   .search-result[data-selected] {
-    background: var(--color-surface);
-    border-color: var(--color-border);
+    background: var(--accent);
+    border-color: var(--border);
   }
 
   .search-result mark {
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
+    background: var(--primary-subtle);
+    color: var(--primary);
     border-radius: 0.1875rem;
     padding: 0 0.125rem;
     font-weight: 500;
@@ -760,15 +965,15 @@
   .toc {
     margin-top: 2.5rem;
     padding: 0.875rem 1rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     border-radius: 0.625rem;
-    background: var(--color-hairline);
+    background: var(--hairline);
     font-size: 0.8125rem;
   }
 
   .toc-list {
     margin-top: 0.5rem;
-    border-left: 1px solid var(--color-border);
+    border-left: 1px solid var(--border);
   }
 
   .toc-list .toc-list {
@@ -782,18 +987,20 @@
     padding: 0.1875rem 0 0.1875rem 1rem;
     margin-left: -1px;
     border-left: 1px solid transparent;
-    color: var(--color-muted);
+    color: var(--muted-foreground);
     line-height: 1.45;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .toc-link:hover {
-    color: var(--color-fg);
+    color: var(--foreground);
   }
 
   .toc-link[data-active='true'] {
-    color: var(--color-accent);
-    border-left-color: var(--color-accent);
+    color: var(--primary);
+    border-left-color: var(--primary);
   }
 
   @media (min-width: 82rem) {
@@ -829,20 +1036,31 @@
     display: none !important;
   }
 
-  /* Ink, not screen: the decorative grid and every themed colour go. */
+  /* Ink, not screen: the decorative layers and every themed colour go. */
   html,
   :root.dark {
-    --color-bg: #fff;
-    --color-fg: #000;
-    --color-muted: #444;
-    --color-border: #bbb;
-    --color-surface: #f6f6f6;
-    --color-hairline: #eee;
-    --color-accent: #000;
+    --background: #fff;
+    --foreground: #000;
+    --muted-foreground: #444;
+    --border: #bbb;
+    --muted: #f6f6f6;
+    --hairline: #eee;
+    --primary: #000;
+    --card: #fff;
+    --card-shadow: none;
+    --card-shadow-lifted: none;
   }
 
-  body::before {
+  body::before,
+  body::after {
     display: none;
+  }
+
+  /* The clipped gradient prints as nothing at all — put the ink back. */
+  .text-gradient {
+    background: none;
+    -webkit-text-fill-color: #000;
+    color: #000;
   }
 
   .prose {

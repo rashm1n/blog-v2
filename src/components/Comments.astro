@@ -19,7 +19,7 @@ const configured = Boolean(repo && repoId && categoryId);
        for whoever is running the dev server, and must never reach a reader. In
        a production build without them, the section renders empty instead. */
     !import.meta.env.PROD && (
-      <p class="text-sm text-muted">
+      <p class="text-sm text-muted-foreground">
         Comments aren't configured yet — set <code>GISCUS_REPO</code>, <code>GISCUS_REPO_ID</code>,
         and <code>GISCUS_CATEGORY_ID</code> once the repo exists.
       </p>
