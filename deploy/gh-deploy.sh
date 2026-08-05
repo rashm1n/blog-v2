@@ -63,8 +63,30 @@ if cmp -s staging/Caddyfile Caddyfile; then
   rm -f staging/Caddyfile
 else
   cp Caddyfile "Caddyfile.bak.$(date +%s)"
-  mv staging/Caddyfile Caddyfile
-  # Atomic: Caddy rejects a bad config and keeps serving the old one.
+
+  # `cp` over the existing file, NOT `mv`. This path is bind-mounted into the
+  # caddy container as a single file, and Docker resolves that to an inode at
+  # container-creation time. A rename gives the path a new inode, so the
+  # container goes on seeing the old file forever — and the reload below then
+  # validates and reloads that stale config and reports success, which is a
+  # very convincing way to deploy nothing. Writing in place keeps the inode
+  # the mount is pinned to.
+  #
+  # The usual argument for rename — atomicity — doesn't apply: the only reader
+  # is the reload on the next line, and the content was validated above.
+  cp staging/Caddyfile Caddyfile
+  rm -f staging/Caddyfile
+
+  # Caddy rejects a bad config and keeps serving the old one.
   docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+
+  # Prove the container is reading the bytes we just wrote, rather than trusting
+  # the reload's exit code — trusting it is exactly what hid the inode bug.
+  if ! docker compose exec -T caddy cat /etc/caddy/Caddyfile | cmp -s - Caddyfile; then
+    echo "ERROR: caddy is not reading the Caddyfile we just wrote." >&2
+    echo "Its bind mount is pinned to a stale inode. Recreate the container:" >&2
+    echo "  cd /srv/blog && docker compose up -d --force-recreate caddy" >&2
+    exit 1
+  fi
   echo "Caddyfile updated and reloaded"
 fi
