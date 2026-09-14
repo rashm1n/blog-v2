@@ -1,0 +1,12 @@
+{
+  "name": "blog-v2",
+  "compatibility_date": "2026-09-14",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "rashmin.dev", "custom_domain": true },
+    { "pattern": "www.rashmin.dev", "custom_domain": true }
+  ]
+}
