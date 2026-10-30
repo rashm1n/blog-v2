@@ -357,5 +357,5 @@ the only element with an entrance animation.
 `/archive` and `/tags/[tag]`), tag badges, `→` link suffixes, `·`-joined meta strings,
 card-styled prev/next links and the 404 terminal window.
 
-**Not changed.** OG images (`src/utils/og.ts`) still render in Geist/JetBrains Mono with
-the old palette.
+**OG images** (`src/utils/og.ts`) render in Schibsted Grotesk on the dark palette, with a
+petrol-teal top rule standing in for the reading-progress bar.

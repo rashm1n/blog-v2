@@ -11,12 +11,12 @@ const wordmark = new URL(SITE_URL).host;
 <header
   id="site-header"
   data-noprint
-  class="sticky top-0 z-40 border-b border-transparent bg-background/70 backdrop-blur-xl transition-colors duration-200 data-[scrolled]:border-border data-[scrolled]:bg-background/85"
+  class="sticky top-0 z-40 border-b border-transparent bg-background/70 backdrop-blur-xl transition-colors duration-200 data-[scrolled]:border-border data-[scrolled]:bg-background/92"
 >
-  <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
+  <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
     <a
       href="/"
-      class="text-lg font-semibold tracking-[-0.02em] text-foreground transition-colors hover:text-primary"
+      class="text-base font-semibold xs:text-lg tracking-[-0.02em] text-foreground transition-colors hover:text-primary"
     >
       {wordmark}
     </a>
@@ -29,11 +29,14 @@ const wordmark = new URL(SITE_URL).host;
             <a
               href={link.href}
               aria-current={active ? 'page' : undefined}
-              class:list={[
+              class={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                'px-2.5 font-normal hover:bg-transparent hover:text-foreground',
-                active ? 'text-foreground underline decoration-primary decoration-2 underline-offset-[6px]' : 'text-muted-foreground',
-              ]}
+                // Tighter below xs so the whole bar fits a 360px phone.
+                'px-1.5 text-[0.8125rem] font-normal hover:bg-transparent hover:text-foreground xs:px-2.5 xs:text-sm',
+                active
+                  ? 'text-foreground underline decoration-primary decoration-2 underline-offset-[6px]'
+                  : 'text-muted-foreground'
+              )}
             >
               {link.label}
             </a>

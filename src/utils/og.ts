@@ -7,17 +7,17 @@ import { SITE_URL } from '../consts';
 /**
  * The social card, rendered at build time into /og/<slug>.png.
  *
- * It is seen almost entirely at thumbnail size, so it carries one serif
- * headline and one supporting line, in the site's own palette and typefaces.
+ * It is seen almost entirely at thumbnail size, so it carries one headline and
+ * one supporting line, in the site's own palette and typeface.
  * 1200×630 is the size every platform crops from.
  */
 
 /* The dark tokens from src/styles/global.css. Keep in sync by hand. */
 const TOKEN = {
-  background: '#14161a',
-  foreground: '#e3e5ea',
-  mutedForeground: '#9aa0ab',
-  primary: '#93a5ff',
+  background: '#16191c',
+  foreground: '#e7e9e7',
+  mutedForeground: '#9aa1a6',
+  primary: '#5fcfd9',
 } as const;
 
 /* ------------------------------------------------------------------ fonts */
@@ -26,13 +26,15 @@ const TOKEN = {
  * and cannot decode woff2. See src/assets/fonts/README.md. */
 const fontsDir = join(process.cwd(), 'src/assets/fonts');
 
-const face = (name: string, file: string, weight: 400 | 500) =>
-  ({ name, data: readFileSync(join(fontsDir, file)), weight, style: 'normal' }) as const;
+const face = (file: string, weight: 400 | 500) =>
+  ({
+    name: 'Schibsted Grotesk',
+    data: readFileSync(join(fontsDir, file)),
+    weight,
+    style: 'normal',
+  }) as const;
 
-const FONTS = [
-  face('Newsreader', 'Newsreader-Medium.woff', 500),
-  face('Geist', 'Geist-Regular.ttf', 400),
-];
+const FONTS = [face('SchibstedGrotesk-400.woff', 400), face('SchibstedGrotesk-500.woff', 500)];
 
 /* ----------------------------------------------------------------- layout */
 
@@ -84,18 +86,17 @@ export async function renderOgCard({
   const muted: Style = { fontSize: 22, color: TOKEN.mutedForeground };
 
   const header = box({ alignItems: 'baseline', gap: 20 }, [
-    box({ fontFamily: 'Newsreader', fontSize: 30, color: TOKEN.foreground }, domain),
+    box({ fontSize: 30, fontWeight: 500, color: TOKEN.foreground }, domain),
     box(muted, kicker),
   ]);
 
   const body = box({ flexDirection: 'column', gap: 22, maxWidth: 1000 }, [
     box(
       {
-        fontFamily: 'Newsreader',
         fontSize: titleSize ?? headlineSize(title),
         fontWeight: 500,
-        lineHeight: 1.1,
-        letterSpacing: '-0.015em',
+        lineHeight: 1.08,
+        letterSpacing: '-0.03em',
         lineClamp: 3,
       },
       title
@@ -119,7 +120,10 @@ export async function renderOgCard({
         padding: '56px 72px',
         backgroundColor: TOKEN.background,
         color: TOKEN.foreground,
-        fontFamily: 'Geist',
+        fontFamily: 'Schibsted Grotesk',
+        // The accent rule the site's reading-progress bar draws, as the one
+        // mark of colour on an otherwise neutral card.
+        borderTop: `6px solid ${TOKEN.primary}`,
       },
       [header, body, ...(footerParts.length > 0 ? [footer] : [box({ height: 1 })])]
     ) as Parameters<typeof satori>[0],

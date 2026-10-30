@@ -6,12 +6,12 @@ import { getPublished } from '../../utils/posts';
 
 const posts = await getPublished('posts');
 const description =
-  'Technical writing on ai, microservices, distributed systems, and software engineering.';
+  'Technical writing on AI, microservices, distributed systems and software engineering.';
 ---
 
 <BaseLayout title="Writing" description={description}>
   <PageHeader
-    eyebrow={`${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`}
+    eyebrow={posts.length > 0 ? `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}` : undefined}
     title="Writing"
     description={description}
   />

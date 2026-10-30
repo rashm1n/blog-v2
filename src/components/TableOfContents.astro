@@ -13,24 +13,28 @@ const { headings } = Astro.props;
 const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
+{/* A closed disclosure on narrow screens, so a reader arriving on a post meets
+    the article before the outline. The wide-screen rail forces it open in CSS. */}
 {
   items.length > 1 && (
-    <nav class="toc" data-noprint aria-label="Table of contents">
-      <p class="label">On this page</p>
-      <ul class="toc-list">
-        {items.map((h) => (
-          <li>
-            <a
-              href={`#${h.slug}`}
-              class="toc-link"
-              style={h.depth === 3 ? 'padding-left: 1.75rem' : undefined}
-            >
-              {h.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <details class="toc" data-noprint>
+      <summary class="toc-summary label">On this page</summary>
+      <nav aria-label="Table of contents">
+        <ul class="toc-list">
+          {items.map((h) => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                class="toc-link"
+                style={h.depth === 3 ? 'padding-left: 1.75rem' : undefined}
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </details>
   )
 }
 

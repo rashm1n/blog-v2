@@ -11,19 +11,25 @@ const categoryId = import.meta.env.GISCUS_CATEGORY_ID ?? '';
 const configured = Boolean(repo && repoId && categoryId);
 ---
 
+{/* The build vars are absent in local dev, which is normal — so the hint is for
+    whoever is running the dev server, and must never reach a reader. A
+    production build without them leaves the whole section out, heading
+    included, rather than promising comments that never load. */}
 {
-  configured ? (
-    <div id="giscus-container" data-repo={repo} data-repo-id={repoId} data-category={category} data-category-id={categoryId} />
-  ) : (
-    /* The build vars are absent in local dev, which is normal — so this hint is
-       for whoever is running the dev server, and must never reach a reader. In
-       a production build without them, the section renders empty instead. */
-    !import.meta.env.PROD && (
-      <p class="text-sm text-muted-foreground">
-        Comments aren't configured yet — set <code>GISCUS_REPO</code>, <code>GISCUS_REPO_ID</code>,
-        and <code>GISCUS_CATEGORY_ID</code> once the repo exists.
-      </p>
-    )
+  (configured || !import.meta.env.PROD) && (
+    <section data-noprint class="mt-16">
+      <h2 class="rule-heading label">Comments</h2>
+      <div class="mt-5">
+        {configured ? (
+          <div id="giscus-container" data-repo={repo} data-repo-id={repoId} data-category={category} data-category-id={categoryId} />
+        ) : (
+          <p class="text-sm text-muted-foreground">
+            Comments aren’t configured yet. Set <code>GISCUS_REPO</code>, <code>GISCUS_REPO_ID</code>,
+            and <code>GISCUS_CATEGORY_ID</code> once the repo exists.
+          </p>
+        )}
+      </div>
+    </section>
   )
 }
 

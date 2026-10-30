@@ -15,7 +15,7 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
 
 <BaseLayout title="Tags" description="Browse posts by tag.">
   <PageHeader
-    eyebrow={`${tags.length} ${tags.length === 1 ? 'tag' : 'tags'}`}
+    eyebrow={tags.length > 0 ? `${tags.length} ${tags.length === 1 ? 'tag' : 'tags'}` : undefined}
     title="Tags"
     description="Everything on the site, grouped by topic."
   />

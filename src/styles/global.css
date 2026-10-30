@@ -24,8 +24,8 @@
 
    Fonts stay pointed at Astro's Fonts API variables rather than the
    `@fontsource-variable/geist` import shadcn's init adds — the site already
-   self-hosts and preloads Geist through the config, and a second copy would
-   ship the same font twice. */
+   self-hosts and preloads Schibsted Grotesk through the config, and a second
+   face would ship a font nothing uses. */
 @theme inline {
   --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
@@ -60,12 +60,13 @@
 }
 
 @theme {
-  /* Semantic hues, used only by callouts. Each is ≥5:1 on the page background,
-     because callout titles are text, not decoration. */
-  --color-info: #0b62d6;
-  --color-success: #0f7a4d;
-  --color-warning: #a35a00;
-  --color-danger: #c02626;
+  /* Semantic hues, used only by callouts. Each is ≥5:1 on its own tinted
+     callout panel in both themes (the dark set is in `:root.dark`), because
+     callout titles are text, not decoration. */
+  --color-info: #0a5cc8;
+  --color-success: #0c6e45;
+  --color-warning: #8f4f00;
+  --color-danger: #b42323;
 
   --breakpoint-xs: 30rem;
 
@@ -104,10 +105,8 @@
   --ring: #0a6b7c;
   --radius: 0.375rem;
 
-  /* Site-specific extras, outside shadcn's vocabulary. */
-  --hairline: #eaece9;
+  /* Site-specific extra, outside shadcn's vocabulary. */
   --primary-subtle: #dcefef;
-  --card-shadow: none;
 }
 
 :root.dark {
@@ -132,9 +131,12 @@
   --input: #383e44;
   --ring: #5fcfd9;
 
-  --hairline: #1f2327;
   --primary-subtle: #173338;
-  --card-shadow: none;
+
+  --color-info: #7db4ff;
+  --color-success: #5ccf97;
+  --color-warning: #e6a54a;
+  --color-danger: #f5807a;
 }
 
 @layer base {
@@ -206,6 +208,11 @@
   ::selection {
     background: var(--primary);
     color: var(--primary-foreground);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--primary);
   }
 
   :focus-visible {
@@ -282,8 +289,8 @@
 @layer components {
   /* ---------------------------------------------------------------- shared */
 
-  /* Small sans metadata: dates, counts, section names. The interface voice,
-     against the serif reading voice. */
+  /* Small metadata: dates, counts, section names. The interface voice, set
+     smaller and quieter than the reading voice. */
   .label {
     font-family: var(--font-sans);
     font-size: 0.8125rem;
@@ -292,7 +299,7 @@
     color: var(--muted-foreground);
   }
 
-  /* Section heading: mono label followed by a hairline that fills the row. */
+  /* Section heading: a label followed by a hairline that fills the row. */
   .rule-heading {
     display: flex;
     align-items: center;
@@ -319,21 +326,6 @@
     font-size: 0.6875rem;
     line-height: 1.4;
     color: var(--muted-foreground);
-  }
-
-  /* Interactive card. A plain bordered row at rest; on hover the surface
-     steps up and the border firms. No lift, no tint: the title colour change
-     in the card itself is the only accent. */
-  .card-interactive {
-    box-shadow: var(--card-shadow);
-    transition:
-      border-color 0.15s var(--ease-out-quint),
-      background-color 0.15s var(--ease-out-quint);
-  }
-
-  .card-interactive:hover {
-    border-color: color-mix(in oklab, var(--foreground) 16%, transparent);
-    background-color: var(--accent);
   }
 
   /* Entrance animation for above-the-fold content. `--reveal-delay` lets a
@@ -453,6 +445,7 @@
 
   /* 18px grotesk; 68ch keeps lines inside the 45–75 character band. */
   .prose {
+    --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M8 7h9v9'/%3E%3C/svg%3E");
     max-width: 68ch;
     color: var(--foreground);
     font-size: 1.125rem;
@@ -493,7 +486,7 @@
     width: 1.35em;
     font-family: var(--font-mono);
     font-weight: 400;
-    color: var(--border);
+    color: var(--muted-foreground);
     text-decoration: none;
     opacity: 0;
     transition:
@@ -522,16 +515,19 @@
     text-decoration-color: var(--primary);
   }
 
-  /* Outbound links say so before they're clicked. `inline-block` keeps the
-     glyph out of the parent's underline run. */
+  /* Outbound links say so before they're clicked: a masked arrow, drawn in the
+     link's own colour. `inline-block` keeps it out of the underline run. */
   .prose a[data-external]::after {
-    content: '↗';
+    content: '';
     display: inline-block;
-    margin-left: 0.1em;
-    font-size: 0.8em;
-    vertical-align: 0.15em;
-    text-decoration: none;
-    opacity: 0.65;
+    width: 0.5em;
+    height: 0.5em;
+    margin-left: 0.2em;
+    vertical-align: 0.2em;
+    background: currentColor;
+    opacity: 0.7;
+    -webkit-mask: var(--icon-external) center / contain no-repeat;
+    mask: var(--icon-external) center / contain no-repeat;
   }
 
   .prose strong {
@@ -540,7 +536,7 @@
   }
 
   .prose blockquote {
-    border-left: 3px solid var(--primary);
+    border-left: 2px solid var(--border);
     padding-left: 1.25rem;
     color: var(--muted-foreground);
   }
@@ -552,10 +548,10 @@
      sets `--callout` and everything else derives from it. */
   .callout {
     --callout: var(--primary);
-    border-left: 2px solid var(--callout);
-    border-radius: 0 0.5rem 0.5rem 0;
+    border: 1px solid color-mix(in oklab, var(--callout) 28%, transparent);
+    border-radius: 0.5rem;
     padding: 1rem 1.25rem;
-    background: color-mix(in oklab, var(--callout) 7%, transparent);
+    background: color-mix(in oklab, var(--callout) 6%, transparent);
   }
 
   .callout > * + * {
@@ -652,8 +648,10 @@
     color: var(--muted-foreground);
   }
 
+  /* The UA sets markers in tabular figures, whose wide 1 opens a gap before
+     the period. Outside markers are end-aligned, so proportional is safe. */
   .prose ol > li::marker {
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: normal;
   }
 
   .prose hr {
@@ -778,7 +776,7 @@
     color: #fff;
   }
 
-  /* Mono runs large beside a serif of the same nominal size. */
+  /* Mono runs large beside the grotesk at the same nominal size. */
   .prose :not(pre) > code {
     font-size: 0.8em;
     background: var(--muted);
@@ -795,6 +793,7 @@
     width: 100%;
     font-size: 0.875rem;
     line-height: 1.55;
+    font-variant-numeric: tabular-nums;
   }
 
   .prose th,
@@ -962,12 +961,46 @@
      Both states live here rather than in utility classes so the media query can
      actually unset them. */
   .toc {
+    --icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     margin-top: 2.5rem;
+    border-block: 1px solid var(--border);
     font-size: 0.875rem;
   }
 
+  .toc-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.15s ease;
+  }
+
+  .toc-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc-summary::after {
+    content: '';
+    width: 0.875rem;
+    height: 0.875rem;
+    background: currentColor;
+    -webkit-mask: var(--icon-chevron) center / contain no-repeat;
+    mask: var(--icon-chevron) center / contain no-repeat;
+    transition: transform 0.2s var(--ease-out-quint);
+  }
+
+  .toc-summary:hover {
+    color: var(--foreground);
+  }
+
+  .toc[open] > .toc-summary::after {
+    transform: rotate(180deg);
+  }
+
   .toc-list {
-    margin-top: 0.5rem;
+    margin-bottom: 1rem;
     border-left: 1px solid var(--border);
   }
 
@@ -1019,6 +1052,28 @@
     .toc::-webkit-scrollbar {
       display: none;
     }
+
+    .toc-list {
+      margin: 0.5rem 0 0;
+    }
+
+    /* The rail is always open. Where the browser can't force a closed
+       <details> to show its content, the summary stays a working toggle. */
+    @supports selector(::details-content) {
+      .toc::details-content {
+        content-visibility: visible;
+      }
+
+      .toc-summary {
+        padding: 0;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      .toc-summary::after {
+        display: none;
+      }
+    }
   }
 }
 
@@ -1041,10 +1096,8 @@
     --muted-foreground: #444;
     --border: #bbb;
     --muted: #f6f6f6;
-    --hairline: #eee;
     --primary: #000;
     --card: #fff;
-    --card-shadow: none;
   }
 
   .prose {
@@ -1057,6 +1110,15 @@
      left bare — the reader already has the page they point into. */
   .prose a[data-external]::after {
     content: ' (' attr(href) ')';
+    display: inline;
+    width: auto;
+    height: auto;
+    margin: 0;
+    vertical-align: baseline;
+    background: none;
+    opacity: 1;
+    -webkit-mask: none;
+    mask: none;
     font-family: var(--font-mono);
     font-size: 0.8em;
     word-break: break-all;

@@ -10,7 +10,7 @@ const description = 'Notes and photos from trips.';
 
 <BaseLayout title="Travel" description={description}>
   <PageHeader
-    eyebrow={`${posts.length} ${posts.length === 1 ? 'entry' : 'entries'}`}
+    eyebrow={posts.length > 0 ? `${posts.length} ${posts.length === 1 ? 'entry' : 'entries'}` : undefined}
     title="Travel"
     description={description}
   />

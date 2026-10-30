@@ -31,72 +31,76 @@ const targets = [
 ---
 
 <div
-  class="mt-12 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-6 text-sm"
+  class="mt-12 border-t border-border pt-6 text-sm"
   data-post-actions
   data-noprint
   data-url={url}
   data-title={title}
 >
-  <span class="label">Share</span>
+  <!-- Pulled out by the buttons' own padding, so every label, wrapped or not,
+       sits on the column edge. -->
+  <div class="-mx-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+    <span class="label px-1.5">Share</span>
 
-  <button
-    type="button"
-    data-copy-link
-    class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="h-3.5 w-3.5"
-      aria-hidden="true"
+    <button
+      type="button"
+      data-copy-link
+      class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
-      <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path>
-      <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path>
-    </svg>
-    <span data-copy-label>Copy link</span>
-  </button>
-
-  <!-- Replaced by the native share sheet where one exists. -->
-  <button
-    type="button"
-    data-native-share
-    hidden
-    class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="h-3.5 w-3.5"
-      aria-hidden="true"
-    >
-      <path d="M12 3v13M8 7l4-4 4 4"></path>
-      <path d="M20 14v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5"></path>
-    </svg>
-    Share
-  </button>
-
-  {
-    targets.map((target) => (
-      <a
-        href={target.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-3.5 w-3.5"
+        aria-hidden="true"
       >
-        {target.label}
-      </a>
-    ))
-  }
+        <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path>
+        <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path>
+      </svg>
+      <span data-copy-label>Copy link</span>
+    </button>
+
+    <!-- Opens the native share sheet; only shown where one exists. -->
+    <button
+      type="button"
+      data-native-share
+      hidden
+      class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-3.5 w-3.5"
+        aria-hidden="true"
+      >
+        <path d="M12 3v13M8 7l4-4 4 4"></path>
+        <path d="M20 14v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5"></path>
+      </svg>
+      More
+    </button>
+
+    {
+      targets.map((target) => (
+        <a
+          href={target.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          {target.label}
+        </a>
+      ))
+    }
+  </div>
 </div>
 
 <script>

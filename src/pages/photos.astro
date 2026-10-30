@@ -6,24 +6,25 @@ import { cn } from '@/lib/utils';
 ---
 
 <BaseLayout title="Photos" description="Photo gallery — coming soon.">
-  <PageHeader eyebrow="Coming soon" title="Photos" description="A gallery is on the way." />
-
-  <div class="grid grid-cols-2 gap-3 pb-8 sm:grid-cols-3">
-    {
-      Array.from({ length: 6 }).map(() => (
-        <div class="aspect-square rounded-xl border border-dashed border-border bg-muted/40" />
-      ))
-    }
-  </div>
+  <PageHeader title="Photos" description="A gallery is on the way." />
 
   <a
     href="/"
-    class={cn(
-      buttonVariants({ variant: 'ghost', size: 'sm' }),
-      'mb-8 -ml-2.5 gap-1.5 text-muted-foreground'
-    )}
+    class={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'mb-8 -ml-2.5 text-sm text-muted-foreground')}
   >
-    <span class="text-primary transition-transform group-hover/button:-translate-x-0.5">←</span>
-    <span>Back home</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="text-primary transition-transform group-hover/button:-translate-x-0.5"
+      aria-hidden="true"
+    >
+      <path d="M19 12H5M12 19l-7-7 7-7"></path>
+    </svg>
+    Back home
   </a>
 </BaseLayout>

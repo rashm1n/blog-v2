@@ -10,13 +10,9 @@ const entries = [...posts, ...travel].sort(
 );
 const years = byYear(entries);
 
-// PostIndex already groups by year; the header carries the span.
-const span =
-  years.length === 0
-    ? ''
-    : years.length === 1
-      ? `${years[0][0]}`
-      : `${years[years.length - 1][0]}–${years[0][0]}`;
+// PostIndex already groups by year; the header carries the span, but only once
+// there is one — a single year would just repeat the group label below it.
+const span = years.length > 1 ? `${years[years.length - 1][0]}–${years[0][0]}` : undefined;
 
 const description = 'Everything published here, newest first.';
 ---

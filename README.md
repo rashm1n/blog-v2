@@ -87,12 +87,11 @@ Every page carries a 1200×630 PNG rendered at build time by
 `/og-default.png` behind everything else. Nothing to add per post: the route reads the
 entry's date, reading time and tags, so the card shows what the post itself shows.
 
-The card is deliberately the page in miniature — same aurora, same 48px grid, same gradient
-headline, same mono labels — and it reads those values from the same oklch the palette is
-authored in, rather than a hand-copied hex set that drifts. The second aurora light is hued
-from the slug, so cards differ from each other without ever leaving the brand.
+The card is the page in miniature: the dark palette, the Schibsted Grotesk headline, and one
+petrol-teal rule along the top. Its colours are a hand-copied set of the dark tokens in
+`global.css` (`TOKEN` in `og.ts`), so a palette change has to be made in both places.
 
-Both typefaces are vendored as static TTFs in `src/assets/fonts/` because satori reads font
+The typeface is vendored as static woff files in `src/assets/fonts/` because satori reads font
 files directly and cannot decode the woff2 Fontsource ships. See the
 [README there](./src/assets/fonts/README.md).
 
