@@ -272,12 +272,6 @@
   animation-timing-function: var(--ease-out-quint);
 }
 
-/* Ring strokes are authored in px, not viewBox units, so the 40px index ring
-   and the 96px header ring draw the same hairline. */
-.post-ring * {
-  vector-effect: non-scaling-stroke;
-}
-
 @media (prefers-reduced-motion: reduce) {
   @view-transition {
     navigation: none;

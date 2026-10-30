@@ -24,7 +24,6 @@ export async function getStaticPaths() {
       kicker: sectionFor(entry.collection).label,
       meta: [formatDateISO(entry.data.pubDate), `${readingTime(entry.body ?? '')} min read`],
       tags: entry.data.tags,
-      seed: entry.id,
     } satisfies OgCardOptions,
   }));
 }

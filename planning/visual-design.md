@@ -359,15 +359,3 @@ card-styled prev/next links and the 404 terminal window.
 
 **Not changed.** OG images (`src/utils/og.ts`) still render in Geist/JetBrains Mono with
 the old palette.
-
-### Phase 13b: hash-ring marks
-
-Every post carries a consistent-hashing ring (`src/utils/ring.ts`, rendered by
-`PostRing.astro`): each tag hashes to three virtual nodes, the post hashes to
-its own point (primary), the primary arc runs clockwise to the node that owns
-it, and chords join the post to the nearest node of each tag. Shared tags mean
-shared nodes, so related posts look related. Appears in the index rows (turns
-60° on hover, the site's only ambient motion), hung in the margin of the post
-header (morphs from the index via a view transition), and on the OG card,
-which is now dark-palette Newsreader + Geist with the ring on the right.
-Optical sizing was already on; Newsreader ships no old-style figures.

@@ -3,16 +3,13 @@ import { Resvg } from '@resvg/resvg-js';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SITE_URL } from '../consts';
-import { ringMarkup } from './ring';
 
 /**
  * The social card, rendered at build time into /og/<slug>.png.
  *
  * It is seen almost entirely at thumbnail size, so it carries one serif
- * headline, one supporting line, and the post's hash ring on the right —
- * the same mark the post wears on the site, so the card and its
- * destination are recognisably the same thing. 1200×630 is the size every
- * platform crops from.
+ * headline and one supporting line, in the site's own palette and typefaces.
+ * 1200×630 is the size every platform crops from.
  */
 
 /* The dark tokens from src/styles/global.css. Keep in sync by hand. */
@@ -52,29 +49,6 @@ const box = (style: Style, children?: Node[] | string): Node => ({
   props: { style: { display: 'flex', ...style }, children },
 });
 
-const RING_SIZE = 500;
-
-function ring(seed: string, tags: string[]): Node {
-  // scale = px per unit / 2, so the ring's hairlines land at 2px on the card.
-  const inner = ringMarkup(
-    seed,
-    tags,
-    { ring: 'rgba(154,160,171,0.45)', chord: TOKEN.mutedForeground, node: TOKEN.foreground, post: TOKEN.primary },
-    RING_SIZE / 200,
-    0.4
-  );
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${RING_SIZE}" height="${RING_SIZE}">${inner}</svg>`;
-  return {
-    type: 'img',
-    props: {
-      src: `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`,
-      width: RING_SIZE,
-      height: RING_SIZE,
-      style: { position: 'absolute', right: 20, top: (630 - RING_SIZE) / 2 },
-    },
-  };
-}
-
 export interface OgCardOptions {
   title: string;
   description: string;
@@ -83,22 +57,18 @@ export interface OgCardOptions {
   /** Bottom line — date, reading time. */
   meta?: string[];
   tags?: string[];
-  /** Print the tags in the footer as well as on the ring. */
-  showTags?: boolean;
-  /** Places the post on its ring. Pass the slug, the same id PostRing gets. */
-  seed?: string;
   /** Overrides the length-derived headline size. */
   titleSize?: number;
 }
 
 /**
  * Headlines are set as large as they can be without spilling past three lines
- * in the 640px column left of the ring. 46 is the floor that still survives a
+ * in the 1000px column. 46 is the floor that still survives a
  * feed thumbnail.
  */
 function headlineSize(title: string): number {
-  if (title.length > 70) return 46;
-  if (title.length > 40) return 54;
+  if (title.length > 76) return 46;
+  if (title.length > 44) return 54;
   return 64;
 }
 
@@ -108,8 +78,6 @@ export async function renderOgCard({
   kicker,
   meta = [],
   tags = [],
-  showTags = true,
-  seed = title,
   titleSize,
 }: OgCardOptions): Promise<Response> {
   const domain = SITE_URL.replace(/^https?:\/\//, '');
@@ -120,7 +88,7 @@ export async function renderOgCard({
     box(muted, kicker),
   ]);
 
-  const body = box({ flexDirection: 'column', gap: 22, maxWidth: 640 }, [
+  const body = box({ flexDirection: 'column', gap: 22, maxWidth: 1000 }, [
     box(
       {
         fontFamily: 'Newsreader',
@@ -137,7 +105,7 @@ export async function renderOgCard({
 
   // Satori throws on an explicitly `undefined` child, so an empty footer is
   // left out of the tree rather than rendered blank.
-  const footerParts = [...meta, ...(showTags ? tags : [])];
+  const footerParts = [...meta, ...tags];
   const footer = box({ gap: 28 }, footerParts.map((part) => box(muted, part)));
 
   const svg = await satori(
@@ -153,7 +121,7 @@ export async function renderOgCard({
         color: TOKEN.foreground,
         fontFamily: 'Geist',
       },
-      [ring(seed, tags), header, body, ...(footerParts.length > 0 ? [footer] : [box({ height: 1 })])]
+      [header, body, ...(footerParts.length > 0 ? [footer] : [box({ height: 1 })])]
     ) as Parameters<typeof satori>[0],
     { width: 1200, height: 630, fonts: FONTS }
   );
