@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import { formatDate, readingTime, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
+
+interface Props {
+  /** Newest first. Up to three are laid out; the caller lists the rest. */
+  entries: AnyEntry[];
+}
+
+const entries = Astro.props.entries.slice(0, 3);
+---
+
+{/* Hyprland's dwindle layout: the newest post takes the left half, each
+    later one splits the space that's left. Uniform gaps, no shadows. */}
+<ul class="tiles" data-count={entries.length}>
+  {
+    entries.map((entry, i) => (
+      <li>
+        <a href={`${sectionFor(entry.collection).path}/${entry.id}`} class="tile">
+          {entry.data.heroImage && (
+            <div class="tile__media">
+              <Image
+                src={entry.data.heroImage}
+                alt=""
+                width={i === 0 ? 1200 : 800}
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            </div>
+          )}
+          <div class="tile__body">
+            <h3
+              class="tile__title"
+              style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
+            >
+              {entry.data.title}
+            </h3>
+            {entry.data.description && <p class="tile__description">{entry.data.description}</p>}
+            <p class="label mt-auto flex gap-x-4 pt-3">
+              <time datetime={entry.data.pubDate.toISOString()}>{formatDate(entry.data.pubDate)}</time>
+              <span>{readingTime(entry.body ?? '')} min read</span>
+            </p>
+          </div>
+        </a>
+      </li>
+    ))
+  }
+</ul>

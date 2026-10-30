@@ -10,7 +10,7 @@ const { eyebrow, title, description } = Astro.props;
 ---
 
 <header class="pt-12 pb-10 sm:pt-20">
-  <h1 class="text-4xl leading-tight font-normal tracking-[-0.015em] sm:text-5xl">{title}</h1>
+  <h1 class="text-4xl leading-[1.05] font-bold tracking-[-0.03em] sm:text-[3.25rem]">{title}</h1>
   {description && <p class="mt-4 max-w-xl text-muted-foreground">{description}</p>}
   {eyebrow && <p class="label mt-2 tabular-nums">{eyebrow}</p>}
 </header>

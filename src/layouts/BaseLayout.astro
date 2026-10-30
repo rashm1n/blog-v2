@@ -16,9 +16,11 @@ interface Props {
   published?: Date;
   updated?: Date;
   tags?: string[];
+  /** Let the page use the full frame instead of the reading column. */
+  wide?: boolean;
 }
 
-const { title, description, image, article, jsonLd, markdownPath, published, updated, tags } =
+const { title, description, image, article, jsonLd, markdownPath, published, updated, tags, wide } =
   Astro.props;
 ---
 
@@ -48,8 +50,10 @@ const { title, description, image, article, jsonLd, markdownPath, published, upd
 
     <!-- tabindex="-1" so the skip link and back-to-top can move focus here;
          it stays out of the tab order. -->
-    <main id="content" tabindex="-1" class="mx-auto w-full max-w-2xl flex-1 px-4 sm:px-6 focus:outline-none">
-      <slot />
+    <main id="content" tabindex="-1" class="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 focus:outline-none">
+      <div class:list={[!wide && 'max-w-2xl']}>
+        <slot />
+      </div>
     </main>
 
     <Footer />

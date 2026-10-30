@@ -28,9 +28,8 @@
    ship the same font twice. */
 @theme inline {
   --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-face-serif), ui-serif, Georgia, serif;
   --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
-  --font-heading: var(--font-serif);
+  --font-heading: var(--font-sans);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -75,64 +74,71 @@
 
 /* ------------------------------------------------------------------ palette */
 
-/* Cool paper and ink, so the page reads like a printed page rather than a
-   screen; one cobalt accent, the colour of the ink a correction is made in.
-   Light is the primary theme. Muted text stays ≥4.5:1 on the page in both
-   themes, because it carries dates and descriptions, not decoration. */
+/* Neutral paper and graphite, one petrol-teal accent. Nothing warm, nothing
+   violet: the hero images bring their own colour, so the chrome stays out of
+   their way. Muted text stays ≥4.5:1 on the page in both themes, because it
+   carries dates and descriptions, not decoration.
+
+   `--tile-active-*` is the one place two hues meet: the border of the tile
+   under the cursor, taken from Hyprland's default active-window border. */
 :root {
   color-scheme: light;
 
-  --background: #f6f7f9;
-  --foreground: #16181d;
+  --background: #f4f5f3;
+  --foreground: #15181b;
   --card: #ffffff;
-  --card-foreground: #16181d;
+  --card-foreground: #15181b;
   --popover: #ffffff;
-  --popover-foreground: #16181d;
-  --primary: #2b45c8;
+  --popover-foreground: #15181b;
+  --primary: #0a6b7c;
   --primary-foreground: #ffffff;
-  --secondary: #eceef2;
-  --secondary-foreground: #16181d;
-  --muted: #eceef2;
-  --muted-foreground: #596070;
-  --accent: #eceef2;
-  --accent-foreground: #16181d;
-  --destructive: #c62828;
-  --border: #dcdfe5;
-  --input: #cfd3db;
-  --ring: #2b45c8;
-  --radius: 0.5rem;
+  --secondary: #e9ebe8;
+  --secondary-foreground: #15181b;
+  --muted: #eaece9;
+  --muted-foreground: #5a6166;
+  --accent: #e9ebe8;
+  --accent-foreground: #15181b;
+  --destructive: #b42318;
+  --border: #d8dbd7;
+  --input: #c9cdc8;
+  --ring: #0a6b7c;
+  --radius: 0.375rem;
 
   /* Site-specific extras, outside shadcn's vocabulary. */
-  --hairline: #eceef2;
-  --primary-subtle: #e3e8fb;
+  --hairline: #eaece9;
+  --primary-subtle: #dcefef;
   --card-shadow: none;
+  --tile-active-from: #0b93b8;
+  --tile-active-to: #0f9a6c;
 }
 
 :root.dark {
   color-scheme: dark;
 
-  --background: #14161a;
-  --foreground: #e3e5ea;
-  --card: #1a1d22;
-  --card-foreground: #e3e5ea;
-  --popover: #1a1d22;
-  --popover-foreground: #e3e5ea;
-  --primary: #93a5ff;
-  --primary-foreground: #14161a;
-  --secondary: #22252b;
-  --secondary-foreground: #e3e5ea;
-  --muted: #1c1f24;
-  --muted-foreground: #9aa0ab;
-  --accent: #22252b;
-  --accent-foreground: #e3e5ea;
-  --destructive: #ef6b6b;
-  --border: #2a2e35;
-  --input: #343842;
-  --ring: #93a5ff;
+  --background: #16191c;
+  --foreground: #e7e9e7;
+  --card: #1c2024;
+  --card-foreground: #e7e9e7;
+  --popover: #1c2024;
+  --popover-foreground: #e7e9e7;
+  --primary: #5fcfd9;
+  --primary-foreground: #0e1a1c;
+  --secondary: #23282c;
+  --secondary-foreground: #e7e9e7;
+  --muted: #1f2327;
+  --muted-foreground: #9aa1a6;
+  --accent: #23282c;
+  --accent-foreground: #e7e9e7;
+  --destructive: #f07167;
+  --border: #2d3237;
+  --input: #383e44;
+  --ring: #5fcfd9;
 
-  --hairline: #1a1d22;
-  --primary-subtle: #232a4d;
+  --hairline: #1f2327;
+  --primary-subtle: #173338;
   --card-shadow: none;
+  --tile-active-from: #33ccff;
+  --tile-active-to: #00ff99;
 }
 
 @layer base {
@@ -187,15 +193,13 @@
     text-wrap: balance;
   }
 
-  /* Headlines are typeset, not UI: serif, optical sizing on so the display
-     cuts kick in at large sizes. Components that want a sans heading opt out
-     with `font-sans`, which wins because utilities sit in a later layer. */
+  /* Headlines tighten as they grow; the grotesk is drawn loose for text. */
   h1,
   h2,
   h3,
   h4 {
-    font-family: var(--font-serif);
-    font-optical-sizing: auto;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   p {
@@ -349,17 +353,117 @@
     }
   }
 
+  /* ----------------------------------------------------------------- tiles */
+
+  /* The home page's latest posts, tiled like windows. At rest each tile has
+     the grey border of an unfocused window; under the cursor or keyboard it
+     takes the two-tone border of the focused one. The gradient is painted on
+     the border-box behind a solid padding-box, so the radius still clips. */
+  .tiles {
+    display: grid;
+    gap: 0.625rem;
+  }
+
+  @media (min-width: 48rem) {
+    .tiles[data-count='2'] {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .tiles[data-count='3'] {
+      grid-template-columns: 3fr 2fr;
+    }
+
+    .tiles[data-count='3'] > :first-child {
+      grid-row: span 2;
+    }
+  }
+
+  .tile {
+    --tile-edge: linear-gradient(var(--border), var(--border));
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 0.625rem;
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      var(--tile-edge) border-box;
+  }
+
+  .tile:hover,
+  .tile:focus-visible {
+    --tile-edge: linear-gradient(45deg, var(--tile-active-from), var(--tile-active-to));
+  }
+
+  /* The border is the focus indicator; an outline around it would double it. */
+  .tile:focus-visible {
+    outline: none;
+  }
+
+  .tile__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+  }
+
+  .tile__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The tall tile grows its image to match the two stacked beside it. */
+  @media (min-width: 48rem) {
+    .tiles[data-count='3'] > :first-child .tile__media {
+      flex: 1;
+      aspect-ratio: auto;
+      min-height: 16rem;
+    }
+  }
+
+  .tile__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 1rem 1.125rem 1.125rem;
+  }
+
+  .tiles[data-count='3'] > :first-child .tile__body {
+    flex: none;
+  }
+
+  .tile__title {
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  /* Halves are equals; only a tile that outranks its neighbours sets larger. */
+  .tiles:not([data-count='2']) > :first-child .tile__title {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);
+    line-height: 1.1;
+  }
+
+  .tile__description {
+    margin-top: 0.5rem;
+    max-width: 60ch;
+    color: var(--muted-foreground);
+    line-height: 1.55;
+  }
+
+  .tiles[data-count='3'] > :not(:first-child) .tile__description {
+    display: none;
+  }
+
   /* ----------------------------------------------------------------- prose */
 
-  /* Serif at 19px with a little more leading than a sans would need; 66ch
-     keeps lines inside the 45–75 character band. */
+  /* 18px grotesk; 68ch keeps lines inside the 45–75 character band. */
   .prose {
-    max-width: 66ch;
+    max-width: 68ch;
     color: var(--foreground);
-    font-family: var(--font-serif);
-    font-size: 1.1875rem;
-    line-height: 1.7;
-    font-optical-sizing: auto;
+    font-size: 1.125rem;
+    line-height: 1.68;
     hanging-punctuation: first;
   }
 
@@ -370,29 +474,24 @@
   .prose h2,
   .prose h3,
   .prose h4 {
-    font-weight: 600;
-    line-height: 1.25;
-    letter-spacing: -0.005em;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
     margin-top: 2.2em;
     margin-bottom: 0.6em;
     scroll-margin-top: 6rem;
   }
 
   .prose h2 {
-    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.65rem);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);
   }
 
   .prose h3 {
-    font-size: clamp(1.2rem, 1.05rem + 0.5vw, 1.3rem);
+    font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.375rem);
   }
 
   .prose h4 {
     font-size: 1em;
-  }
-
-  /* Interface bits inside an article stay in the interface face. */
-  .prose :is(figcaption, table, .callout__title, .code-block) {
-    font-family: var(--font-sans);
   }
 
   /* Anchor links injected by PostLayout — visible on hover, mono hash. */
@@ -444,15 +543,14 @@
   }
 
   .prose strong {
-    font-weight: 600;
+    font-weight: 650;
     color: var(--foreground);
   }
 
   .prose blockquote {
-    border-left: 2px solid var(--border);
+    border-left: 3px solid var(--primary);
     padding-left: 1.15rem;
     color: var(--muted-foreground);
-    font-style: italic;
   }
 
   /* --------------------------------------------------------------- callouts */
@@ -566,21 +664,14 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Three centred dots instead of a full-width rule. */
   .prose hr {
     border: 0;
+    border-top: 1px solid var(--border);
     margin: 3em 0;
-    text-align: center;
-  }
-
-  .prose hr::before {
-    content: '· · ·';
-    letter-spacing: 0.6em;
-    color: var(--muted-foreground);
   }
 
   .prose img {
-    border-radius: 0.625rem;
+    border-radius: 0.375rem;
     border: 1px solid var(--border);
     max-width: 100%;
     height: auto;
@@ -593,7 +684,7 @@
     display: block;
     width: 100%;
     cursor: zoom-in;
-    border-radius: 0.625rem;
+    border-radius: 0.375rem;
     /* The image already carries the border; a ring here would double it. */
     transition: opacity 0.2s ease;
   }
@@ -880,12 +971,7 @@
      actually unset them. */
   .toc {
     margin-top: 2.5rem;
-    padding: 0.875rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    background: var(--hairline);
-    font-family: var(--font-sans);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
   }
 
   .toc-list {
@@ -920,11 +1006,13 @@
     border-left-color: var(--primary);
   }
 
-  @media (min-width: 82rem) {
+  /* The column sits on the left of a 64rem frame, so the rail takes the room
+     to its right: frame edge + gutter + 42rem column + 3rem. */
+  @media (min-width: 72rem) {
     .toc {
       position: fixed;
       top: 7.5rem;
-      left: calc(50% + 22rem);
+      left: calc(50% - 32rem + 1.5rem + 42rem + 3rem);
       width: 15rem;
       max-height: calc(100vh - 12rem);
       overflow-y: auto;

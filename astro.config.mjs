@@ -35,22 +35,13 @@ export default defineConfig({
   },
   fonts: [
     {
-      // The reading face: body copy and every headline. Variable optical size,
-      // so the same family sets the 3rem home sentence and the 19px paragraphs.
-      name: 'Newsreader',
-      cssVariable: '--font-face-serif',
-      provider: fontProviders.fontsource(),
-      weights: ['400 600'],
-      styles: ['normal', 'italic'],
-      subsets: ['latin'],
-      fallbacks: ['ui-serif', 'Georgia', 'serif'],
-    },
-    {
-      name: 'Geist',
+      // The one face for reading and interface alike. A news grotesk: built for
+      // long text at body sizes, with enough character to carry the headlines.
+      name: 'Schibsted Grotesk',
       cssVariable: '--font-face-sans',
       provider: fontProviders.fontsource(),
-      weights: [400, 500, 600, 700],
-      styles: ['normal'],
+      weights: ['400 800'],
+      styles: ['normal', 'italic'],
       subsets: ['latin'],
       fallbacks: ['ui-sans-serif', 'system-ui', 'sans-serif'],
     },

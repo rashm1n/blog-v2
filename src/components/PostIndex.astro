@@ -19,10 +19,8 @@ const shortDate = (date: Date) =>
 <div class="space-y-10">
   {
     years.map(([year, group]) => (
-      <section class="relative">
-        {/* Hangs in the left margin once there is one; inline above the rows
-            until then. Top offset lines it up with the first title. */}
-        <h2 class="label mb-1 tabular-nums lg:absolute lg:top-[0.45rem] lg:right-full lg:mr-10 lg:mb-0">
+      <section>
+        <h2 class="label mb-1 tabular-nums">
           {year}
         </h2>
 
@@ -33,7 +31,7 @@ const shortDate = (date: Date) =>
                 href={`${sectionFor(entry.collection).path}/${entry.id}`}
                 class="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-3"
               >
-                <span class="font-serif text-xl leading-snug font-medium text-foreground transition-colors group-hover:text-primary">
+                <span class="text-xl leading-snug font-semibold tracking-[-0.01em] text-foreground transition-colors group-hover:text-primary">
                   <span
                     style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
                   >
