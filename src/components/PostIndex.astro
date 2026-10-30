@@ -1,0 +1,63 @@
+---
+import { byYear, formatDate, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
+
+interface Props {
+  entries: AnyEntry[];
+}
+
+const { entries } = Astro.props;
+const years = byYear(entries);
+
+// Only label the section when the list mixes writing and travel (archive, tags);
+// on /blog every row would say the same thing.
+const mixed = new Set(entries.map((e) => e.collection)).size > 1;
+
+const shortDate = (date: Date) =>
+  date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+---
+
+<div class="space-y-10">
+  {
+    years.map(([year, group]) => (
+      <section class="relative">
+        {/* Hangs in the left margin once there is one; inline above the rows
+            until then. Top offset lines it up with the first title. */}
+        <h2 class="label mb-1 tabular-nums lg:absolute lg:top-[0.45rem] lg:right-full lg:mr-10 lg:mb-0">
+          {year}
+        </h2>
+
+        <ul>
+          {group.map((entry) => (
+            <li>
+              <a
+                href={`${sectionFor(entry.collection).path}/${entry.id}`}
+                class="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-3"
+              >
+                <span class="font-serif text-xl leading-snug font-medium text-foreground transition-colors group-hover:text-primary">
+                  <span
+                    style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
+                  >
+                    {entry.data.title}
+                  </span>
+                </span>
+
+                <span class="label tabular-nums">
+                  {mixed && entry.collection === 'travel' && <span class="mr-2">Travel</span>}
+                  <time datetime={entry.data.pubDate.toISOString()} title={formatDate(entry.data.pubDate)}>
+                    {shortDate(entry.data.pubDate)}
+                  </time>
+                </span>
+
+                {entry.data.description && (
+                  <p class="col-span-2 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted-foreground">
+                    {entry.data.description}
+                  </p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>

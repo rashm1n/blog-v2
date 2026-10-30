@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import PostCard from '../../components/PostCard.astro';
+import PostIndex from '../../components/PostIndex.astro';
 import { getPublished } from '../../utils/posts';
 
 const posts = await getPublished('travel');
@@ -15,12 +15,12 @@ const description = 'Notes and photos from trips.';
     description={description}
   />
 
-  <div class="space-y-3 pb-8">
-    {posts.map((post) => <PostCard entry={post} basePath="/travel" />)}
+  <div class="pb-8">
+    <PostIndex entries={posts} />
     {
       posts.length === 0 && (
-        <p class="rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
-          Nothing posted yet — coming soon.
+        <p class="text-muted-foreground">
+          No trips written up yet. <a href="/blog" class="text-primary underline underline-offset-4">Read the writing</a> in the meantime.
         </p>
       )
     }

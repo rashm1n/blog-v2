@@ -15,7 +15,7 @@
      background / foreground   the page
      card                      material that floats above the page
      muted / muted-foreground  inset surfaces, secondary text
-     primary                   the one accent (phosphor amber)
+     primary                   the one accent (cobalt ink)
      accent                    hover surface — NOT the brand colour
 
    That last one is the name that trips you up coming from the old palette,
@@ -28,8 +28,9 @@
    ship the same font twice. */
 @theme inline {
   --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-face-serif), ui-serif, Georgia, serif;
   --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-serif);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -74,63 +75,63 @@
 
 /* ------------------------------------------------------------------ palette */
 
-/* Graphite surfaces, so the posts carry the colour; one phosphor-amber accent
-   from the terminal the site is named after. Light uses a darker amber so it
-   still clears 4.5:1 as link text, with white on it as a button. Muted text
-   stays ≥4.5:1 on the page in both themes; it carries meta, not decoration. */
+/* Cool paper and ink, so the page reads like a printed page rather than a
+   screen; one cobalt accent, the colour of the ink a correction is made in.
+   Light is the primary theme. Muted text stays ≥4.5:1 on the page in both
+   themes, because it carries dates and descriptions, not decoration. */
 :root {
   color-scheme: light;
 
-  --background: #fafafa;
-  --foreground: #171717;
+  --background: #f6f7f9;
+  --foreground: #16181d;
   --card: #ffffff;
-  --card-foreground: #171717;
+  --card-foreground: #16181d;
   --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #8a5300;
+  --popover-foreground: #16181d;
+  --primary: #2b45c8;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #171717;
-  --muted: #f4f4f5;
-  --muted-foreground: #5f5f63;
-  --accent: #f4f4f5;
-  --accent-foreground: #171717;
-  --destructive: #dc2626;
-  --border: rgb(23 23 23 / 0.09);
-  --input: rgb(23 23 23 / 0.12);
-  --ring: #8a5300;
-  --radius: 0.625rem;
+  --secondary: #eceef2;
+  --secondary-foreground: #16181d;
+  --muted: #eceef2;
+  --muted-foreground: #596070;
+  --accent: #eceef2;
+  --accent-foreground: #16181d;
+  --destructive: #c62828;
+  --border: #dcdfe5;
+  --input: #cfd3db;
+  --ring: #2b45c8;
+  --radius: 0.5rem;
 
   /* Site-specific extras, outside shadcn's vocabulary. */
-  --hairline: #f4f4f5;
-  --primary-subtle: #f6ead6;
-  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  --hairline: #eceef2;
+  --primary-subtle: #e3e8fb;
+  --card-shadow: none;
 }
 
 :root.dark {
   color-scheme: dark;
 
-  --background: #141415;
-  --foreground: #ededed;
-  --card: #19191b;
-  --card-foreground: #ededed;
-  --popover: #19191b;
-  --popover-foreground: #ededed;
-  --primary: #e0a24a;
-  --primary-foreground: #141415;
-  --secondary: #232325;
-  --secondary-foreground: #ededed;
-  --muted: #1e1e20;
-  --muted-foreground: #a1a1a6;
-  --accent: #232325;
-  --accent-foreground: #ededed;
-  --destructive: #e5484d;
-  --border: rgb(237 237 237 / 0.08);
-  --input: rgb(237 237 237 / 0.12);
-  --ring: #e0a24a;
+  --background: #14161a;
+  --foreground: #e3e5ea;
+  --card: #1a1d22;
+  --card-foreground: #e3e5ea;
+  --popover: #1a1d22;
+  --popover-foreground: #e3e5ea;
+  --primary: #93a5ff;
+  --primary-foreground: #14161a;
+  --secondary: #22252b;
+  --secondary-foreground: #e3e5ea;
+  --muted: #1c1f24;
+  --muted-foreground: #9aa0ab;
+  --accent: #22252b;
+  --accent-foreground: #e3e5ea;
+  --destructive: #ef6b6b;
+  --border: #2a2e35;
+  --input: #343842;
+  --ring: #93a5ff;
 
-  --hairline: #19191b;
-  --primary-subtle: #3a2c17;
+  --hairline: #1a1d22;
+  --primary-subtle: #232a4d;
   --card-shadow: none;
 }
 
@@ -184,6 +185,17 @@
   h2,
   h3 {
     text-wrap: balance;
+  }
+
+  /* Headlines are typeset, not UI: serif, optical sizing on so the display
+     cuts kick in at large sizes. Components that want a sans heading opt out
+     with `font-sans`, which wins because utilities sit in a later layer. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-optical-sizing: auto;
   }
 
   p {
@@ -253,7 +265,7 @@
 }
 
 /* Post titles morph from the list row into the article heading. The name is
-   derived from the slug in PostCard/PostLayout, so the pairing is automatic
+   derived from the slug in PostIndex/PostLayout, so the pairing is automatic
    and stays unique within each document. */
 ::view-transition-group(.post-title) {
   animation-duration: 0.32s;
@@ -269,12 +281,13 @@
 @layer components {
   /* ---------------------------------------------------------------- shared */
 
-  /* Small monospace eyebrow used for section headings and metadata. */
+  /* Small sans metadata: dates, counts, section names. The interface voice,
+     against the serif reading voice. */
   .label {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
     font-weight: 400;
-    line-height: 1rem;
+    line-height: 1.25rem;
     color: var(--muted-foreground);
   }
 
@@ -338,34 +351,48 @@
 
   /* ----------------------------------------------------------------- prose */
 
+  /* Serif at 19px with a little more leading than a sans would need; 66ch
+     keeps lines inside the 45–75 character band. */
   .prose {
-    max-width: 68ch;
+    max-width: 66ch;
     color: var(--foreground);
-    font-size: 1.0625rem;
-    line-height: 1.75;
+    font-family: var(--font-serif);
+    font-size: 1.1875rem;
+    line-height: 1.7;
+    font-optical-sizing: auto;
+    hanging-punctuation: first;
   }
 
   .prose > * + * {
-    margin-top: 1.4em;
+    margin-top: 1.25em;
   }
 
   .prose h2,
   .prose h3,
   .prose h4 {
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.011em;
-    margin-top: 2.4em;
-    margin-bottom: 0.7em;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    margin-top: 2.2em;
+    margin-bottom: 0.6em;
     scroll-margin-top: 6rem;
   }
 
   .prose h2 {
-    font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.65rem);
   }
 
   .prose h3 {
-    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.25rem);
+    font-size: clamp(1.2rem, 1.05rem + 0.5vw, 1.3rem);
+  }
+
+  .prose h4 {
+    font-size: 1em;
+  }
+
+  /* Interface bits inside an article stay in the interface face. */
+  .prose :is(figcaption, table, .callout__title, .code-block) {
+    font-family: var(--font-sans);
   }
 
   /* Anchor links injected by PostLayout — visible on hover, mono hash. */
@@ -422,10 +449,10 @@
   }
 
   .prose blockquote {
-    border-left: 2px solid var(--primary);
+    border-left: 2px solid var(--border);
     padding-left: 1.15rem;
     color: var(--muted-foreground);
-    font-style: normal;
+    font-style: italic;
   }
 
   /* --------------------------------------------------------------- callouts */
@@ -449,9 +476,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.8125rem;
+    font-weight: 600;
     color: var(--callout);
   }
 
@@ -537,8 +563,7 @@
   }
 
   .prose ol > li::marker {
-    font-family: var(--font-mono);
-    font-size: 0.875em;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Three centred dots instead of a full-width rule. */
@@ -579,8 +604,8 @@
 
   .figure__caption {
     margin-top: 0.65rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
     line-height: 1.6;
     color: var(--muted-foreground);
     text-align: center;
@@ -635,8 +660,8 @@
   .lightbox__caption {
     flex-shrink: 0;
     max-width: 46rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
     line-height: 1.6;
     text-align: center;
     /* Fixed light-on-dark: the backdrop is dark in both themes. */
@@ -670,8 +695,9 @@
     color: #fff;
   }
 
+  /* Mono runs large beside a serif of the same nominal size. */
   .prose :not(pre) > code {
-    font-size: 0.85em;
+    font-size: 0.8em;
     background: var(--muted);
     border: 1px solid var(--border);
     padding: 0.1em 0.35em;
@@ -684,7 +710,8 @@
     overflow-x: auto;
     border-collapse: collapse;
     width: 100%;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
   }
 
   .prose th,
@@ -748,8 +775,7 @@
     gap: 0.375rem;
     padding: 0.1875rem 0.4375rem;
     border-radius: 0.3125rem;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--muted-foreground);
     cursor: pointer;
     /* Dimmed rather than hidden: the chrome bar would otherwise look empty on
@@ -858,6 +884,7 @@
     border: 1px solid var(--border);
     border-radius: 0.625rem;
     background: var(--hairline);
+    font-family: var(--font-sans);
     font-size: 0.8125rem;
   }
 

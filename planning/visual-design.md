@@ -9,6 +9,10 @@ chrome, high information density in list views, code treated as a first-class co
 and a handful of details that reward people who notice detail.
 
 > [!IMPORTANT]
+> **Phase 13 is current.** It replaced the graphite/amber terminal look with a typeset,
+> reading-first design — see [Phase 13](#phase-13-typeset-journal) at the end. Everything
+> above it is history.
+>
 > Phase 12 moved the whole surface onto **shadcn/ui** and deliberately reversed several of
 > the restrictions this document originally set out — the page now carries a gradient wash,
 > list rows are cards, and headings are gradient-filled. Read
@@ -322,3 +326,36 @@ without a keyframe per position.
 | `src/components/ui/*.tsx` | Vendored shadcn components (button, card, badge, separator, avatar) |
 | `src/components/AuthorAvatar.tsx` | Avatar subtree kept in one React render (see traps above) |
 | `src/components/PostCard.astro` | The list row, now a card — replaces `PostListItem.astro` |
+
+## Phase 13: typeset journal
+
+The site is about long-form writing, so the design is now built around reading it. The
+terminal identity (`~/` wordmark, mono labels, amber, a card per post) read as a stock
+developer theme and has been retired.
+
+**Palette.** Cool paper `#f6f7f9`, ink `#16181d`, slate `#596070` for meta, rule `#dcdfe5`,
+one cobalt accent `#2b45c8` (dark: `#14161a` / `#e3e5ea` / `#93a5ff`). Light is the primary
+theme. Cream backgrounds were avoided on purpose.
+
+**Type.** Three faces, three jobs:
+
+- **Newsreader** (variable, optical sizes, with italics): every headline and all prose.
+  Set by the base `h1–h4` rule and `.prose`; prose is 19px / 1.7 at a 66ch measure.
+- **Geist**: interface text only — nav, dates, counts, tags, captions, ToC. `.label`
+  is now Geist, not mono.
+- **JetBrains Mono**: code only. No longer preloaded.
+
+**Layout.** One left-aligned column. On wide screens the left margin carries the year
+(`PostIndex`, `lg`) and the article's date and read time (`PostLayout`, `xl`); on narrow
+screens both fold inline above the content.
+
+**One loud element.** The home page opens with `SITE_LEAD` as a large serif sentence and
+nothing else — no avatar, button row or eyebrow. Everything after it stays quiet. It is
+the only element with an entrance animation.
+
+**What went.** `PostCard` (replaced by `PostIndex`, used by home, `/blog`, `/travel`,
+`/archive` and `/tags/[tag]`), tag badges, `→` link suffixes, `·`-joined meta strings,
+card-styled prev/next links and the 404 terminal window.
+
+**Not changed.** OG images (`src/utils/og.ts`) still render in Geist/JetBrains Mono with
+the old palette.

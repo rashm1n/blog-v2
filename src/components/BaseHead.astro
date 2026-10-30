@@ -53,8 +53,8 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<meta name="theme-color" content="#fdfdfc" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href="/rss.xml" />
 <link rel="alternate" type="application/feed+json" title={SITE_TITLE} href="/feed.json" />
@@ -100,8 +100,10 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 
 <script type="application/ld+json" is:inline set:html={jsonLdScript(graph)}></script>
 
+<Font cssVariable="--font-face-serif" preload />
 <Font cssVariable="--font-face-sans" preload />
-<Font cssVariable="--font-face-mono" preload />
+<!-- Code only, so not worth a preload on pages without any. -->
+<Font cssVariable="--font-face-mono" />
 
 {import.meta.env.PROD && umamiWebsiteId && (
   <script is:inline defer src={umamiScriptUrl} data-website-id={umamiWebsiteId}></script>

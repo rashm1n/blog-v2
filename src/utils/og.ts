@@ -142,7 +142,7 @@ const MONO_LABEL: Style = {
   color: css(TOKEN.mutedForeground),
 };
 
-/** The `h-2.5 w-px bg-border` separator PostCard uses between date and length. */
+/** The `h-2.5 w-px bg-border` separator the old PostCard used between date and length. */
 const divider = () => box({ width: 1, height: 14, backgroundColor: css(TOKEN.border) });
 
 export interface OgCardOptions {
@@ -352,7 +352,7 @@ export async function renderOgCard({
     tags.length === 0
       ? [domainMark]
       : [
-          /* PostCard's `#tag` badges, at the size they need to survive a
+          /* The old PostCard's `#tag` badges, at the size they need to survive a
            * thumbnail. Three is the cap there too. */
           box(
             { gap: 10 },

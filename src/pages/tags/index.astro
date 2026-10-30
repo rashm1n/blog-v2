@@ -1,8 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import { badgeVariants } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { getPublished, allTags } from '../../utils/posts';
 
 const [posts, travel] = await Promise.all([getPublished('posts'), getPublished('travel')]);
@@ -22,21 +20,17 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
     description="Everything on the site, grouped by topic."
   />
 
-  <div class="flex flex-wrap gap-2 pb-8">
+  <ul class="grid grid-cols-2 gap-x-8 pb-8 sm:grid-cols-3">
     {
       tags.map(([tag, count]) => (
-        <a
-          href={`/tags/${tag}`}
-          class={cn(
-            badgeVariants({ variant: 'outline' }),
-            'h-7 gap-2 px-2.5 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground'
-          )}
-        >
-          #{tag}
-          <span class="tabular-nums opacity-60">{count}</span>
-        </a>
+        <li>
+          <a href={`/tags/${tag}`} class="group flex items-baseline justify-between gap-3 border-b border-border py-2.5">
+            <span class="font-serif text-lg transition-colors group-hover:text-primary">{tag}</span>
+            <span class="label tabular-nums">{count}</span>
+          </a>
+        </li>
       ))
     }
-    {tags.length === 0 && <p class="text-sm text-muted-foreground">No tags yet.</p>}
-  </div>
+  </ul>
+  {tags.length === 0 && <p class="pb-8 text-muted-foreground">No tags yet.</p>}
 </BaseLayout>

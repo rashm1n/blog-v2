@@ -35,6 +35,17 @@ export default defineConfig({
   },
   fonts: [
     {
+      // The reading face: body copy and every headline. Variable optical size,
+      // so the same family sets the 3rem home sentence and the 19px paragraphs.
+      name: 'Newsreader',
+      cssVariable: '--font-face-serif',
+      provider: fontProviders.fontsource(),
+      weights: ['400 600'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['ui-serif', 'Georgia', 'serif'],
+    },
+    {
       name: 'Geist',
       cssVariable: '--font-face-sans',
       provider: fontProviders.fontsource(),

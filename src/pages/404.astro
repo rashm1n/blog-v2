@@ -1,45 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Card } from '@/components/ui/card';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 ---
 
 <BaseLayout title="Not found" description="Page not found.">
-  <div class="flex flex-col items-start gap-6 py-24">
-    <Card className="reveal w-full gap-0 border py-0 font-mono text-sm ring-0">
-      <div class="flex items-center gap-1.5 border-b border-border px-3 py-2.5">
-        <span class="size-2.5 rounded-full bg-destructive/70"></span>
-        <span class="size-2.5 rounded-full bg-[oklch(0.78_0.16_85)]/70"></span>
-        <span class="size-2.5 rounded-full bg-emerald-500/70"></span>
-      </div>
-      <div class="space-y-1 px-4 py-4">
-        <p class="text-muted-foreground">
-          <span class="text-primary">$</span> curl -sI <span id="missing-path">/…</span>
-        </p>
-        <p class="text-foreground">HTTP/2 404</p>
-      </div>
-    </Card>
-
-    <h1
-      class="reveal text-3xl font-medium tracking-[-0.02em]"
-      style="--reveal-delay: 60ms"
-    >
-      Page not found
+  <div class="pt-14 pb-24 sm:pt-24">
+    <h1 class="text-[2.125rem] leading-[1.12] font-normal tracking-[-0.015em] sm:text-[3.25rem]">
+      There's nothing at <span id="missing-path" class="break-all">this address</span>.
     </h1>
-    <p class="reveal -mt-2 text-sm text-muted-foreground" style="--reveal-delay: 100ms">
-      That URL doesn't resolve to anything. It may have moved, or never existed.
+    <p class="mt-6 text-muted-foreground">
+      It may have moved, or never existed. Try the <a href="/blog" class="text-primary underline underline-offset-4">list of posts</a>,
+      search with <kbd class="kbd" data-shortcut-hint>⌘K</kbd>, or go to the <a href="/" class="text-primary underline underline-offset-4">home page</a>.
     </p>
-
-    <div class="reveal flex flex-wrap gap-2" style="--reveal-delay: 140ms">
-      <a href="/" class={cn(buttonVariants({ size: 'lg' }), 'h-10 px-4')}>Home</a>
-      <a
-        href="/blog"
-        class={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-10 px-3.5')}
-      >
-        All writing
-      </a>
-    </div>
   </div>
 
   <script>

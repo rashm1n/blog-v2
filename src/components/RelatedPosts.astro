@@ -1,5 +1,5 @@
 ---
-import { formatDateISO, readingTime, sectionFor, type AnyEntry } from '../utils/posts';
+import { formatDate, sectionFor, type AnyEntry } from '../utils/posts';
 
 interface Props {
   entries: AnyEntry[];
@@ -17,13 +17,13 @@ const { entries } = Astro.props;
           <li>
             <a
               href={`${sectionFor(entry.collection).path}/${entry.id}`}
-              class="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-accent"
+              class="group flex items-baseline justify-between gap-6 py-2.5"
             >
-              <span class="text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
+              <span class="font-serif text-lg leading-snug text-foreground transition-colors group-hover:text-primary">
                 {entry.data.title}
               </span>
-              <span class="hidden shrink-0 font-mono text-xs tabular-nums text-muted-foreground xs:block">
-                {formatDateISO(entry.data.pubDate)} · {readingTime(entry.body ?? '')} min
+              <span class="label hidden shrink-0 tabular-nums xs:block">
+                {formatDate(entry.data.pubDate)}
               </span>
             </a>
           </li>

@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
-import { byYear, formatDate, getPublished, readingTime, sectionFor } from '../utils/posts';
+import PostIndex from '../components/PostIndex.astro';
+import { byYear, getPublished } from '../utils/posts';
 
 const [posts, travel] = await Promise.all([getPublished('posts'), getPublished('travel')]);
 const entries = [...posts, ...travel].sort(
@@ -9,14 +10,13 @@ const entries = [...posts, ...travel].sort(
 );
 const years = byYear(entries);
 
-// Per-year counts sit in each group heading, so the eyebrow carries the span
-// instead of repeating the total.
+// PostIndex already groups by year; the header carries the span.
 const span =
   years.length === 0
     ? ''
     : years.length === 1
       ? `${years[0][0]}`
-      : `${years[years.length - 1][0]} — ${years[0][0]}`;
+      : `${years[years.length - 1][0]}–${years[0][0]}`;
 
 const description = 'Everything published here, newest first.';
 ---
@@ -29,48 +29,7 @@ const description = 'Everything published here, newest first.';
   />
 
   <div class="pb-8">
-    {
-      years.map(([year, group]) => (
-        <section class="mb-10">
-          <div class="flex items-baseline gap-3">
-            <h2 class="font-mono text-sm font-medium tabular-nums text-foreground">{year}</h2>
-            <span class="label">
-              {group.length} {group.length === 1 ? 'entry' : 'entries'}
-            </span>
-            {/* Same fading hairline as `.rule-heading`, which this row is a
-                variant of — it just leads with the year instead of a label. */}
-            <span class="h-px flex-1 bg-linear-to-r from-border to-transparent" />
-          </div>
-
-          <ul class="mt-1">
-            {group.map((entry) => (
-              <li>
-                <a
-                  href={`${sectionFor(entry.collection).path}/${entry.id}`}
-                  class="group -mx-3 flex flex-col gap-x-4 gap-y-0.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent xs:flex-row xs:items-baseline"
-                >
-                  <time
-                    datetime={entry.data.pubDate.toISOString()}
-                    title={formatDate(entry.data.pubDate)}
-                    class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground xs:w-14"
-                  >
-                    {entry.data.pubDate.toISOString().slice(5, 10).replace('-', '/')}
-                  </time>
-
-                  <span class="flex-1 text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
-                    {entry.data.title}
-                  </span>
-
-                  <span class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                    {readingTime(entry.body ?? '')} min
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
-    }
-    {entries.length === 0 && <p class="py-8 text-sm text-muted-foreground">Nothing published yet.</p>}
+    <PostIndex entries={entries} />
+    {entries.length === 0 && <p class="py-8 text-muted-foreground">Nothing published yet.</p>}
   </div>
 </BaseLayout>

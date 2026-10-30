@@ -1,16 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
-import { AuthorAvatar } from '../components/AuthorAvatar';
-import { badgeVariants } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { AUTHOR_NAME, AUTHOR_ROLE, SITE_LEAD, SOCIAL_LINKS } from '../consts';
+import PostIndex from '../components/PostIndex.astro';
+import { SITE_LEAD } from '../consts';
 import { allTags, getPublished } from '../utils/posts';
 
 const allPosts = await getPublished('posts');
 const allTravel = await getPublished('travel');
-const posts = allPosts.slice(0, 5);
+const posts = allPosts.slice(0, 8);
 const travel = allTravel.slice(0, 3);
 
 // Most-used tags first, so the row reads as "what this site is about" rather
@@ -20,91 +16,25 @@ const topics = allTags(entries)
   .map((tag) => ({ tag, count: entries.filter((e) => e.data.tags.includes(tag)).length }))
   .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
   .slice(0, 8);
-
-const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
 ---
 
 <BaseLayout>
-  <section class="pt-10 pb-14 sm:pt-16">
-    <div class="reveal flex items-center gap-4">
-      <AuthorAvatar initial={initial} size="lg" />
-      <p class="label">{AUTHOR_ROLE}</p>
-    </div>
+  {/* The one loud thing on the site: a single typeset sentence. Everything
+      after it is set quietly. */}
+  <h1
+    class="reveal pt-14 pb-16 text-[2.125rem] leading-[1.12] font-normal tracking-[-0.015em] sm:pt-24 sm:pb-20 sm:text-[2.875rem]"
+  >
+    {SITE_LEAD}
+  </h1>
 
-    <h1
-      class="reveal mt-6 text-[2.75rem] leading-[1.05] font-medium tracking-[-0.03em] sm:text-6xl"
-      style="--reveal-delay: 60ms"
-    >
-      {AUTHOR_NAME}
-    </h1>
-
-    <p
-      class="reveal mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
-      style="--reveal-delay: 120ms"
-    >
-      {SITE_LEAD}
-    </p>
-
-    <div class="reveal mt-8 flex flex-wrap items-center gap-2" style="--reveal-delay: 180ms">
-      <a href="/blog" class={cn(buttonVariants({ size: 'lg' }), 'h-10 px-4')}>
-        Read the writing
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="transition-transform group-hover/button:translate-x-0.5"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6"></path>
-        </svg>
-      </a>
-
-      {
-        SOCIAL_LINKS.map((link) => (
-          <a
-            href={link.url}
-            rel="me"
-            class={cn(
-              buttonVariants({ variant: 'ghost', size: 'lg' }),
-              'h-10 px-3 text-muted-foreground'
-            )}
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="py-6">
-    <h2 class="rule-heading label">~/writing</h2>
-    <div class="mt-4 space-y-3">
-      {posts.map((post, i) => <PostCard entry={post} basePath="/blog" feature={i === 0} />)}
-      {
-        posts.length === 0 && (
-          <p class="py-8 text-sm text-muted-foreground">Nothing published yet.</p>
-        )
-      }
-    </div>
+  <section aria-labelledby="writing-heading">
+    <h2 id="writing-heading" class="sr-only">Writing</h2>
+    <PostIndex entries={posts} />
+    {posts.length === 0 && <p class="py-8 text-muted-foreground">Nothing published yet.</p>}
     {
-      posts.length > 0 && (
-        <a
-          href="/blog"
-          class={cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'mt-4 -ml-2.5 gap-1.5 font-mono text-muted-foreground'
-          )}
-        >
-          {/* Explicit span, not a bare text node: a bare run becomes an
-              anonymous flex item and the arrow ends up sitting on the "g". */}
-          <span>All writing</span>
-          <span class="text-primary transition-transform group-hover/button:translate-x-0.5">
-            →
-          </span>
+      allPosts.length > posts.length && (
+        <a href="/blog" class="label mt-6 inline-block underline underline-offset-4 hover:text-foreground">
+          All {allPosts.length} posts
         </a>
       )
     }
@@ -112,44 +42,24 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
 
   {
     travel.length > 0 && (
-      <section class="py-6">
-        <h2 class="rule-heading label">~/travel</h2>
-        <div class="mt-4 space-y-3">
-          {travel.map((post) => (
-            <PostCard entry={post} basePath="/travel" />
-          ))}
-        </div>
-        <a
-          href="/travel"
-          class={cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'mt-4 -ml-2.5 gap-1.5 font-mono text-muted-foreground'
-          )}
-        >
-          <span>All travel</span>
-          <span class="text-primary transition-transform group-hover/button:translate-x-0.5">→</span>
-        </a>
+      <section class="mt-20">
+        <h2 class="mb-4 text-2xl font-medium">Travel</h2>
+        <PostIndex entries={travel} />
       </section>
     )
   }
 
   {
     topics.length > 0 && (
-      <section class="py-6 pb-16">
-        <h2 class="rule-heading label">~/topics</h2>
-        <div class="mt-4 flex flex-wrap gap-2">
+      <section class="mt-20 pb-8">
+        <h2 class="label">Topics</h2>
+        <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
           {topics.map(({ tag }) => (
-            <a
-              href={`/tags/${tag}`}
-              class={cn(
-                badgeVariants({ variant: 'outline' }),
-                'h-7 rounded-md px-2 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground'
-              )}
-            >
-              #{tag}
+            <a href={`/tags/${tag}`} class="text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary hover:decoration-current">
+              {tag}
             </a>
           ))}
-        </div>
+        </p>
       </section>
     )
   }
