@@ -1,10 +1,11 @@
 ---
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { AUTHOR_NAME, NAV_LINKS } from '../consts';
+import { NAV_LINKS, SITE_URL } from '../consts';
 import ThemeToggle from './ThemeToggle.astro';
 
 const { pathname } = Astro.url;
+const wordmark = new URL(SITE_URL).host;
 ---
 
 <header
@@ -17,7 +18,7 @@ const { pathname } = Astro.url;
       href="/"
       class="font-serif text-xl font-medium tracking-[-0.01em] text-foreground transition-colors hover:text-primary"
     >
-      {AUTHOR_NAME}
+      {wordmark}
     </a>
 
     <nav class="flex items-center gap-0.5 text-sm">
