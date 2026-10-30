@@ -10,13 +10,8 @@ import { cn } from '@/lib/utils';
 
   <div class="grid grid-cols-2 gap-3 pb-8 sm:grid-cols-3">
     {
-      Array.from({ length: 6 }).map((_, i) => (
-        // Staggered pulse so the placeholder reads as "loading soon" rather
-        // than as six broken tiles.
-        <div
-          class="aspect-square animate-pulse rounded-xl border border-dashed border-border bg-muted/40"
-          style={`animation-delay: ${i * 120}ms; animation-duration: 3s`}
-        />
+      Array.from({ length: 6 }).map(() => (
+        <div class="aspect-square rounded-xl border border-dashed border-border bg-muted/40" />
       ))
     }
   </div>
