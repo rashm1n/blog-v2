@@ -1,36 +1,58 @@
 ---
-import { Separator } from '@/components/ui/separator';
 import { SOCIAL_LINKS, AUTHOR_NAME } from '../consts';
 
 const year = new Date().getFullYear();
 
-const links = [
-  { label: 'Archive', url: '/archive' },
-  { label: 'Tags', url: '/tags' },
-  ...SOCIAL_LINKS,
+const groups = [
+  {
+    label: 'Browse',
+    links: [
+      { label: 'Writing', url: '/blog' },
+      { label: 'Archive', url: '/archive' },
+      { label: 'Tags', url: '/tags' },
+    ],
+  },
+  {
+    label: 'Feeds',
+    links: [
+      { label: 'RSS', url: '/rss.xml' },
+      { label: 'JSON Feed', url: '/feed.json' },
+      { label: 'llms.txt', url: '/llms.txt' },
+    ],
+  },
+  {
+    label: 'Elsewhere',
+    links: SOCIAL_LINKS.filter((link) => link.url.startsWith('http')),
+  },
 ];
 ---
 
 <footer data-noprint class="mx-auto mt-24 w-full max-w-5xl px-4 sm:px-6">
-  <Separator />
+  <div class="grid grid-cols-2 gap-8 border-t border-border py-10 sm:grid-cols-4">
+    <div class="col-span-2 sm:col-span-1">
+      <p class="display text-base">{AUTHOR_NAME}</p>
+      <p class="label mt-1">&copy; {year}. Written by hand, served from a box I run.</p>
+    </div>
 
-  <div
-    class="label flex flex-col gap-4 py-8 sm:flex-row sm:items-center sm:justify-between"
-  >
-    <p>&copy; {year} {AUTHOR_NAME}</p>
-
-    <nav class="flex flex-wrap items-center gap-x-4 gap-y-2">
-      {
-        links.map((link) => (
-          <a
-            href={link.url}
-            rel={link.url.startsWith('http') ? 'me' : undefined}
-            class="underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-current"
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </nav>
+    {
+      groups.map((group) => (
+        <nav aria-label={group.label}>
+          <h2 class="label text-foreground">{group.label}</h2>
+          <ul class="mt-2 space-y-1">
+            {group.links.map((link) => (
+              <li>
+                <a
+                  href={link.url}
+                  rel={link.url.startsWith('http') ? 'me' : undefined}
+                  class="label text-[0.8125rem] underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-current"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
   </div>
 </footer>

@@ -38,7 +38,7 @@ const total = posts.length + travel.length;
     <PostIndex entries={[...posts, ...travel].sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())} />
   </div>
 
-  <a href="/tags" class="label mb-8 inline-block underline underline-offset-4 hover:text-foreground">
+  <a href="/tags" class="label mt-6 mb-8 inline-block text-primary underline underline-offset-4">
     All tags
   </a>
 </BaseLayout>

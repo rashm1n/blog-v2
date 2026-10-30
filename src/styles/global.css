@@ -75,63 +75,69 @@
 
 /* ------------------------------------------------------------------ palette */
 
-/* Neutral paper and graphite, one petrol-teal accent. Nothing warm, nothing
-   violet: the hero images bring their own colour, so the chrome stays out of
-   their way. Muted text stays ≥4.5:1 on the page in both themes, because it
-   carries dates and descriptions, not decoration.
+/* Ink navy and aluminium, two signals with separate jobs:
 
-   The accent also marks the focused tile, the way a tiling WM marks the
-   focused window. */
+     primary (blue)   anything you can act on: links, buttons, focus
+     marker  (amber)  where you are: the active section, search hits,
+                      selection, the newest entry in the log
+
+   Neither is decorative, so neither appears anywhere it isn't doing that job.
+   Muted text clears 4.5:1 on the page in both themes; it carries dates,
+   descriptions and the status line, not ornament. */
 :root {
   color-scheme: light;
 
-  --background: #f4f5f3;
-  --foreground: #15181b;
+  --background: #f2f5f9;
+  --foreground: #0d1520;
   --card: #ffffff;
-  --card-foreground: #15181b;
+  --card-foreground: #0d1520;
   --popover: #ffffff;
-  --popover-foreground: #15181b;
-  --primary: #0a6b7c;
+  --popover-foreground: #0d1520;
+  --primary: #2346d6;
   --primary-foreground: #ffffff;
-  --secondary: #e9ebe8;
-  --secondary-foreground: #15181b;
-  --muted: #eaece9;
-  --muted-foreground: #5a6166;
-  --accent: #e9ebe8;
-  --accent-foreground: #15181b;
+  --secondary: #e6ebf2;
+  --secondary-foreground: #0d1520;
+  --muted: #e8edf3;
+  --muted-foreground: #4c5d72;
+  --accent: #e3e9f1;
+  --accent-foreground: #0d1520;
   --destructive: #b42318;
-  --border: #d8dbd7;
-  --input: #c9cdc8;
-  --ring: #0a6b7c;
-  --radius: 0.375rem;
+  --border: #d3dce7;
+  --input: #c3cfdc;
+  --ring: #2346d6;
+  --radius: 0.25rem;
 
-  /* Site-specific extra, outside shadcn's vocabulary. */
-  --primary-subtle: #dcefef;
+  /* Site-specific extras, outside shadcn's vocabulary. */
+  --primary-subtle: #dfe6ff;
+  --marker: #8a5200;
+  --marker-subtle: #ffe7b0;
 }
 
 :root.dark {
   color-scheme: dark;
 
-  --background: #16191c;
-  --foreground: #e7e9e7;
-  --card: #1c2024;
-  --card-foreground: #e7e9e7;
-  --popover: #1c2024;
-  --popover-foreground: #e7e9e7;
-  --primary: #5fcfd9;
-  --primary-foreground: #0e1a1c;
-  --secondary: #23282c;
-  --secondary-foreground: #e7e9e7;
-  --muted: #1f2327;
-  --muted-foreground: #9aa1a6;
-  --accent: #23282c;
-  --accent-foreground: #e7e9e7;
+  --background: #0d1520;
+  --foreground: #dce5ef;
+  --card: #121c2a;
+  --card-foreground: #dce5ef;
+  --popover: #121c2a;
+  --popover-foreground: #dce5ef;
+  --primary: #7fa6ff;
+  --primary-foreground: #0d1520;
+  --secondary: #172334;
+  --secondary-foreground: #dce5ef;
+  --muted: #111b28;
+  --muted-foreground: #8b9bb0;
+  --accent: #172334;
+  --accent-foreground: #dce5ef;
   --destructive: #f07167;
-  --border: #2d3237;
-  --input: #383e44;
-  --ring: #5fcfd9;
+  --border: #22344a;
+  --input: #2c415a;
+  --ring: #7fa6ff;
 
-  --primary-subtle: #173338;
+  --primary-subtle: #1a2b4d;
+  --marker: #ffc75a;
+  --marker-subtle: #3d3018;
 
   --color-info: #7db4ff;
   --color-success: #5ccf97;
@@ -185,20 +191,19 @@
     text-underline-offset: 3px;
   }
 
-  /* Headlines tighten as they grow; the grotesk is drawn loose for text, so
-     body-size h4 keeps its own spacing. Size carries hierarchy, not weight. */
-  h1,
-  h2,
-  h3 {
-    text-wrap: balance;
-    letter-spacing: -0.02em;
-  }
-
+  /* Every headline is the system voice: Martian Mono drawn at 75% width.
+     Condensed is what lets a monospace carry a two-line title without
+     running off the measure. */
   h1,
   h2,
   h3,
-  h4 {
+  h4,
+  .display {
+    font-family: var(--font-mono);
+    font-stretch: 75%;
     font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
   p {
@@ -206,8 +211,8 @@
   }
 
   ::selection {
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--marker-subtle);
+    color: var(--foreground);
   }
 
   input,
@@ -217,7 +222,7 @@
 
   :focus-visible {
     outline: 2px solid var(--ring);
-    outline-offset: 3px;
+    outline-offset: 2px;
     border-radius: 2px;
   }
 
@@ -292,8 +297,9 @@
   /* Small metadata: dates, counts, section names. The interface voice, set
      smaller and quieter than the reading voice. */
   .label {
-    font-family: var(--font-sans);
-    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    font-stretch: 87.5%;
+    font-size: 0.75rem;
     font-weight: 400;
     line-height: 1.25rem;
     color: var(--muted-foreground);
@@ -320,8 +326,9 @@
     min-width: 1.25rem;
     padding: 0.0625rem 0.25rem;
     border: 1px solid var(--border);
-    border-radius: 0.3125rem;
-    background: var(--background);
+    border-bottom-width: 2px;
+    border-radius: 0.25rem;
+    background: var(--card);
     font-family: var(--font-mono);
     font-size: 0.6875rem;
     line-height: 1.4;
@@ -342,114 +349,304 @@
     }
   }
 
-  /* ----------------------------------------------------------------- tiles */
+  /* ------------------------------------------------------------------- log */
 
-  /* The home page's latest posts, tiled like windows. At rest each tile has
-     the grey border of an unfocused window; under the cursor or keyboard it
-     takes the accent border of the focused one. */
-  .tiles {
+  /* The post index, drawn like `git log --graph`: one rail, one node per
+     entry. The rail is the timeline, so it only exists where there's a
+     sequence to show. */
+  .log {
+    position: relative;
+  }
+
+  .log__year {
+    position: relative;
+    padding: 1.5rem 0 0.5rem 2rem;
+  }
+
+  .log__entry {
+    position: relative;
+  }
+
+  /* The rail: drawn per entry so a filtered-out row takes its segment with it. */
+  .log__entry::before,
+  .log__year::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0.4375rem;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .log > :first-child::before {
+    top: 1.9rem;
+  }
+
+  .log__link {
     display: grid;
-    gap: 0.75rem;
+    grid-template-columns: 1fr;
+    gap: 0.375rem 1.5rem;
+    padding: 1.25rem 0.75rem 1.25rem 2rem;
+    margin-right: -0.75rem;
+    border-radius: var(--radius);
   }
 
   @media (min-width: 48rem) {
-    .tiles[data-count='2'] {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .tiles[data-count='3'] {
-      grid-template-columns: 3fr 2fr;
-    }
-
-    .tiles[data-count='3'] > :first-child {
-      grid-row: span 2;
+    .log__link {
+      grid-template-columns: 6.5rem 1fr 9rem;
     }
   }
 
-  .tile {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    border: 2px solid var(--border);
-    border-radius: 0.625rem;
-    background: var(--card);
+  .log__link:hover {
+    background: var(--accent);
   }
 
-  .tile:hover,
-  .tile:focus-visible {
+  /* The node. Hollow for every entry, filled for the newest: the one place
+     the log says "you are here". */
+  .log__link::before {
+    content: '';
+    position: absolute;
+    top: 1.6rem;
+    left: 0.125rem;
+    width: 0.6875rem;
+    height: 0.6875rem;
+    border: 2px solid var(--muted-foreground);
+    border-radius: 999px;
+    background: var(--background);
+  }
+
+  .log__link:hover::before,
+  .log__link:focus-visible::before {
     border-color: var(--primary);
   }
 
-  /* The border is the focus indicator; an outline around it would double it. */
-  .tile:focus-visible {
-    outline: none;
+  .log__entry[data-latest] .log__link::before {
+    border-color: var(--marker);
+    background: var(--marker);
   }
 
-  .tile__media {
-    position: relative;
-    aspect-ratio: 16 / 9;
+  .log__date {
+    padding-top: 0.3rem;
   }
 
-  .tile__media img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* The tall tile grows its image to match the two stacked beside it. */
-  @media (min-width: 48rem) {
-    .tiles[data-count='3'] > :first-child .tile__media {
-      flex: 1;
-      aspect-ratio: auto;
-      min-height: 16rem;
-    }
-  }
-
-  .tile__body {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    padding: 1rem 1.25rem 1.25rem;
-  }
-
-  .tiles[data-count='3'] > :first-child .tile__body {
-    flex: none;
-  }
-
-  .tile__title {
-    font-size: 1.25rem;
+  .log__title {
+    font-family: var(--font-mono);
+    font-stretch: 75%;
+    font-weight: 600;
+    font-size: 1.375rem;
     line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    color: var(--foreground);
   }
 
-  /* Halves are equals; only a tile that outranks its neighbours sets larger. */
-  .tiles:not([data-count='2']) > :first-child .tile__title {
-    font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);
-    line-height: 1.1;
+  .log__link:hover .log__title {
+    color: var(--primary);
   }
 
-  .tile__description {
-    margin-top: 0.5rem;
+  .log__description {
     max-width: 60ch;
+    margin-top: 0.375rem;
     color: var(--muted-foreground);
     line-height: 1.55;
   }
 
-  .tiles[data-count='3'] > :not(:first-child) .tile__description {
+  .log__refs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .log__thumb {
     display: none;
+  }
+
+  @media (min-width: 48rem) {
+    .log__thumb {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+  }
+
+  /* ------------------------------------------------------------------ refs */
+
+  /* Tags, set like the refs git prints beside a commit. */
+  .ref {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 1.375rem;
+    padding: 0 0.4375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-stretch: 87.5%;
+    font-size: 0.6875rem;
+    line-height: 1;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+  }
+
+  .ref--latest {
+    border-color: color-mix(in oklab, var(--marker) 55%, transparent);
+    color: var(--marker);
+  }
+
+  a.ref:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* ----------------------------------------------------------------- chips */
+
+  /* Topic filter above the log. Toggle buttons, so pressed state is the
+     source of truth and assistive tech hears it. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    font-family: var(--font-mono);
+    font-stretch: 87.5%;
+    font-size: 0.75rem;
+    color: var(--foreground);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .chip:hover {
+    border-color: var(--primary);
+  }
+
+  .chip[aria-pressed='true'] {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .chip__count {
+    color: var(--muted-foreground);
+  }
+
+  .chip[aria-pressed='true'] .chip__count {
+    color: inherit;
+    opacity: 0.75;
+  }
+
+  /* ----------------------------------------------------------- status line */
+
+  /* The reader's status line, after vim's and tmux's: where you are, how far
+     through, how long is left. Pinned to the bottom so it never competes
+     with the headline it replaces as a reference point. */
+  .statusline {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    height: 2rem;
+    border-top: 1px solid var(--border);
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    backdrop-filter: blur(12px);
+    font-family: var(--font-mono);
+    font-stretch: 87.5%;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    transform: translateY(100%);
+    transition: transform 0.25s var(--ease-out-quint);
+  }
+
+  /* Room for the bar, so it never covers the footer's last line. */
+  body:has(.statusline) {
+    padding-bottom: 2rem;
+  }
+
+  .statusline[data-visible] {
+    transform: none;
+  }
+
+  /* Progress is the top edge of the bar itself, not a second element. */
+  .statusline::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    height: 2px;
+    width: calc(var(--progress, 0) * 100%);
+    background: var(--marker);
+  }
+
+  .statusline__mode {
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+  }
+
+  .statusline__section {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    padding: 0 0.75rem;
+    color: var(--foreground);
+  }
+
+  .statusline__section span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .statusline__cell {
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    border-left: 1px solid var(--border);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  button.statusline__cell {
+    cursor: pointer;
+    color: var(--foreground);
+  }
+
+  button.statusline__cell:hover {
+    background: var(--accent);
+  }
+
+  @media (max-width: 30rem) {
+    .statusline__mode,
+    .statusline__cell[data-optional] {
+      display: none;
+    }
   }
 
   /* ----------------------------------------------------------------- prose */
 
-  /* 18px grotesk; 68ch keeps lines inside the 45–75 character band. */
+  /* 18px Plex; 68ch keeps lines inside the 45–75 character band. */
   .prose {
     --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M8 7h9v9'/%3E%3C/svg%3E");
     max-width: 68ch;
     color: var(--foreground);
     font-size: 1.125rem;
-    line-height: 1.68;
+    line-height: 1.72;
     hanging-punctuation: first;
   }
 
@@ -460,15 +657,14 @@
   .prose h2,
   .prose h3,
   .prose h4 {
-    font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.15;
     margin-top: 2.2em;
     margin-bottom: 0.6em;
     scroll-margin-top: 6rem;
   }
 
   .prose h2 {
-    font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);
+    font-size: clamp(1.625rem, 1.3rem + 1vw, 2rem);
   }
 
   .prose h3 {
@@ -482,8 +678,8 @@
   /* Anchor links injected by PostLayout — visible on hover, mono hash. */
   .heading-anchor {
     position: absolute;
-    margin-left: -1.35em;
-    width: 1.35em;
+    margin-left: -1.1em;
+    width: 1.1em;
     font-family: var(--font-mono);
     font-weight: 400;
     color: var(--muted-foreground);
@@ -536,7 +732,7 @@
   }
 
   .prose blockquote {
-    border-left: 2px solid var(--border);
+    border-left: 2px solid var(--primary);
     padding-left: 1.25rem;
     color: var(--muted-foreground);
   }
@@ -661,7 +857,7 @@
   }
 
   .prose img {
-    border-radius: 0.375rem;
+    border-radius: var(--radius);
     border: 1px solid var(--border);
     max-width: 100%;
     height: auto;
@@ -778,7 +974,7 @@
 
   /* Mono runs large beside the grotesk at the same nominal size. */
   .prose :not(pre) > code {
-    font-size: 0.8em;
+    font-size: 0.78em;
     background: var(--muted);
     border: 1px solid var(--border);
     padding: 0.1em 0.35em;
@@ -817,10 +1013,11 @@
   .prose pre {
     background: var(--muted);
     border: 1px solid var(--border);
-    border-radius: 0.625rem;
+    border-radius: var(--radius);
     padding: 1rem 1.25rem;
     overflow-x: auto;
     font-size: 0.8125rem;
+    font-stretch: 87.5%;
     line-height: 1.65;
     tab-size: 2;
   }
@@ -829,7 +1026,7 @@
   .code-block {
     position: relative;
     border: 1px solid var(--border);
-    border-radius: 0.625rem;
+    border-radius: var(--radius);
     background: var(--muted);
     overflow: hidden;
   }
@@ -847,6 +1044,7 @@
 
   .code-block__lang {
     font-family: var(--font-mono);
+    font-stretch: 87.5%;
     font-size: 0.75rem;
     color: var(--muted-foreground);
   }
@@ -937,19 +1135,20 @@
   .search-result {
     display: block;
     padding: 0.625rem 0.75rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
     border: 1px solid transparent;
+    border-left: 2px solid transparent;
   }
 
   .search-result:hover,
   .search-result[data-selected] {
     background: var(--accent);
-    border-color: var(--border);
+    border-left-color: var(--primary);
   }
 
   .search-result mark {
-    background: var(--primary-subtle);
-    color: var(--primary);
+    background: var(--marker-subtle);
+    color: var(--foreground);
     border-radius: 0.1875rem;
     padding: 0 0.125rem;
     font-weight: 500;
@@ -1027,8 +1226,8 @@
   }
 
   .toc-link[data-active='true'] {
-    color: var(--primary);
-    border-left-color: var(--primary);
+    color: var(--foreground);
+    border-left-color: var(--marker);
   }
 
   /* The column sits on the left of a 64rem frame, so the rail takes the room
@@ -1097,6 +1296,7 @@
     --border: #bbb;
     --muted: #f6f6f6;
     --primary: #000;
+    --marker: #000;
     --card: #fff;
   }
 

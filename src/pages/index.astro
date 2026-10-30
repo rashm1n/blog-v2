@@ -1,79 +1,53 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostIndex from '../components/PostIndex.astro';
-import PostTiles from '../components/PostTiles.astro';
+import TopicFilter from '../components/TopicFilter.astro';
 import { SITE_LEAD } from '../consts';
-import { allTags, getPublished } from '../utils/posts';
+import { getPublished } from '../utils/posts';
 
-const allPosts = await getPublished('posts');
-const allTravel = await getPublished('travel');
-const latest = allPosts.slice(0, 3);
-const earlier = allPosts.slice(3, 11);
-const travel = allTravel.slice(0, 3);
+const [posts, travel] = await Promise.all([getPublished('posts'), getPublished('travel')]);
+const entries = [...posts, ...travel].sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-// Most-used tags first, so the row reads as "what this site is about" rather
-// than as an alphabetical index — /tags already does the exhaustive version.
-const entries = [...allPosts, ...allTravel];
-const topics = allTags(entries)
-  .map((tag) => ({ tag, count: entries.filter((e) => e.data.tags.includes(tag)).length }))
-  .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
-  .slice(0, 8);
+// Feeds are first-class here (see PRODUCT.md), so they're offered up front
+// rather than buried in the footer.
+const feeds = [
+  { label: 'RSS', href: '/rss.xml', note: 'full posts' },
+  { label: 'JSON Feed', href: '/feed.json', note: 'full posts' },
+  { label: 'llms.txt', href: '/llms.txt', note: 'for agents' },
+];
 ---
 
 <BaseLayout wide>
-  {/* The one loud thing on the site: a single typeset sentence. Everything
-      after it is set quietly. */}
-  <h1
-    class="reveal max-w-[22ch] pt-14 pb-12 text-[2.5rem] leading-[1.05] font-medium tracking-[-0.03em] sm:pt-24 sm:pb-16 sm:text-[4rem]"
-  >
-    {SITE_LEAD}
-  </h1>
+  <div class="grid gap-10 pt-14 pb-14 sm:pt-20 lg:grid-cols-[1fr_15rem] lg:gap-16">
+    {/* The one loud thing on the page. */}
+    <h1 class="reveal max-w-[30ch] text-[1.75rem] leading-[1.05] sm:text-[2.875rem]">
+      {SITE_LEAD}
+    </h1>
 
-  <section aria-labelledby="writing-heading">
-    <h2 id="writing-heading" class="sr-only">Latest writing</h2>
-    <PostTiles entries={latest} />
-    {latest.length === 0 && <p class="py-8 text-muted-foreground">Nothing published yet.</p>}
-  </section>
-
-  <div class="max-w-2xl">
-    {
-      earlier.length > 0 && (
-        <section class="mt-20">
-          <h2 class="mb-4 text-2xl">Earlier</h2>
-          <PostIndex entries={earlier} />
-        </section>
-      )
-    }
-    {
-      allPosts.length > latest.length + earlier.length && (
-        <a href="/blog" class="label mt-6 inline-block underline underline-offset-4 hover:text-foreground">
-          All {allPosts.length} posts
-        </a>
-      )
-    }
-
-    {
-      travel.length > 0 && (
-        <section class="mt-20">
-          <h2 class="mb-4 text-2xl">Travel</h2>
-          <PostIndex entries={travel} />
-        </section>
-      )
-    }
-
-    {
-      topics.length > 0 && (
-        <section class="mt-16 pb-8">
-          <h2 class="label">Topics</h2>
-          <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-            {topics.map(({ tag }) => (
-              <a href={`/tags/${tag}`} class="text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary hover:decoration-current">
-                {tag}
+    <aside class="self-end border-l border-border pl-5" aria-labelledby="subscribe-heading">
+      <h2 id="subscribe-heading" class="label text-foreground">Subscribe</h2>
+      <ul class="mt-2 space-y-1">
+        {
+          feeds.map((feed) => (
+            <li class="flex items-baseline justify-between gap-4">
+              <a href={feed.href} class="label text-[0.8125rem] text-primary underline decoration-transparent underline-offset-4 hover:decoration-current">
+                {feed.label}
               </a>
-            ))}
-          </p>
-        </section>
-      )
-    }
+              <span class="label">{feed.note}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="label mt-4 hidden [@media(hover:hover)]:block">
+        Press <kbd class="kbd">?</kbd> for keyboard shortcuts
+      </p>
+    </aside>
   </div>
+
+  <section aria-labelledby="log-heading">
+    <h2 id="log-heading" class="sr-only">All posts</h2>
+    <TopicFilter entries={entries} />
+    <PostIndex entries={entries} />
+    {entries.length === 0 && <p class="py-8 text-muted-foreground">Nothing published yet.</p>}
+  </section>
 </BaseLayout>

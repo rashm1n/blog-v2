@@ -6,7 +6,7 @@ import TableOfContents from '../components/TableOfContents.astro';
 import Comments from '../components/Comments.astro';
 import CodeBlocks from '../components/CodeBlocks.astro';
 import PostImages from '../components/PostImages.astro';
-import ReadingProgress from '../components/ReadingProgress.astro';
+import StatusLine from '../components/StatusLine.astro';
 import RelatedPosts from '../components/RelatedPosts.astro';
 import PostActions from '../components/PostActions.astro';
 import {
@@ -39,6 +39,9 @@ interface Props {
 const { entry, headings, body, prev, next } = Astro.props;
 const { title, description, pubDate, updatedDate, tags, heroImage } = entry.data;
 const minutes = readingTime(body);
+const words = wordCount(body);
+const section = sectionFor(entry.collection);
+const sourcePath = markdownPath(entry);
 const ogImage = `/og/${entry.id}.png`;
 
 // Computed here rather than in each route's getStaticPaths so `/blog` and
@@ -64,7 +67,7 @@ const jsonLd = articleNodes({
   canonical: new URL(Astro.url.pathname, siteURL),
   image: new URL(ogImage, siteURL),
   section: sectionFor(entry.collection),
-  wordCount: wordCount(body),
+  wordCount: words,
   minutes,
 });
 ---
@@ -78,14 +81,20 @@ const jsonLd = articleNodes({
   updated={updatedDate}
   tags={tags}
   jsonLd={jsonLd}
-  markdownPath={markdownPath(entry)}
+  markdownPath={sourcePath}
 >
-  <ReadingProgress />
+  <StatusLine minutes={minutes} />
 
-  <article class="pt-12 pb-8 sm:pt-20">
+  <article class="pt-10 pb-8 sm:pt-16">
     <header>
+      <nav aria-label="Breadcrumb" data-noprint class="label mb-6 flex gap-2">
+        <a href={section.path} class="hover:text-primary">{section.label}</a>
+        <span aria-hidden="true">/</span>
+        <span class="truncate" aria-current="page">{entry.id}</span>
+      </nav>
+
       <h1
-        class="text-[2.25rem] leading-[1.05] font-medium tracking-[-0.03em] sm:text-[3.25rem]"
+        class="text-[2.25rem] leading-[1.04] sm:text-[3.25rem]"
         style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
       >
         {title}
@@ -93,26 +102,41 @@ const jsonLd = articleNodes({
 
       <p class="mt-5 text-lg leading-relaxed text-muted-foreground">{description}</p>
 
-      {/* One meta line under the standfirst, so the headline opens the page. */}
-      <div class="label mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-        <span>{minutes} min read</span>
-        {updatedDate && <span>Updated {formatDate(updatedDate)}</span>}
-        {
-          tags.length > 0 && (
-            <span class="flex flex-wrap gap-x-3">
-              {tags.map((tag: string) => (
-                <a
-                  href={`/tags/${tag}`}
-                  class="underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-current"
-                >
-                  {tag}
-                </a>
-              ))}
-            </span>
-          )
-        }
-      </div>
+      {/* Facts about the post, labelled, in one scannable row. */}
+      <dl class="mt-7 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-border py-3 xs:grid-cols-4">
+        <div>
+          <dt class="label">Published</dt>
+          <dd class="label text-foreground"><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></dd>
+        </div>
+        {updatedDate && (
+          <div>
+            <dt class="label">Updated</dt>
+            <dd class="label text-foreground"><time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time></dd>
+          </div>
+        )}
+        <div>
+          <dt class="label">Length</dt>
+          <dd class="label tabular-nums text-foreground">{minutes} min, {words.toLocaleString('en-US')} words</dd>
+        </div>
+        <div data-noprint>
+          <dt class="label">Source</dt>
+          <dd class="label">
+            <a href={sourcePath} class="text-primary underline decoration-transparent underline-offset-4 hover:decoration-current">
+              View as Markdown
+            </a>
+          </dd>
+        </div>
+      </dl>
+
+      {
+        tags.length > 0 && (
+          <p class="mt-4 flex flex-wrap gap-2">
+            {tags.map((tag: string) => (
+              <a href={`/tags/${tag}`} class="ref">{tag}</a>
+            ))}
+          </p>
+        )
+      }
     </header>
 
     {
@@ -123,7 +147,7 @@ const jsonLd = articleNodes({
           width={1600}
           height={900}
           loading="eager"
-          class="mt-10 aspect-[16/9] w-full rounded-[0.625rem] object-cover"
+          class="mt-10 aspect-[16/9] w-full rounded-[var(--radius)] border border-border object-cover"
         />
       )
     }
@@ -142,9 +166,9 @@ const jsonLd = articleNodes({
       (prev || next) && (
         <nav data-noprint aria-label="More posts" class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2">
           {prev ? (
-            <a href={prev.href} class="group block">
+            <a href={prev.href} rel="prev" class="group block border-t-2 border-border pt-3 transition-colors hover:border-primary">
               <span class="label block">Previous</span>
-              <span class="mt-1 block text-lg leading-snug font-medium transition-colors group-hover:text-primary">
+              <span class="display mt-1 block text-xl leading-tight transition-colors group-hover:text-primary">
                 {prev.title}
               </span>
             </a>
@@ -152,9 +176,9 @@ const jsonLd = articleNodes({
             <div class="hidden sm:block" />
           )}
           {next && (
-            <a href={next.href} class="group block sm:text-right">
+            <a href={next.href} rel="next" class="group block border-t-2 border-border pt-3 transition-colors hover:border-primary sm:text-right">
               <span class="label block">Next</span>
-              <span class="mt-1 block text-lg leading-snug font-medium transition-colors group-hover:text-primary">
+              <span class="display mt-1 block text-xl leading-tight transition-colors group-hover:text-primary">
                 {next.title}
               </span>
             </a>

@@ -9,7 +9,7 @@ chrome, high information density in list views, code treated as a first-class co
 and a handful of details that reward people who notice detail.
 
 > [!IMPORTANT]
-> **Phase 13 is current.** It replaced the graphite/amber terminal look with a typeset,
+> **Phase 14 is current** — see [Phase 14](#phase-14-git-log) at the end. Phase 13 replaced the graphite/amber terminal look with a typeset,
 > reading-first design — see [Phase 13](#phase-13-typeset-journal) at the end. Everything
 > above it is history.
 >
@@ -359,3 +359,30 @@ card-styled prev/next links and the 404 terminal window.
 
 **OG images** (`src/utils/og.ts`) render in Schibsted Grotesk on the dark palette, with a
 petrol-teal top rule standing in for the reading-progress bar.
+
+## Phase 14: git log
+
+The owner asked for something more technical with more useful interface features. Phase 13's
+journal look is retired, but so is a literal terminal look: no prompts, no typed-out hero.
+
+**Palette.** Ink navy `#0d1520` / aluminium `#f2f5f9`. Two signals with separate jobs:
+`primary` blue (`#7fa6ff` / `#2346d6`) for anything you can act on, and `--marker` amber
+(`#ffc75a` / `#8a5200`) for *where you are*: the active ToC entry, search hits, selection,
+the newest log node and the reading-progress edge. Radius is 0.25rem.
+
+**Type.** Two families. Martian Mono, set at `font-stretch: 75%`, for every headline (base
+`h1–h4` and `.display`), and at 87.5% for the interface (`.label`, refs, chips, status line)
+and code. IBM Plex Sans for prose and descriptions. Martian is vendored
+(`src/assets/fonts/`) because the Fontsource provider resolves only the weight axis.
+
+**The log.** `PostIndex` draws posts as `git log --graph`: a rail, one node per entry, date
+column, title, tags as refs and a thumbnail. Home and `/blog` add `TopicFilter`, which hides
+rows client-side and keeps `?topic=` in the URL. `PostTiles` is gone.
+
+**The status line** (`StatusLine.astro`) is the one bold element on article pages: a
+vim/tmux-style bar pinned to the bottom that shows the current section, minutes left and %
+read. It replaces `ReadingProgress` and `BackToTop`.
+
+**Keyboard.** `Shortcuts.astro`: `/` search, `j`/`k` move through lists, `[`/`]` previous and
+next article, `t` theme, `?` shortcut sheet. The search palette lists quick actions while the
+query is empty, including "View this post as Markdown" on articles.

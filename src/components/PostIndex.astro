@@ -1,5 +1,6 @@
 ---
-import { byYear, formatDate, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
+import { Image } from 'astro:assets';
+import { byYear, formatDate, readingTime, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
 
 interface Props {
   entries: AnyEntry[];
@@ -7,6 +8,7 @@ interface Props {
 
 const { entries } = Astro.props;
 const years = byYear(entries);
+const newest = entries[0];
 
 // Only label the section when the list mixes writing and travel (archive, tags);
 // on /blog every row would say the same thing.
@@ -16,46 +18,62 @@ const shortDate = (date: Date) =>
   date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 ---
 
-<div class="space-y-10">
+{/* `git log --graph`, for posts. Rows carry their tags in data-tags so
+    TopicFilter can hide them without a round trip. */}
+<ol class="log" data-log>
   {
     years.map(([year, group]) => (
-      <section>
-        <h2 class="label mb-1 tabular-nums">
+      <>
+        <li class="log__year label tabular-nums" data-log-year={year}>
           {year}
-        </h2>
+        </li>
+        {group.map((entry) => (
+          <li
+            class="log__entry"
+            data-tags={entry.data.tags.join(' ')}
+            data-year={year}
+            data-latest={entry === newest ? '' : undefined}
+          >
+            <a
+              href={`${sectionFor(entry.collection).path}/${entry.id}`}
+              class="log__link"
+              data-nav-item
+            >
+              <span class="log__date label tabular-nums">
+                <time datetime={entry.data.pubDate.toISOString()} title={formatDate(entry.data.pubDate)}>
+                  {shortDate(entry.data.pubDate)}
+                </time>
+              </span>
 
-        <ul>
-          {group.map((entry) => (
-            <li>
-              <a
-                href={`${sectionFor(entry.collection).path}/${entry.id}`}
-                class="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-3"
-              >
-                <span class="text-xl leading-snug font-semibold tracking-[-0.01em] text-foreground transition-colors group-hover:text-primary">
-                  <span
-                    style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
-                  >
-                    {entry.data.title}
-                  </span>
+              <span>
+                <span
+                  class="log__title block"
+                  style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
+                >
+                  {entry.data.title}
                 </span>
-
-                <span class="label tabular-nums">
-                  {mixed && entry.collection === 'travel' && <span class="mr-2">Travel</span>}
-                  <time datetime={entry.data.pubDate.toISOString()} title={formatDate(entry.data.pubDate)}>
-                    {shortDate(entry.data.pubDate)}
-                  </time>
-                </span>
-
                 {entry.data.description && (
-                  <p class="col-span-2 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted-foreground">
-                    {entry.data.description}
-                  </p>
+                  <span class="log__description block">{entry.data.description}</span>
                 )}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+                <span class="log__refs">
+                  {entry === newest && <span class="ref ref--latest">latest</span>}
+                  {mixed && entry.collection === 'travel' && <span class="ref">travel</span>}
+                  {entry.data.tags.map((tag: string) => (
+                    <span class="ref">{tag}</span>
+                  ))}
+                  <span class="label ml-1">{readingTime(entry.body ?? '')} min read</span>
+                </span>
+              </span>
+
+              {entry.data.heroImage ? (
+                <Image src={entry.data.heroImage} alt="" width={320} class="log__thumb" loading="lazy" />
+              ) : (
+                <span />
+              )}
+            </a>
+          </li>
+        ))}
+      </>
     ))
   }
-</div>
+</ol>

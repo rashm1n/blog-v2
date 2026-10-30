@@ -14,10 +14,10 @@ import { SITE_URL } from '../consts';
 
 /* The dark tokens from src/styles/global.css. Keep in sync by hand. */
 const TOKEN = {
-  background: '#16191c',
-  foreground: '#e7e9e7',
-  mutedForeground: '#9aa1a6',
-  primary: '#5fcfd9',
+  background: '#0d1520',
+  foreground: '#dce5ef',
+  mutedForeground: '#8b9bb0',
+  primary: '#ffc75a',
 } as const;
 
 /* ------------------------------------------------------------------ fonts */

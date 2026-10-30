@@ -35,23 +35,33 @@ export default defineConfig({
   },
   fonts: [
     {
-      // The one face for reading and interface alike. A news grotesk: built for
-      // long text at body sizes, with enough character to carry the headlines.
-      name: 'Schibsted Grotesk',
+      // Reading face. IBM's own engineering grotesk: plain at body sizes,
+      // a little mechanical in the details.
+      name: 'IBM Plex Sans',
       cssVariable: '--font-face-sans',
       provider: fontProviders.fontsource(),
-      weights: ['400 800'],
+      weights: ['400 700'],
       styles: ['normal', 'italic'],
       subsets: ['latin'],
       fallbacks: ['ui-sans-serif', 'system-ui', 'sans-serif'],
     },
     {
-      name: 'JetBrains Mono',
+      // The system voice: headlines (condensed), interface and code.
+      // Vendored because Fontsource's package ships the weight axis only, and
+      // the headlines need the width axis (they're set at 75%).
+      name: 'Martian Mono',
       cssVariable: '--font-face-mono',
-      provider: fontProviders.fontsource(),
-      weights: [400, 500, 600],
-      styles: ['normal'],
-      subsets: ['latin'],
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
+            src: ['./src/assets/fonts/MartianMono-latin-standard.woff2'],
+            weight: '100 800',
+            style: 'normal',
+            stretch: '75% 112.5%',
+          },
+        ],
+      },
       fallbacks: ['ui-monospace', 'SFMono-Regular', 'monospace'],
     },
   ],

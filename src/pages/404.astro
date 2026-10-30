@@ -4,12 +4,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="Not found" description="Page not found.">
   <div class="pt-14 pb-24 sm:pt-24">
-    <h1 class="text-4xl leading-[1.05] font-medium tracking-[-0.03em] sm:text-[3.25rem]">
+    <p class="label">404</p>
+    <h1 class="mt-3 text-[2.25rem] leading-[1.04] sm:text-[3.25rem]">
       There’s nothing at <span id="missing-path" class="break-all">this address</span>.
     </h1>
     <p class="mt-6 text-muted-foreground">
       It may have moved, or never existed. Try the <a href="/blog" class="text-primary underline underline-offset-4">list of posts</a>,
-      search with <kbd class="kbd" data-shortcut-hint>⌘K</kbd>, or go to the <a href="/" class="text-primary underline underline-offset-4">home page</a>.
+      search with <kbd class="kbd">/</kbd>, or go to the <a href="/" class="text-primary underline underline-offset-4">home page</a>.
     </p>
   </div>
 

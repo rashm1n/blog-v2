@@ -1,0 +1,80 @@
+---
+// vim/tmux-style status line for articles: current section, progress and time
+// left. Replaces the old top progress rule and the back-to-top button, which
+// is now the last cell. Hidden until the reader is past the header, so it
+// never sits on top of the page they just opened.
+interface Props {
+  minutes: number;
+}
+
+const { minutes } = Astro.props;
+---
+
+<div class="statusline" data-statusline data-minutes={minutes} data-noprint aria-hidden="true">
+  <span class="statusline__mode">read</span>
+  <span class="statusline__section"><span data-status-section></span></span>
+  <span class="statusline__cell" data-optional data-status-left></span>
+  <span class="statusline__cell" data-status-pct>0%</span>
+  <!-- Focusable though the bar is aria-hidden would be a trap, so the button
+       is removed from the tab order; "Home" and the skip link cover keyboards. -->
+  <button type="button" class="statusline__cell" data-status-top tabindex="-1">top</button>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-statusline]');
+  const article = document.querySelector('article');
+  const header = article?.querySelector('header');
+
+  if (bar && article && header) {
+    const total = Number(bar.dataset.minutes) || 1;
+    const sectionEl = bar.querySelector<HTMLElement>('[data-status-section]')!;
+    const leftEl = bar.querySelector<HTMLElement>('[data-status-left]')!;
+    const pctEl = bar.querySelector<HTMLElement>('[data-status-pct]')!;
+    const headings = [...article.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]')];
+    const title = header.querySelector('h1')?.textContent?.trim() ?? '';
+
+    // The heading anchor ('#') is prepended into each heading; skip it.
+    const label = (h: HTMLElement) =>
+      [...h.childNodes].filter((n) => !(n instanceof HTMLElement && n.classList.contains('heading-anchor')))
+        .map((n) => n.textContent).join('').trim();
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const start = article.offsetTop;
+      const distance = article.offsetHeight - window.innerHeight;
+      const progress = distance > 0 ? Math.min(1, Math.max(0, (window.scrollY - start) / distance)) : 1;
+
+      bar.toggleAttribute('data-visible', header.getBoundingClientRect().bottom < 0);
+      bar.style.setProperty('--progress', String(progress));
+      pctEl.textContent = `${Math.round(progress * 100)}%`;
+
+      const left = Math.ceil(total * (1 - progress));
+      leftEl.textContent = left > 0 ? `${left} min left` : 'done';
+
+      let current: HTMLElement | undefined;
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top <= 96) current = h;
+        else break;
+      }
+      sectionEl.textContent = current ? label(current) : title;
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    bar.querySelector('[data-status-top]')?.addEventListener('click', () => {
+      // An explicit `behavior` wins over the CSS reduced-motion rule, so check here too.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+      document.getElementById('content')?.focus({ preventScroll: true });
+    });
+  }
+</script>

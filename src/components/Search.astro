@@ -9,7 +9,7 @@
 <dialog id="search-dialog" data-noprint class="search-dialog" aria-label="Search">
   <div
     id="search-panel"
-    class="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-background shadow-2xl shadow-black/10 dark:shadow-black/50"
+    class="w-full max-w-xl overflow-hidden rounded-[var(--radius)] border border-border bg-card shadow-2xl shadow-black/15 dark:shadow-black/50"
   >
     <div class="flex items-center gap-3 border-b border-border px-4">
       <svg
@@ -29,7 +29,7 @@
       <input
         id="search-input"
         type="text"
-        placeholder="Search"
+        placeholder="Search posts, or pick an action"
         autocomplete="off"
         autocorrect="off"
         spellcheck="false"
@@ -56,7 +56,7 @@
     <p id="search-status" role="status" aria-live="polite" class="sr-only"></p>
 
     <div
-      class="flex items-center gap-4 border-t border-border bg-muted px-4 py-2 text-xs text-muted-foreground"
+      class="label flex items-center gap-4 border-t border-border bg-muted px-4 py-2"
     >
       <span class="flex items-center gap-1.5"><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd>
         navigate</span>
@@ -117,6 +117,54 @@
     input.setAttribute('aria-expanded', 'false');
   };
 
+  // Shown while the query is empty, so the palette is useful before typing.
+  // Navigation is plain links; the rest are buttons with a handler.
+  const ACTIONS: { label: string; hint: string; href?: string; run?: () => void }[] = [
+    { label: 'Go to Writing', hint: '/blog', href: '/blog' },
+    { label: 'Go to Archive', hint: '/archive', href: '/archive' },
+    { label: 'Browse tags', hint: '/tags', href: '/tags' },
+    { label: 'Go to About', hint: '/about', href: '/about' },
+    { label: 'Switch theme', hint: 't', run: () => document.getElementById('theme-toggle')?.click() },
+    {
+      label: 'Copy link to this page',
+      hint: location.pathname,
+      run: () => navigator.clipboard.writeText(location.href).catch(() => {}),
+    },
+    { label: 'Subscribe with RSS', hint: '/rss.xml', href: '/rss.xml' },
+  ];
+  const source = document.querySelector<HTMLLinkElement>('link[rel="alternate"][type="text/markdown"]');
+  if (source) ACTIONS.unshift({ label: 'View this post as Markdown', hint: '.md', href: source.href });
+
+  function showActions() {
+    const nodes = ACTIONS.map((action) => {
+      const el = document.createElement(action.href ? 'a' : 'button');
+      if (action.href) (el as HTMLAnchorElement).href = action.href;
+      else (el as HTMLButtonElement).type = 'button';
+      el.className = 'search-result flex w-full items-center justify-between gap-4 text-left';
+      el.dataset.result = '';
+      el.setAttribute('role', 'option');
+      const label = document.createElement('span');
+      label.className = 'text-sm text-foreground';
+      label.textContent = action.label;
+      const hint = document.createElement('span');
+      hint.className = 'label truncate';
+      hint.textContent = action.hint;
+      el.append(label, hint);
+      if (action.run) {
+        el.addEventListener('click', () => {
+          action.run!();
+          close();
+        });
+      }
+      return el;
+    });
+    results.replaceChildren(...nodes);
+    status.textContent = '';
+    input.setAttribute('aria-expanded', 'true');
+    selected = -1;
+    highlight(0);
+  }
+
   async function ensurePagefind() {
     if (pagefind) return pagefind;
     try {
@@ -139,7 +187,7 @@
     // The results list is the only thing that should scroll while this is up.
     document.body.style.overflow = 'hidden';
     input.value = '';
-    message('Type to search.');
+    showActions();
     input.focus();
     ensurePagefind();
   }
@@ -155,7 +203,7 @@
   });
 
   function items() {
-    return [...results.querySelectorAll<HTMLAnchorElement>('[data-result]')];
+    return [...results.querySelectorAll<HTMLElement>('[data-result]')];
   }
 
   function highlight(next: number) {
@@ -194,7 +242,7 @@
       const target = items()[selected];
       if (target) {
         e.preventDefault();
-        window.location.href = target.href;
+        target.click();
       }
     }
   });
@@ -205,7 +253,7 @@
     debounceTimer = setTimeout(async () => {
       const query = input.value.trim();
       if (!query) {
-        message('Type to search.');
+        showActions();
         return;
       }
       const pf = await ensurePagefind();
@@ -226,9 +274,9 @@
           // else goes through escapeHtml, including the URL in the href.
           (entry) => `
             <a href="${escapeHtml(entry.url)}" data-result role="option" aria-selected="false" class="search-result">
-              <p class="text-sm font-medium text-foreground">${escapeHtml(entry.meta.title ?? entry.url)}</p>
+              <p class="display text-[0.9375rem] text-foreground">${escapeHtml(entry.meta.title ?? entry.url)}</p>
               <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">${entry.excerpt}</p>
-              <p class="mt-1.5 font-mono text-[0.6875rem] text-muted-foreground/80">${escapeHtml(entry.url.replace(/\/$/, '') || '/')}</p>
+              <p class="label mt-1.5">${escapeHtml(entry.url.replace(/\/$/, '') || '/')}</p>
             </a>`
         )
         .join('');
