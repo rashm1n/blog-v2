@@ -16,10 +16,10 @@ const description = 'Notes and photos from trips.';
   />
 
   <div class="space-y-3 pb-8">
-    {posts.map((post, i) => <PostCard entry={post} basePath="/travel" index={i} />)}
+    {posts.map((post) => <PostCard entry={post} basePath="/travel" />)}
     {
       posts.length === 0 && (
-        <p class="rounded-xl border border-dashed border-border bg-card/40 px-4 py-12 text-center text-sm text-muted-foreground backdrop-blur-sm">
+        <p class="rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
           Nothing posted yet — coming soon.
         </p>
       )

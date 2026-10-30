@@ -36,8 +36,6 @@ const { title, description, image, article, jsonLd, markdownPath, published, upd
       tags={tags}
     />
   </head>
-  <!-- No background on <body>: <html> owns it, so the decorative grid drawn by
-       body::before (z-index -1) isn't painted over. -->
   <body class="flex min-h-screen flex-col text-foreground antialiased">
     <a
       href="#content"

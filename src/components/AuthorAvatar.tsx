@@ -1,7 +1,7 @@
-import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 /**
- * The monogram + "still around" dot, as one React component.
+ * The monogram, as one React component.
  *
  * This exists because shadcn's Avatar is a Radix primitive and Radix passes
  * state from Root to Fallback through React context. Astro renders each child
@@ -30,12 +30,10 @@ const SIZES = {
   md: {
     root: "data-[size=lg]:size-12",
     fallback: "text-lg",
-    badge: "group-data-[size=lg]/avatar:size-3",
   },
   lg: {
     root: "data-[size=lg]:size-14",
     fallback: "text-xl",
-    badge: "group-data-[size=lg]/avatar:size-3.5",
   },
 } as const
 
@@ -51,11 +49,10 @@ export function AuthorAvatar({
   return (
     <Avatar size="lg" className={`after:border-transparent ${s.root}`}>
       <AvatarFallback
-        className={`bg-linear-135 from-primary to-primary/55 font-mono font-semibold text-primary-foreground ${s.fallback}`}
+        className={`border bg-secondary font-mono font-medium text-foreground ${s.fallback}`}
       >
         {initial}
       </AvatarFallback>
-      <AvatarBadge className={`bg-emerald-500 ring-background ${s.badge}`} />
     </Avatar>
   )
 }

@@ -88,7 +88,7 @@ const jsonLd = articleNodes({
 
   <article class="pt-10 pb-8 sm:pt-14">
     <header class="reveal">
-      <div class="label flex flex-wrap items-center gap-x-2.5 gap-y-1">
+      <div class="label flex flex-wrap items-center gap-x-2 gap-y-1">
         <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
         <span class="text-border" aria-hidden="true">/</span>
         <span>{minutes} min read</span>
@@ -105,7 +105,7 @@ const jsonLd = articleNodes({
       </div>
 
       <h1
-        class="text-gradient mt-4 text-[1.875rem] leading-[1.12] font-semibold tracking-tighter sm:text-[2.5rem]"
+        class="mt-4 text-[1.875rem] leading-[1.12] font-medium tracking-[-0.02em] sm:text-[2.5rem]"
         style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
       >
         {title}
@@ -121,7 +121,7 @@ const jsonLd = articleNodes({
                 href={`/tags/${tag}`}
                 class={cn(
                   badgeVariants({ variant: 'outline' }),
-                  'h-6 px-2 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary'
+                  'h-6 px-2 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground'
                 )}
               >
                 #{tag}
@@ -162,10 +162,10 @@ const jsonLd = articleNodes({
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {prev ? (
               <a href={prev.href} class="group block">
-                <Card className="card-interactive h-full gap-1.5 border bg-card/70 py-4 ring-0">
+                <Card className="card-interactive h-full gap-2 border py-4 ring-0">
                   <CardContent>
                     <span class="label">← Previous</span>
-                    <span class="mt-1.5 block text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
+                    <span class="mt-2 block text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
                       {prev.title}
                     </span>
                   </CardContent>
@@ -176,10 +176,10 @@ const jsonLd = articleNodes({
             )}
             {next && (
               <a href={next.href} class="group block sm:text-right">
-                <Card className="card-interactive h-full gap-1.5 border bg-card/70 py-4 ring-0">
+                <Card className="card-interactive h-full gap-2 border py-4 ring-0">
                   <CardContent>
                     <span class="label">Next →</span>
-                    <span class="mt-1.5 block text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
+                    <span class="mt-2 block text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
                       {next.title}
                     </span>
                   </CardContent>

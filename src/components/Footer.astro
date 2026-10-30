@@ -28,7 +28,7 @@ const links = [
           <a
             href={link.url}
             rel={link.url.startsWith('http') ? 'me' : undefined}
-            class="relative transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-all hover:text-foreground hover:after:w-full"
+            class="underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-current"
           >
             {link.label}
           </a>

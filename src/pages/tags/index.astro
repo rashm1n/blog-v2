@@ -29,7 +29,7 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
           href={`/tags/${tag}`}
           class={cn(
             badgeVariants({ variant: 'outline' }),
-            'h-7 gap-2 px-2.5 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary'
+            'h-7 gap-2 px-2.5 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground'
           )}
         >
           #{tag}

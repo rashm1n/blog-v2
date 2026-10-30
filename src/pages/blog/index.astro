@@ -17,7 +17,7 @@ const description =
   />
 
   <div class="space-y-3 pb-8">
-    {posts.map((post, i) => <PostCard entry={post} basePath="/blog" index={i} />)}
+    {posts.map((post) => <PostCard entry={post} basePath="/blog" />)}
     {posts.length === 0 && <p class="py-8 text-sm text-muted-foreground">Nothing published yet.</p>}
   </div>
 </BaseLayout>

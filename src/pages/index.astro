@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import { AuthorAvatar } from '../components/AuthorAvatar';
-import { Badge, badgeVariants } from '@/components/ui/badge';
+import { badgeVariants } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { AUTHOR_NAME, AUTHOR_ROLE, SITE_LEAD, SOCIAL_LINKS } from '../consts';
@@ -27,23 +27,12 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
 <BaseLayout>
   <section class="pt-10 pb-14 sm:pt-16">
     <div class="reveal flex items-center gap-4">
-      {/* The dot rides on the avatar rather than sitting beside the role, so
-          the "still here, still writing" signal reads before any text does. */}
       <AuthorAvatar initial={initial} size="lg" />
-
-      <Badge variant="secondary" className="h-6 gap-1.5 px-2.5 font-mono text-[0.6875rem]">
-        <span class="relative flex size-1.5" aria-hidden="true">
-          <span
-            class="absolute inline-flex size-full animate-ping-slow rounded-full bg-primary opacity-60"
-          ></span>
-          <span class="relative inline-flex size-1.5 rounded-full bg-primary"></span>
-        </span>
-        {AUTHOR_ROLE}
-      </Badge>
+      <p class="label">{AUTHOR_ROLE}</p>
     </div>
 
     <h1
-      class="reveal text-gradient mt-6 text-[2.75rem] leading-[1.05] font-semibold tracking-tighter sm:text-6xl"
+      class="reveal mt-6 text-[2.75rem] leading-[1.05] font-medium tracking-[-0.03em] sm:text-6xl"
       style="--reveal-delay: 60ms"
     >
       {AUTHOR_NAME}
@@ -81,7 +70,7 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
             rel="me"
             class={cn(
               buttonVariants({ variant: 'ghost', size: 'lg' }),
-              'h-10 px-3.5 text-muted-foreground'
+              'h-10 px-3 text-muted-foreground'
             )}
           >
             {link.label}
@@ -92,9 +81,9 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
   </section>
 
   <section class="py-6">
-    <h2 class="rule-heading label">Writing</h2>
+    <h2 class="rule-heading label">~/writing</h2>
     <div class="mt-4 space-y-3">
-      {posts.map((post, i) => <PostCard entry={post} basePath="/blog" index={i} />)}
+      {posts.map((post, i) => <PostCard entry={post} basePath="/blog" feature={i === 0} />)}
       {
         posts.length === 0 && (
           <p class="py-8 text-sm text-muted-foreground">Nothing published yet.</p>
@@ -124,7 +113,7 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
   {
     travel.length > 0 && (
       <section class="py-6">
-        <h2 class="rule-heading label">Travel</h2>
+        <h2 class="rule-heading label">~/travel</h2>
         <div class="mt-4 space-y-3">
           {travel.map((post) => (
             <PostCard entry={post} basePath="/travel" />
@@ -147,18 +136,17 @@ const initial = AUTHOR_NAME.slice(0, 1).toUpperCase();
   {
     topics.length > 0 && (
       <section class="py-6 pb-16">
-        <h2 class="rule-heading label">Topics</h2>
+        <h2 class="rule-heading label">~/topics</h2>
         <div class="mt-4 flex flex-wrap gap-2">
-          {topics.map(({ tag, count }) => (
+          {topics.map(({ tag }) => (
             <a
               href={`/tags/${tag}`}
               class={cn(
                 badgeVariants({ variant: 'outline' }),
-                'h-7 gap-2 px-2.5 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary'
+                'h-7 rounded-md px-2 font-mono text-xs font-normal text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground'
               )}
             >
               #{tag}
-              <span class="tabular-nums opacity-60">{count}</span>
             </a>
           ))}
         </div>

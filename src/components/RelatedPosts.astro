@@ -19,15 +19,7 @@ const { entries } = Astro.props;
               href={`${sectionFor(entry.collection).path}/${entry.id}`}
               class="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-accent"
             >
-              <span class="flex items-baseline gap-2.5 text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
-                {/* Slides out from under the title on hover — a hint of
-                    direction without adding a permanent glyph column. */}
-                <span
-                  class="w-0 shrink-0 overflow-hidden text-primary opacity-0 transition-all group-hover:w-2.5 group-hover:opacity-100"
-                  aria-hidden="true"
-                >
-                  →
-                </span>
+              <span class="text-sm leading-snug text-foreground transition-colors group-hover:text-primary">
                 {entry.data.title}
               </span>
               <span class="hidden shrink-0 font-mono text-xs tabular-nums text-muted-foreground xs:block">
