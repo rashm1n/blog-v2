@@ -1,4 +1,5 @@
 ---
+import PostRing from './PostRing.astro';
 import { byYear, formatDate, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
 
 interface Props {
@@ -31,8 +32,15 @@ const shortDate = (date: Date) =>
             <li>
               <a
                 href={`${sectionFor(entry.collection).path}/${entry.id}`}
-                class="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-3"
+                class="group grid grid-cols-[auto_1fr_auto] items-baseline gap-x-4 gap-y-1 py-3 sm:gap-x-6"
               >
+                {/* Rotates a sixth of a turn on hover: the hash ring "moving on". */}
+                <PostRing
+                  id={entry.id}
+                  tags={entry.data.tags}
+                  class="size-9 self-start transition-transform duration-500 ease-[var(--ease-out-quint)] group-hover:rotate-60 group-focus-visible:rotate-60 sm:size-10"
+                />
+
                 <span class="font-serif text-xl leading-snug font-medium text-foreground transition-colors group-hover:text-primary">
                   <span
                     style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
@@ -49,7 +57,7 @@ const shortDate = (date: Date) =>
                 </span>
 
                 {entry.data.description && (
-                  <p class="col-span-2 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted-foreground">
+                  <p class="col-span-2 col-start-2 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted-foreground">
                     {entry.data.description}
                   </p>
                 )}

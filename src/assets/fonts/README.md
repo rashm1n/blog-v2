@@ -4,21 +4,20 @@ These are **not** the fonts the site serves to browsers. Those come from
 Fontsource through Astro's Fonts API, configured in `astro.config.mjs`, and are
 subset and served as woff2.
 
-These static TTFs exist for one reason: `src/utils/og.ts` renders the social
-cards with satori, which reads font files directly and cannot read woff2 —
-Fontsource ships nothing else. Keeping a static copy here is what lets the cards
-be set in the same two typefaces as the pages they advertise.
+These static files exist for one reason: `src/utils/og.ts` renders the social
+cards with satori, which reads font files directly and cannot read woff2. Keeping a static copy here is what lets the cards
+be set in the same typefaces as the pages they advertise.
 
 | File | Family | Used for |
 | --- | --- | --- |
-| `Geist-Regular.ttf`, `Geist-SemiBold.ttf` | [Geist](https://github.com/vercel/geist-font) | The card headline and the author name — the site's `--font-face-sans`. |
-| `JetBrainsMono-Regular.ttf`, `JetBrainsMono-Bold.ttf` | [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) | Dates, reading time, tags and the domain — the site's `--font-face-mono`. |
+| `Newsreader-Medium.woff` | [Newsreader](https://github.com/productiontype/Newsreader) | The card headline and the domain — the site's `--font-face-serif`. Fontsource's static `latin-500-normal.woff` (satori reads woff, not woff2). |
+| `Geist-Regular.ttf` | [Geist](https://github.com/vercel/geist-font) | Description, date, reading time and tags — the site's `--font-face-sans`. |
 
 Both families are licensed under the SIL Open Font License 1.1.
 
 - Geist: Copyright 2024 The Geist Project Authors
-- JetBrains Mono: Copyright 2020 The JetBrains Mono Project Authors
+- Newsreader: Copyright 2020 The Newsreader Project Authors
 
 Only the weights the cards actually use are kept. Adding a weight to a card
-means adding its TTF here as well; satori will otherwise synthesise it from the
+means adding its file here as well; satori will otherwise synthesise it from the
 nearest one it has, which looks subtly wrong rather than obviously broken.
