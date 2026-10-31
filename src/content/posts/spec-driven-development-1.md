@@ -3,7 +3,7 @@ title: "SDD: Spec-Driven Development. Controlled Vibe Coding!"
 description: "What spec-driven development is, and how writing the spec first keeps AI-assisted coding under control."
 pubDate: 2026-10-31
 tags: [llm, ai, sdd]
-heroImage: ../../assets/posts/sdd/hero.png   # optional
+heroImage: ../../assets/photos/sdd-hero.jpg   # optional
 draft: false 
 ---
 
