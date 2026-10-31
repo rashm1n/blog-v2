@@ -7,6 +7,7 @@ import sitemap from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
 
 import remarkCallouts from './src/plugins/remark-callouts.mjs';
+import remarkInlineSvg from './src/plugins/remark-inline-svg.mjs';
 import rehypeExternalLinks from './src/plugins/rehype-external-links.mjs';
 
 import react from '@astrojs/react';
@@ -64,7 +65,7 @@ export default defineConfig({
   ],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkCallouts],
+      remarkPlugins: [remarkCallouts, remarkInlineSvg],
       rehypePlugins: [[rehypeExternalLinks, { site: SITE }]],
     }),
     shikiConfig: {

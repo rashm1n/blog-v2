@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340">
+<rect class="dg-accent-panel" x="180" y="8" width="440" height="322" rx="16" fill="#e8f2fa" stroke="#b5d3ea"/>
+
+<rect class="dg-card dg-card--accent" x="202" y="30" width="396" height="82" rx="10" fill="#fff" stroke="#b5d3ea"/>
+<rect class="dg-icon-box" x="218" y="53" width="36" height="36" rx="8" fill="#e8f2fa"/>
+<circle class="dg-icon" cx="236" cy="71" r="9" fill="none" stroke="#0071b8" stroke-width="1.6"/><circle class="dg-icon" cx="236" cy="71" r="4.5" fill="none" stroke="#0071b8" stroke-width="1.6"/><circle class="dg-dot" cx="236" cy="71" r="1.4" fill="#0071b8"/>
+<text class="dg-title" x="270" y="79" font-family="Newsreader, Georgia, serif" font-weight="500" font-size="23" fill="#1d1d1d">Mission</text>
+<rect class="dg-card dg-card--accent" x="202" y="128" width="396" height="82" rx="10" fill="#fff" stroke="#b5d3ea"/>
+<rect class="dg-icon-box" x="218" y="151" width="36" height="36" rx="8" fill="#e8f2fa"/>
+<path class="dg-icon dg-icon--solid" d="M227 174 L236 169.5 L245 174 L236 178.5 Z" fill="#fff" stroke="#0071b8" stroke-width="1.5" stroke-linejoin="round"/><path class="dg-icon dg-icon--solid" d="M227 169 L236 164.5 L245 169 L236 173.5 Z" fill="#fff" stroke="#0071b8" stroke-width="1.5" stroke-linejoin="round"/><path class="dg-icon dg-icon--solid" d="M227 164 L236 159.5 L245 164 L236 168.5 Z" fill="#fff" stroke="#0071b8" stroke-width="1.5" stroke-linejoin="round"/>
+<text class="dg-title" x="270" y="177" font-family="Newsreader, Georgia, serif" font-weight="500" font-size="23" fill="#1d1d1d">Tech Stack</text>
+<rect class="dg-card dg-card--accent" x="202" y="226" width="396" height="82" rx="10" fill="#fff" stroke="#b5d3ea"/>
+<rect class="dg-icon-box" x="218" y="249" width="36" height="36" rx="8" fill="#e8f2fa"/>
+<path class="dg-icon" d="M228 276 V258 M228 259 H244 L240 263 L244 267 H228" fill="none" stroke="#0071b8" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text class="dg-title" x="270" y="275" font-family="Newsreader, Georgia, serif" font-weight="500" font-size="23" fill="#1d1d1d">Roadmap</text>
+</svg>

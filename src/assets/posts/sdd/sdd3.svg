@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+<rect class="dg-frame" x="16" y="16" width="768" height="388" rx="20" fill="none" stroke="#d9d9d3" stroke-dasharray="5 5"/>
+<rect class="dg-accent-panel" x="40" y="69" width="330" height="308" rx="16" fill="#e8f2fa" stroke="#b5d3ea"/>
+<text class="dg-label" x="64" y="102" font-family="JetBrains Mono, monospace" font-weight="500" font-size="15" fill="#0071b8">constitution.md</text>
+<rect class="dg-card dg-card--accent" x="62" y="121" width="286" height="70" rx="10" fill="#fff" stroke="#b5d3ea"/>
+<rect class="dg-icon-box" x="78" y="138" width="36" height="36" rx="8" fill="#e8f2fa"/>
+<circle class="dg-icon" cx="96" cy="156" r="9" fill="none" stroke="#0071b8" stroke-width="1.6"/><circle class="dg-icon" cx="96" cy="156" r="4.5" fill="none" stroke="#0071b8" stroke-width="1.6"/><circle class="dg-dot" cx="96" cy="156" r="1.4" fill="#0071b8"/>
+<text class="dg-title" x="130" y="164" font-family="Newsreader, Georgia, serif" font-weight="500" font-size="23" fill="#1d1d1d">Mission</text>
+<rect class="dg-card dg-card--accent" x="62" y="203" width="286" height="70" rx="10" fill="#fff" stroke="#b5d3ea"/>
+<rect class="dg-icon-box" x="78" y="220" width="36" height="36" rx="8" fill="#e8f2fa"/>
+<path class="dg-icon dg-icon--solid" d="M87 243 L96 238.5 L105 243 L96 247.5 Z" fill="#fff" stroke="#0071b8" stroke-width="1.5" stroke-linejoin="round"/><path class="dg-icon dg-icon--solid" d="M87 238 L96 233.5 L105 238 L96 242.5 Z" fill="#fff" stroke="#0071b8" stroke-width="1.5" stroke-linejoin="round"/><path class="dg-icon dg-icon--solid" d="M87 233 L96 228.5 L105 233 L96 237.5 Z" fill="#fff" stroke="#0071b8" stroke-width="1.5" stroke-linejoin="round"/>
+<text class="dg-title" x="130" y="246" font-family="Newsreader, Georgia, serif" font-weight="500" font-size="23" fill="#1d1d1d">Tech Stack</text>
+<rect class="dg-card dg-card--accent" x="62" y="285" width="286" height="70" rx="10" fill="#fff" stroke="#b5d3ea"/>
+<rect class="dg-icon-box" x="78" y="302" width="36" height="36" rx="8" fill="#e8f2fa"/>
+<path class="dg-icon" d="M88 329 V311 M88 312 H104 L100 316 L104 320 H88" fill="none" stroke="#0071b8" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text class="dg-title" x="130" y="328" font-family="Newsreader, Georgia, serif" font-weight="500" font-size="23" fill="#1d1d1d">Roadmap</text>
+<path class="dg-connector" d="M370 223 H420 M420 74 V364" fill="none" stroke="#b5d3ea" stroke-width="1.6"/>
+<circle class="dg-dot" cx="370" cy="223" r="4" fill="#0071b8"/>
+<path class="dg-connector" d="M420 74 H450" stroke="#b5d3ea" stroke-width="1.6"/>
+<g class="dg-chip dg-chip--feature">
+<rect class="dg-card" x="450" y="52" width="290" height="44" rx="10" fill="#fff" stroke="#d9d9d3"/>
+<rect class="dg-chip-bar" x="450" y="52" width="6" height="44" rx="3" fill="#0071b8"/>
+<path class="dg-chip-icon" d="M474 64 H484 L490 70 V84 H474 Z M484 64 V70 H490" fill="#e8f2fa" stroke="#0071b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text class="dg-mono" x="504" y="80" font-family="JetBrains Mono, monospace" font-weight="500" font-size="16" fill="#1d1d1d">feature1.md</text>
+</g>
+<path class="dg-connector" d="M420 132 H450" stroke="#b5d3ea" stroke-width="1.6"/>
+<g class="dg-chip dg-chip--feature">
+<rect class="dg-card" x="450" y="110" width="290" height="44" rx="10" fill="#fff" stroke="#d9d9d3"/>
+<rect class="dg-chip-bar" x="450" y="110" width="6" height="44" rx="3" fill="#0071b8"/>
+<path class="dg-chip-icon" d="M474 122 H484 L490 128 V142 H474 Z M484 122 V128 H490" fill="#e8f2fa" stroke="#0071b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text class="dg-mono" x="504" y="138" font-family="JetBrains Mono, monospace" font-weight="500" font-size="16" fill="#1d1d1d">feature2.md</text>
+</g>
+<path class="dg-connector" d="M420 190 H450" stroke="#b5d3ea" stroke-width="1.6"/>
+<g class="dg-chip dg-chip--improvement">
+<rect class="dg-card" x="450" y="168" width="290" height="44" rx="10" fill="#fff" stroke="#d9d9d3"/>
+<rect class="dg-chip-bar" x="450" y="168" width="6" height="44" rx="3" fill="#0071b8"/>
+<path class="dg-chip-icon" d="M474 180 H484 L490 186 V200 H474 Z M484 180 V186 H490" fill="#e8f2fa" stroke="#0071b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text class="dg-mono" x="504" y="196" font-family="JetBrains Mono, monospace" font-weight="500" font-size="16" fill="#1d1d1d">improvement1.md</text>
+</g>
+<path class="dg-connector" d="M420 248 H450" stroke="#b5d3ea" stroke-width="1.6"/>
+<g class="dg-chip dg-chip--feature">
+<rect class="dg-card" x="450" y="226" width="290" height="44" rx="10" fill="#fff" stroke="#d9d9d3"/>
+<rect class="dg-chip-bar" x="450" y="226" width="6" height="44" rx="3" fill="#0071b8"/>
+<path class="dg-chip-icon" d="M474 238 H484 L490 244 V258 H474 Z M484 238 V244 H490" fill="#e8f2fa" stroke="#0071b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text class="dg-mono" x="504" y="254" font-family="JetBrains Mono, monospace" font-weight="500" font-size="16" fill="#1d1d1d">feature3.md</text>
+</g>
+<path class="dg-connector" d="M420 306 H450" stroke="#b5d3ea" stroke-width="1.6"/>
+<g class="dg-chip dg-chip--issue">
+<rect class="dg-card" x="450" y="284" width="290" height="44" rx="10" fill="#fff" stroke="#d9d9d3"/>
+<rect class="dg-chip-bar" x="450" y="284" width="6" height="44" rx="3" fill="#0071b8"/>
+<path class="dg-chip-icon" d="M474 296 H484 L490 302 V316 H474 Z M484 296 V302 H490" fill="#e8f2fa" stroke="#0071b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text class="dg-mono" x="504" y="312" font-family="JetBrains Mono, monospace" font-weight="500" font-size="16" fill="#1d1d1d">issue1.md</text>
+</g>
+<path class="dg-connector" d="M420 364 H450" stroke="#b5d3ea" stroke-width="1.6"/>
+<g class="dg-chip dg-chip--issue">
+<rect class="dg-card" x="450" y="342" width="290" height="44" rx="10" fill="#fff" stroke="#d9d9d3"/>
+<rect class="dg-chip-bar" x="450" y="342" width="6" height="44" rx="3" fill="#0071b8"/>
+<path class="dg-chip-icon" d="M474 354 H484 L490 360 V374 H474 Z M484 354 V360 H490" fill="#e8f2fa" stroke="#0071b8" stroke-width="1.4" stroke-linejoin="round"/>
+<text class="dg-mono" x="504" y="370" font-family="JetBrains Mono, monospace" font-weight="500" font-size="16" fill="#1d1d1d">issue2.md</text>
+</g>
+</svg>

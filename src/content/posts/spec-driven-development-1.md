@@ -3,7 +3,7 @@ title: "SDD: Spec-Driven Development. Controlled Vibe Coding!"
 description: "What spec-driven development is, and how writing the spec first keeps AI-assisted coding under control."
 pubDate: 2026-10-31
 tags: [llm, ai, sdd]
-heroImage: ../../assets/photos/sdd-hero.jpg   # optional
+heroImage: ../../assets/posts/sdd/hero1.jpg   # optional
 draft: false 
 ---
 
@@ -33,7 +33,7 @@ This also happens when code is generated without a broader understanding of the 
 
 To address the above-mentioned issues, a new paradigm, a worthy (?) successor, is here: SDD, which is built on decoupling the specification from the implementation.
 
-![SDD](../../assets/posts/sdd/sdd1.png)
+![SDD](../../assets/posts/sdd/sdd1.svg)
 
 Spec-driven development mainly focuses on a human-in-the-loop approach with a detailed requirement document called a ‘spec’. Specs are intended to be persisted between sessions. Detailed specifications of implementation details are created and verified before providing them to agent/s to implement. The specs are mainly written in natural language.
 
@@ -49,7 +49,7 @@ If we deep dive into the spec, there are two levels of specs: the project-level 
 
 As the name suggests, this lives in the root of the project and specifies the overall objective, the mission, targeted tech stack and overall roadmap. The constitution also consists of high-level principles, which child specs and implementations should always follow.
 
-![SDD](../../assets/posts/sdd/sdd2.png)
+![SDD](../../assets/posts/sdd/sdd2.svg)
 
 - Mission - Core idea
 - Tech Stack - Targeted tech stack
@@ -122,7 +122,7 @@ their responsibility.
 
 After several iterations, the spec hierarchy of a project would look something like this.
 
-![SDD](../../assets/posts/sdd/sdd3.png)
+![SDD](../../assets/posts/sdd/sdd3.svg)
 
 # Conclusion
 
