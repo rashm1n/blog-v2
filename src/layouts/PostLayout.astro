@@ -6,7 +6,7 @@ import TableOfContents from '../components/TableOfContents.astro';
 import Comments from '../components/Comments.astro';
 import CodeBlocks from '../components/CodeBlocks.astro';
 import PostImages from '../components/PostImages.astro';
-import StatusLine from '../components/StatusLine.astro';
+import { Separator } from '@/components/ui/separator';
 import RelatedPosts from '../components/RelatedPosts.astro';
 import PostActions from '../components/PostActions.astro';
 import {
@@ -83,7 +83,6 @@ const jsonLd = articleNodes({
   jsonLd={jsonLd}
   markdownPath={sourcePath}
 >
-  <StatusLine minutes={minutes} />
 
   <article class="pt-10 pb-8 sm:pt-16">
     <header>
@@ -94,16 +93,17 @@ const jsonLd = articleNodes({
       </nav>
 
       <h1
-        class="text-[2.25rem] leading-[1.04] sm:text-[3.25rem]"
+        class="max-w-[20ch] text-[2.5rem] leading-[1.1] sm:text-[3.75rem]"
         style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
       >
         {title}
       </h1>
 
-      <p class="mt-5 text-lg leading-relaxed text-muted-foreground">{description}</p>
+      <p class="mt-5 text-xl leading-relaxed text-muted-foreground">{description}</p>
 
       {/* Facts about the post, labelled, in one scannable row. */}
-      <dl class="mt-7 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-border py-3 xs:grid-cols-4">
+      <Separator className="mt-8" />
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-3 py-4 xs:grid-cols-4">
         <div>
           <dt class="label">Published</dt>
           <dd class="label text-foreground"><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></dd>
@@ -127,12 +127,14 @@ const jsonLd = articleNodes({
           </dd>
         </div>
       </dl>
+      <Separator />
 
       {
         tags.length > 0 && (
-          <p class="mt-4 flex flex-wrap gap-2">
+          <p class="label mt-4 flex flex-wrap gap-x-3">
+            <span>Tagged</span>
             {tags.map((tag: string) => (
-              <a href={`/tags/${tag}`} class="ref">{tag}</a>
+              <a href={`/tags/${tag}`} class="text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary hover:decoration-current">{tag}</a>
             ))}
           </p>
         )
@@ -147,7 +149,7 @@ const jsonLd = articleNodes({
           width={1600}
           height={900}
           loading="eager"
-          class="mt-10 aspect-[16/9] w-full rounded-[var(--radius)] border border-border object-cover"
+          class="mt-10 aspect-[16/9] w-full rounded-md border border-border object-cover"
         />
       )
     }
@@ -164,23 +166,19 @@ const jsonLd = articleNodes({
 
     {
       (prev || next) && (
-        <nav data-noprint aria-label="More posts" class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2">
+        <nav data-noprint aria-label="More posts" class="mt-14 grid grid-cols-1 border-t border-border sm:grid-cols-2">
           {prev ? (
-            <a href={prev.href} rel="prev" class="group block border-t-2 border-border pt-3 transition-colors hover:border-primary">
+            <a href={prev.href} rel="prev" class="group block py-6 sm:pr-6">
               <span class="label block">Previous</span>
-              <span class="display mt-1 block text-xl leading-tight transition-colors group-hover:text-primary">
-                {prev.title}
-              </span>
+              <span class="display mt-1 block text-xl leading-tight transition-colors group-hover:text-primary">{prev.title}</span>
             </a>
           ) : (
             <div class="hidden sm:block" />
           )}
           {next && (
-            <a href={next.href} rel="next" class="group block border-t-2 border-border pt-3 transition-colors hover:border-primary sm:text-right">
+            <a href={next.href} rel="next" class="group block border-t border-border py-6 sm:border-t-0 sm:border-l sm:pl-6 sm:text-right">
               <span class="label block">Next</span>
-              <span class="display mt-1 block text-xl leading-tight transition-colors group-hover:text-primary">
-                {next.title}
-              </span>
+              <span class="display mt-1 block text-xl leading-tight transition-colors group-hover:text-primary">{next.title}</span>
             </a>
           )}
         </nav>

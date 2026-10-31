@@ -22,14 +22,14 @@
    where `--color-accent` *was* the brand hue. Brand colour is `primary` now;
    `accent` is what a row fills with under the cursor.
 
-   Fonts stay pointed at Astro's Fonts API variables rather than the
-   `@fontsource-variable/geist` import shadcn's init adds — the site already
-   self-hosts and preloads Schibsted Grotesk through the config, and a second
-   face would ship a font nothing uses. */
+   Type follows the ngrok blog with free faces: Newsreader 500 for headings,
+   Source Serif 4 for reading, JetBrains Mono for meta, captions and code. The
+   sans stack is left for the odd piece of interface chrome. */
 @theme inline {
-  --font-sans: var(--font-face-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-face-mono), ui-monospace, SFMono-Regular, monospace;
-  --font-heading: var(--font-sans);
+  --font-sans: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif;
+  --font-serif: var(--font-face-body);
+  --font-mono: var(--font-face-mono);
+  --font-heading: var(--font-face-heading);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -75,69 +75,68 @@
 
 /* ------------------------------------------------------------------ palette */
 
-/* Ink navy and aluminium, two signals with separate jobs:
+/* Paper, ink and a fountain-pen teal, with two signals that have separate jobs:
 
-     primary (blue)   anything you can act on: links, buttons, focus
-     marker  (amber)  where you are: the active section, search hits,
-                      selection, the newest entry in the log
+     primary (teal)     anything you can act on: links, buttons, focus
+     marker  (yellow)   where you are: search hits,
+                        selection, the section you're reading
 
-   Neither is decorative, so neither appears anywhere it isn't doing that job.
-   Muted text clears 4.5:1 on the page in both themes; it carries dates,
-   descriptions and the status line, not ornament. */
+   Neither is decorative. Muted text clears 4.5:1 on the page and on cards in
+   both themes; it carries dates, descriptions and the status line. */
 :root {
   color-scheme: light;
 
-  --background: #f2f5f9;
-  --foreground: #0d1520;
+  --background: #fafafa;
+  --foreground: #1d1d1d;
   --card: #ffffff;
-  --card-foreground: #0d1520;
+  --card-foreground: #1d2025;
   --popover: #ffffff;
-  --popover-foreground: #0d1520;
-  --primary: #2346d6;
+  --popover-foreground: #1d2025;
+  --primary: #0071b8;
   --primary-foreground: #ffffff;
-  --secondary: #e6ebf2;
-  --secondary-foreground: #0d1520;
-  --muted: #e8edf3;
-  --muted-foreground: #4c5d72;
-  --accent: #e3e9f1;
-  --accent-foreground: #0d1520;
+  --secondary: #f1f1ee;
+  --secondary-foreground: #1d2025;
+  --muted: #f3f3f0;
+  --muted-foreground: #59606b;
+  --accent: #eff3f2;
+  --accent-foreground: #1d2025;
   --destructive: #b42318;
-  --border: #d3dce7;
-  --input: #c3cfdc;
-  --ring: #2346d6;
-  --radius: 0.25rem;
+  --border: #e2e2dd;
+  --input: #d3d3cd;
+  --ring: #0071b8;
+  --radius: 0.625rem;
 
   /* Site-specific extras, outside shadcn's vocabulary. */
-  --primary-subtle: #dfe6ff;
-  --marker: #8a5200;
-  --marker-subtle: #ffe7b0;
+  --primary-subtle: #e0effa;
+  --marker: #835600;
+  --marker-subtle: #fff0a6;
 }
 
 :root.dark {
   color-scheme: dark;
 
-  --background: #0d1520;
-  --foreground: #dce5ef;
-  --card: #121c2a;
-  --card-foreground: #dce5ef;
-  --popover: #121c2a;
-  --popover-foreground: #dce5ef;
-  --primary: #7fa6ff;
-  --primary-foreground: #0d1520;
-  --secondary: #172334;
-  --secondary-foreground: #dce5ef;
-  --muted: #111b28;
-  --muted-foreground: #8b9bb0;
-  --accent: #172334;
-  --accent-foreground: #dce5ef;
+  --background: #17191e;
+  --foreground: #e8e6e1;
+  --card: #1d2026;
+  --card-foreground: #e8e6e1;
+  --popover: #1d2026;
+  --popover-foreground: #e8e6e1;
+  --primary: #6ab8f0;
+  --primary-foreground: #0b1d2a;
+  --secondary: #23262d;
+  --secondary-foreground: #e8e6e1;
+  --muted: #1b1e23;
+  --muted-foreground: #a3a8b1;
+  --accent: #22282c;
+  --accent-foreground: #e8e6e1;
   --destructive: #f07167;
-  --border: #22344a;
-  --input: #2c415a;
-  --ring: #7fa6ff;
+  --border: #2d3139;
+  --input: #3a3f48;
+  --ring: #6ab8f0;
 
-  --primary-subtle: #1a2b4d;
-  --marker: #ffc75a;
-  --marker-subtle: #3d3018;
+  --primary-subtle: #15283a;
+  --marker: #ffd666;
+  --marker-subtle: #4a3f14;
 
   --color-info: #7db4ff;
   --color-success: #5ccf97;
@@ -161,7 +160,7 @@
   }
 
   body {
-    font-family: var(--font-sans);
+    font-family: var(--font-serif);
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
   }
@@ -191,17 +190,15 @@
     text-underline-offset: 3px;
   }
 
-  /* Every headline is the system voice: Martian Mono drawn at 75% width.
-     Condensed is what lets a monospace carry a two-line title without
-     running off the measure. */
+  /* Every headline is Newsreader at 500: one weight, so size carries the
+     hierarchy. */
   h1,
   h2,
   h3,
   h4,
   .display {
-    font-family: var(--font-mono);
-    font-stretch: 75%;
-    font-weight: 600;
+    font-family: var(--font-heading);
+    font-weight: 500;
     letter-spacing: -0.01em;
     text-wrap: balance;
   }
@@ -294,14 +291,14 @@
 @layer components {
   /* ---------------------------------------------------------------- shared */
 
-  /* Small metadata: dates, counts, section names. The interface voice, set
-     smaller and quieter than the reading voice. */
+  /* Small metadata: dates, counts, section names. ngrok's mono caps. */
   .label {
     font-family: var(--font-mono);
-    font-stretch: 87.5%;
     font-size: 0.75rem;
     font-weight: 400;
     line-height: 1.25rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     color: var(--muted-foreground);
   }
 
@@ -349,304 +346,16 @@
     }
   }
 
-  /* ------------------------------------------------------------------- log */
-
-  /* The post index, drawn like `git log --graph`: one rail, one node per
-     entry. The rail is the timeline, so it only exists where there's a
-     sequence to show. */
-  .log {
-    position: relative;
-  }
-
-  .log__year {
-    position: relative;
-    padding: 1.5rem 0 0.5rem 2rem;
-  }
-
-  .log__entry {
-    position: relative;
-  }
-
-  /* The rail: drawn per entry so a filtered-out row takes its segment with it. */
-  .log__entry::before,
-  .log__year::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0.4375rem;
-    width: 1px;
-    background: var(--border);
-  }
-
-  .log > :first-child::before {
-    top: 1.9rem;
-  }
-
-  .log__link {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.375rem 1.5rem;
-    padding: 1.25rem 0.75rem 1.25rem 2rem;
-    margin-right: -0.75rem;
-    border-radius: var(--radius);
-  }
-
-  @media (min-width: 48rem) {
-    .log__link {
-      grid-template-columns: 6.5rem 1fr 9rem;
-    }
-  }
-
-  .log__link:hover {
-    background: var(--accent);
-  }
-
-  /* The node. Hollow for every entry, filled for the newest: the one place
-     the log says "you are here". */
-  .log__link::before {
-    content: '';
-    position: absolute;
-    top: 1.6rem;
-    left: 0.125rem;
-    width: 0.6875rem;
-    height: 0.6875rem;
-    border: 2px solid var(--muted-foreground);
-    border-radius: 999px;
-    background: var(--background);
-  }
-
-  .log__link:hover::before,
-  .log__link:focus-visible::before {
-    border-color: var(--primary);
-  }
-
-  .log__entry[data-latest] .log__link::before {
-    border-color: var(--marker);
-    background: var(--marker);
-  }
-
-  .log__date {
-    padding-top: 0.3rem;
-  }
-
-  .log__title {
-    font-family: var(--font-mono);
-    font-stretch: 75%;
-    font-weight: 600;
-    font-size: 1.375rem;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    text-wrap: balance;
-    color: var(--foreground);
-  }
-
-  .log__link:hover .log__title {
-    color: var(--primary);
-  }
-
-  .log__description {
-    max-width: 60ch;
-    margin-top: 0.375rem;
-    color: var(--muted-foreground);
-    line-height: 1.55;
-  }
-
-  .log__refs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.375rem 0.5rem;
-    margin-top: 0.75rem;
-  }
-
-  .log__thumb {
-    display: none;
-  }
-
-  @media (min-width: 48rem) {
-    .log__thumb {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-  }
-
-  /* ------------------------------------------------------------------ refs */
-
-  /* Tags, set like the refs git prints beside a commit. */
-  .ref {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    height: 1.375rem;
-    padding: 0 0.4375rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-family: var(--font-mono);
-    font-stretch: 87.5%;
-    font-size: 0.6875rem;
-    line-height: 1;
-    color: var(--muted-foreground);
-    white-space: nowrap;
-  }
-
-  .ref--latest {
-    border-color: color-mix(in oklab, var(--marker) 55%, transparent);
-    color: var(--marker);
-  }
-
-  a.ref:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  /* ----------------------------------------------------------------- chips */
-
-  /* Topic filter above the log. Toggle buttons, so pressed state is the
-     source of truth and assistive tech hears it. */
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    height: 2rem;
-    padding: 0 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    font-family: var(--font-mono);
-    font-stretch: 87.5%;
-    font-size: 0.75rem;
-    color: var(--foreground);
-    cursor: pointer;
-    transition:
-      border-color 0.15s ease,
-      background-color 0.15s ease;
-  }
-
-  .chip:hover {
-    border-color: var(--primary);
-  }
-
-  .chip[aria-pressed='true'] {
-    border-color: var(--primary);
-    background: var(--primary);
-    color: var(--primary-foreground);
-  }
-
-  .chip__count {
-    color: var(--muted-foreground);
-  }
-
-  .chip[aria-pressed='true'] .chip__count {
-    color: inherit;
-    opacity: 0.75;
-  }
-
-  /* ----------------------------------------------------------- status line */
-
-  /* The reader's status line, after vim's and tmux's: where you are, how far
-     through, how long is left. Pinned to the bottom so it never competes
-     with the headline it replaces as a reference point. */
-  .statusline {
-    position: fixed;
-    inset: auto 0 0 0;
-    z-index: 40;
-    display: flex;
-    align-items: stretch;
-    height: 2rem;
-    border-top: 1px solid var(--border);
-    background: color-mix(in oklab, var(--card) 92%, transparent);
-    backdrop-filter: blur(12px);
-    font-family: var(--font-mono);
-    font-stretch: 87.5%;
-    font-size: 0.75rem;
-    color: var(--muted-foreground);
-    transform: translateY(100%);
-    transition: transform 0.25s var(--ease-out-quint);
-  }
-
-  /* Room for the bar, so it never covers the footer's last line. */
-  body:has(.statusline) {
-    padding-bottom: 2rem;
-  }
-
-  .statusline[data-visible] {
-    transform: none;
-  }
-
-  /* Progress is the top edge of the bar itself, not a second element. */
-  .statusline::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 0;
-    height: 2px;
-    width: calc(var(--progress, 0) * 100%);
-    background: var(--marker);
-  }
-
-  .statusline__mode {
-    display: flex;
-    align-items: center;
-    padding: 0 0.75rem;
-    background: var(--primary);
-    color: var(--primary-foreground);
-    font-weight: 600;
-  }
-
-  .statusline__section {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    align-items: center;
-    padding: 0 0.75rem;
-    color: var(--foreground);
-  }
-
-  .statusline__section span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .statusline__cell {
-    display: flex;
-    align-items: center;
-    padding: 0 0.75rem;
-    border-left: 1px solid var(--border);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  button.statusline__cell {
-    cursor: pointer;
-    color: var(--foreground);
-  }
-
-  button.statusline__cell:hover {
-    background: var(--accent);
-  }
-
-  @media (max-width: 30rem) {
-    .statusline__mode,
-    .statusline__cell[data-optional] {
-      display: none;
-    }
-  }
-
   /* ----------------------------------------------------------------- prose */
 
-  /* 18px Plex; 68ch keeps lines inside the 45–75 character band. */
+  /* 20/32 Source Serif in a 51rem column (816px), as on the ngrok blog. Body
+     copy sits a step softer than headings. */
   .prose {
     --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M8 7h9v9'/%3E%3C/svg%3E");
-    max-width: 68ch;
-    color: var(--foreground);
-    font-size: 1.125rem;
-    line-height: 1.72;
+    max-width: 51rem;
+    color: color-mix(in oklab, var(--foreground) 80%, transparent);
+    font-size: 1.25rem;
+    line-height: 1.6;
     hanging-punctuation: first;
   }
 
@@ -657,6 +366,7 @@
   .prose h2,
   .prose h3,
   .prose h4 {
+    color: var(--foreground);
     line-height: 1.15;
     margin-top: 2.2em;
     margin-bottom: 0.6em;
@@ -664,11 +374,12 @@
   }
 
   .prose h2 {
-    font-size: clamp(1.625rem, 1.3rem + 1vw, 2rem);
+    font-size: 1.875rem;
+    margin-top: 2.6em;
   }
 
   .prose h3 {
-    font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.375rem);
+    font-size: 1.375rem;
   }
 
   .prose h4 {
@@ -727,7 +438,7 @@
   }
 
   .prose strong {
-    font-weight: 650;
+    font-weight: 600;
     color: var(--foreground);
   }
 
@@ -866,26 +577,42 @@
   /* ---------------------------------------------------------------- figures */
 
   /* Built at runtime by PostImages.astro. */
+  /* Each figure sits on a sheet of white paper in both themes. Most figures
+     here are hand-drawn diagrams on white, so the sheet swallows their edges
+     and in dark mode they read as paper on a desk instead of a glaring box. */
   .figure__zoom {
     display: block;
     width: 100%;
+    padding: 1.5rem;
     cursor: zoom-in;
-    border-radius: 0.375rem;
-    /* The image already carries the border; a ring here would double it. */
-    transition: opacity 0.2s ease;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: #fff;
+    transition: border-color 0.15s var(--ease-out-quint);
   }
 
   .figure__zoom:hover {
-    opacity: 0.9;
+    border-color: var(--input);
+  }
+
+  @media (max-width: 30rem) {
+    .figure__zoom {
+      padding: 0.75rem;
+    }
+  }
+
+  .prose .figure__zoom img {
+    margin-inline: auto;
+    border: 0;
+    border-radius: 0.25rem;
   }
 
   .figure__caption {
     margin-top: 0.75rem;
-    font-family: var(--font-sans);
-    font-size: 0.8125rem;
-    line-height: 1.6;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.55;
     color: var(--muted-foreground);
-    text-align: center;
   }
 
   /* --------------------------------------------------------------- lightbox */
@@ -972,9 +699,9 @@
     color: #fff;
   }
 
-  /* Mono runs large beside the grotesk at the same nominal size. */
+  /* Mono runs large beside the sans at the same nominal size. */
   .prose :not(pre) > code {
-    font-size: 0.78em;
+    font-size: 0.82em;
     background: var(--muted);
     border: 1px solid var(--border);
     padding: 0.1em 0.35em;
@@ -1017,7 +744,6 @@
     padding: 1rem 1.25rem;
     overflow-x: auto;
     font-size: 0.8125rem;
-    font-stretch: 87.5%;
     line-height: 1.65;
     tab-size: 2;
   }
@@ -1044,7 +770,6 @@
 
   .code-block__lang {
     font-family: var(--font-mono);
-    font-stretch: 87.5%;
     font-size: 0.75rem;
     color: var(--muted-foreground);
   }
@@ -1231,12 +956,12 @@
   }
 
   /* The column sits on the left of a 64rem frame, so the rail takes the room
-     to its right: frame edge + gutter + 42rem column + 3rem. */
-  @media (min-width: 72rem) {
+     to its right: frame edge + gutter + 51rem column + 3rem. */
+  @media (min-width: 80rem) {
     .toc {
       position: fixed;
       top: 7.5rem;
-      left: calc(50% - 32rem + 1.5rem + 42rem + 3rem);
+      left: calc(50% - 32rem + 1.5rem + 51rem + 3rem);
       width: 15rem;
       max-height: calc(100vh - 12rem);
       overflow-y: auto;

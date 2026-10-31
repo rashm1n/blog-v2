@@ -1,5 +1,5 @@
 ---
-title: Omarchy ! The brand new Arch Linux experience. What and Why ?
+title: "Omarchy! The brand new Arch Linux experience. What and Why?"
 description: Introduction and guide to Omarchy Linux. What, Why and How to Setup.
 pubDate: 2026-08-02
 tags: [linux, omarchy]

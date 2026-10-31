@@ -19,13 +19,9 @@ A big problem with LLMs is their open-endedness. They can answer a prompt one wa
 
 For LLMs like Claude or GPT, we usually provide a text prompt and get a text answer. For Jev, we provide some data and a list of typed questions, and it responds with structured answers and probabilities. By design, it's not intended to be used as a typical LLM for daily tasks like answering general questions or code completion. It's intended as a tool for quick classification or decision-making inside our existing workflows, whether that's a coding agent or a regular application.
 
-![LLM](../../assets/posts/jev/LLM1.png)
+![LLM](../../assets/posts/jev/LLM1.png "A traditional LLM generates its response sequentially, one token at a time")
 
-A traditional LLM generates its response sequentially, one token at a time
-
-![Jev](../../assets/posts/jev/Jev1.png)
-
-For Jev, we provide some data and a list of typed questions, and it responds with structured answers and probabilities.
+![Jev](../../assets/posts/jev/Jev1.png "For Jev, we provide some data and a list of typed questions, and it responds with structured answers and probabilities.")
 
 ## Traditional LLMs vs Jev
 

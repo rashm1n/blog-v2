@@ -17,13 +17,11 @@ const SITE = 'https://rashmin.dev';
 export default defineConfig({
   site: SITE,
   output: 'static',
+  // The photos live on the travel page now; keep the old stub URL working.
+  redirects: { '/photos': '/travel' },
   integrations: [
     mdx(),
-    sitemap({
-      // `/photos` is an unbuilt stub; don't invite crawlers to index a
-      // "coming soon" page as if it were content.
-      filter: (page) => !page.includes('/photos'),
-    }),
+    sitemap(),
     // shadcn/ui components are React. None of them are given a `client:`
     // directive, so this renders them to static HTML at build time and ships
     // no runtime — the site's script budget is unchanged. Adding a directive
@@ -33,36 +31,35 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  // Free stand-ins for the ngrok blog's type (Family / Freight Text / JetBrains
+  // Mono), self-hosted by Astro so font-src can stay 'self'.
   fonts: [
     {
-      // Reading face. IBM's own engineering grotesk: plain at body sizes,
-      // a little mechanical in the details.
-      name: 'IBM Plex Sans',
-      cssVariable: '--font-face-sans',
+      name: 'Newsreader',
+      cssVariable: '--font-face-heading',
       provider: fontProviders.fontsource(),
-      weights: ['400 700'],
-      styles: ['normal', 'italic'],
+      weights: ['500'],
+      styles: ['normal'],
       subsets: ['latin'],
-      fallbacks: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+      fallbacks: ['Georgia', 'serif'],
     },
     {
-      // The system voice: headlines (condensed), interface and code.
-      // Vendored because Fontsource's package ships the weight axis only, and
-      // the headlines need the width axis (they're set at 75%).
-      name: 'Martian Mono',
+      name: 'Source Serif 4',
+      cssVariable: '--font-face-body',
+      provider: fontProviders.fontsource(),
+      weights: ['400', '600'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      name: 'JetBrains Mono',
       cssVariable: '--font-face-mono',
-      provider: fontProviders.local(),
-      options: {
-        variants: [
-          {
-            src: ['./src/assets/fonts/MartianMono-latin-standard.woff2'],
-            weight: '100 800',
-            style: 'normal',
-            stretch: '75% 112.5%',
-          },
-        ],
-      },
-      fallbacks: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+      provider: fontProviders.fontsource(),
+      weights: ['400', '500'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'Menlo', 'monospace'],
     },
   ],
   markdown: {

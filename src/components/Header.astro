@@ -1,4 +1,5 @@
 ---
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { NAV_LINKS, SITE_URL } from '../consts';
 import ThemeToggle from './ThemeToggle.astro';
@@ -15,7 +16,7 @@ const wordmark = new URL(SITE_URL).host;
   <div class="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:gap-6 sm:px-6">
     <a
       href="/"
-      class="display text-[1.0625rem] tracking-[-0.01em] text-foreground transition-colors hover:text-primary"
+      class="display text-[1.375rem] text-foreground transition-colors hover:text-primary"
     >
       {/* The TLD goes on the narrowest phones so the whole bar fits 360px. */}
       {wordmark.replace(/\.dev$/, '')}<span class="hidden xs:inline">.dev</span>
@@ -30,8 +31,9 @@ const wordmark = new URL(SITE_URL).host;
               href={link.href}
               aria-current={active ? 'page' : undefined}
               class={cn(
-                'label rounded-[var(--radius)] px-1.5 py-1 text-[0.8125rem] transition-colors hover:text-foreground xs:px-2',
-                active && 'bg-accent text-foreground'
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'px-1.5 text-[0.9375rem] font-normal text-muted-foreground xs:px-2.5',
+                active && 'bg-muted text-foreground'
               )}
             >
               {link.label}
@@ -49,7 +51,10 @@ const wordmark = new URL(SITE_URL).host;
         type="button"
         aria-label="Search"
         aria-keyshortcuts="/ Meta+K Control+K"
-        class="label flex h-8 items-center gap-2 rounded-[var(--radius)] border border-border bg-card px-2 transition-colors hover:border-primary hover:text-foreground sm:w-56"
+        class={cn(
+          buttonVariants({ variant: 'outline', size: 'default' }),
+          'justify-start gap-2 px-2.5 font-normal text-muted-foreground sm:w-56'
+        )}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

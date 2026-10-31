@@ -1,53 +1,143 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostIndex from '../components/PostIndex.astro';
-import TopicFilter from '../components/TopicFilter.astro';
 import { SITE_LEAD } from '../consts';
-import { getPublished } from '../utils/posts';
+import { formatDate, getPublished, readingTime, sectionFor, titleTransitionName } from '../utils/posts';
+import { PHOTOS } from '../data/photos';
 
 const [posts, travel] = await Promise.all([getPublished('posts'), getPublished('travel')]);
 const entries = [...posts, ...travel].sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const [latest, ...rest] = entries;
+
+// A shared stock image says nothing about the post, so the feature only shows
+// its picture when no other entry uses the same one.
+const image = latest?.data.heroImage;
+const uniqueImage = image && !rest.some((e) => e.data.heroImage?.src === image.src) ? image : undefined;
 
 // Feeds are first-class here (see PRODUCT.md), so they're offered up front
 // rather than buried in the footer.
 const feeds = [
-  { label: 'RSS', href: '/rss.xml', note: 'full posts' },
-  { label: 'JSON Feed', href: '/feed.json', note: 'full posts' },
-  { label: 'llms.txt', href: '/llms.txt', note: 'for agents' },
+  { label: 'RSS', href: '/rss.xml' },
+  { label: 'JSON Feed', href: '/feed.json' },
+  { label: 'llms.txt', href: '/llms.txt' },
 ];
+const photo = (id: string) => PHOTOS.find((p) => p.id === id)!;
+const sky = photo('samet-nangshe');
+// The landscape drone shot anchors the band; two portraits from other trips sit beside it.
+const band = ['weligama', 'kuala-lumpur', 'gardens-by-the-bay'].map(photo);
+const heroLink = 'underline decoration-[#15171a]/30 underline-offset-4 transition-colors hover:decoration-current';
+const link = 'text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary hover:decoration-current';
 ---
 
 <BaseLayout wide>
-  <div class="grid gap-8 pt-10 pb-10 sm:pt-14 lg:grid-cols-[1fr_15rem] lg:gap-16">
-    {/* Says who's writing, then gets out of the way of the log. */}
-    <h1 class="reveal max-w-[40ch] text-[1.25rem] leading-[1.2] sm:text-[1.5rem]">
-      {SITE_LEAD}
-    </h1>
-
-    <aside class="self-start border-l border-border pl-5" aria-labelledby="subscribe-heading">
-      <h2 id="subscribe-heading" class="label text-foreground">Subscribe</h2>
-      <ul class="mt-2 space-y-1">
-        {
-          feeds.map((feed) => (
-            <li class="flex items-baseline justify-between gap-4">
-              <a href={feed.href} class="label text-[0.8125rem] text-primary underline decoration-transparent underline-offset-4 hover:decoration-current">
-                {feed.label}
-              </a>
-              <span class="label">{feed.note}</span>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="label mt-4 hidden [@media(hover:hover)]:block">
-        Press <kbd class="kbd">?</kbd> for keyboard shortcuts
+  {/* The hero is one of the author's own photos: the intro sits in the empty sky above the bay. */}
+  <header class="reveal relative mt-4 flex min-h-[40rem] flex-col overflow-hidden rounded-2xl bg-[#c9cdd1]">
+    <Image
+      src={sky.src}
+      alt={sky.alt}
+      widths={[640, 1024, 1440, 1800]}
+      sizes="(min-width: 64rem) 976px, 100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="absolute inset-0 h-full w-full object-cover object-[50%_50%]"
+    />
+    {/* Fixed ink, not theme colours: the text sits on a pale sky in both themes. */}
+    <div class="relative px-6 pt-12 text-[#15171a] sm:px-12 sm:pt-16">
+      <h1 class="max-w-[20ch] text-[2.25rem] leading-[1.12] sm:text-[3rem]">{SITE_LEAD}</h1>
+      <p class="mt-6 text-[#2b3036]">
+        Follow by {feeds.map((feed, i) => (
+          <>
+            <a href={feed.href} class={heroLink}>{feed.label}</a>{i < feeds.length - 2 ? ', ' : i === feeds.length - 2 ? ' or ' : ''}
+          </>
+        ))}
       </p>
-    </aside>
-  </div>
+    </div>
+    <a href={`/travel#${sky.id}`} class="label relative mt-auto self-end px-6 pb-5 text-white/85 underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current sm:px-12">
+      {sky.place}
+    </a>
+  </header>
 
-  <section aria-labelledby="log-heading">
-    <h2 id="log-heading" class="sr-only">All posts</h2>
-    <TopicFilter entries={entries} />
-    <PostIndex entries={entries} />
-    {entries.length === 0 && <p class="py-8 text-muted-foreground">Nothing published yet.</p>}
+  <div class="h-20 lg:h-24"></div>
+
+  {
+    latest && (
+      <section aria-labelledby="latest-heading" class="reveal [--reveal-delay:60ms]">
+        <h2 id="latest-heading" class="border-b border-border pb-4 text-[1.875rem] leading-tight">Latest writing</h2>
+        <a
+          href={`${sectionFor(latest.collection).path}/${latest.id}`}
+          class:list={['group grid gap-8 py-8 sm:py-10 lg:gap-12', uniqueImage ? 'lg:grid-cols-[1fr_1.1fr] lg:items-center' : 'lg:grid-cols-[1.1fr_1fr] lg:items-end']}
+        >
+          {/* With no picture, `contents` lets the title and summary take a column each. */}
+          <span class:list={['block', !uniqueImage && 'lg:contents']}>
+          <span class="block">
+            <span class="label block tabular-nums">
+              <time datetime={latest.data.pubDate.toISOString()}>{formatDate(latest.data.pubDate)}</time>
+              <span aria-hidden="true"> · </span>{readingTime(latest.body ?? '')} min read
+            </span>
+            <span
+              class="display mt-3 block max-w-[24ch] text-[2rem] leading-[1.12] transition-colors group-hover:text-primary sm:text-[2.5rem]"
+              style={`view-transition-name: ${titleTransitionName(latest.id)}; view-transition-class: post-title`}
+            >
+              {latest.data.title}
+            </span>
+          </span>
+          <span class:list={['mt-4 block', !uniqueImage && 'lg:mt-0']}>
+            {latest.data.description && (
+              <span class="block max-w-[52ch] text-lg leading-relaxed text-muted-foreground">{latest.data.description}</span>
+            )}
+            <span class="mt-6 inline-block text-primary underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-current">
+              Read the post
+            </span>
+          </span>
+          </span>
+          {uniqueImage && (
+            <Image
+              src={uniqueImage}
+              alt=""
+              width={960}
+              class="aspect-[16/10] w-full rounded-md border border-border object-cover"
+            />
+          )}
+        </a>
+      </section>
+    )
+  }
+
+  {
+    rest.length > 0 && (
+      <section aria-labelledby="log-heading" class="mt-12">
+        <h2 id="log-heading" class="sr-only">Earlier posts</h2>
+        <PostIndex entries={rest} />
+      </section>
+    )
+  }
+
+  <section aria-labelledby="photos-heading" class="mt-24">
+    <div class="flex items-baseline justify-between gap-4 border-b border-border pb-4">
+      <h2 id="photos-heading" class="text-[1.875rem] leading-tight">Away from the desk</h2>
+      <a href="/travel" class:list={[link, 'shrink-0']}>All {PHOTOS.length} photos</a>
+    </div>
+    <ul class="grid grid-cols-2 gap-4 pt-8 lg:grid-cols-4 lg:gap-6">
+      {band.map((photo, i) => (
+        <li class:list={[i === 0 && 'col-span-2']}>
+          <a href={`/travel#${photo.id}`} class="group block overflow-hidden rounded-lg bg-muted">
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              widths={[480, 720, 960, 1280]}
+              sizes={i === 0 ? '(min-width: 64rem) 480px, 100vw' : '(min-width: 64rem) 230px, 50vw'}
+              class:list={[
+                'w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none',
+                i === 0 ? 'aspect-[16/9] lg:aspect-[19/12]' : 'aspect-[3/4]',
+              ]}
+            />
+          </a>
+          <p class="label mt-3">{photo.place}</p>
+        </li>
+      ))}
+    </ul>
   </section>
+
+  {entries.length === 0 && <p class="py-8 text-muted-foreground">Nothing published yet.</p>}
 </BaseLayout>

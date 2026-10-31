@@ -7,7 +7,7 @@ export const AUTHOR_NAME = "Rashmin";
 export const AUTHOR_ROLE = "Software engineer";
 /** The homepage's opening sentence, and the default OG card's description. */
 export const SITE_LEAD =
-    "I’m Rashmin. I write about AI, distributed systems and whatever I’m debugging that week.";
+    "I’m Rashmin. I write about AI, software engineering, tech and the occasional trip.";
 
 export const SOCIAL_LINKS = [
     { label: "GitHub", url: "https://github.com/rashm1n" },

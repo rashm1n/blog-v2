@@ -1,6 +1,5 @@
 ---
-import { Image } from 'astro:assets';
-import { byYear, formatDate, readingTime, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
+import { byYear, readingTime, sectionFor, titleTransitionName, type AnyEntry } from '../utils/posts';
 
 interface Props {
   entries: AnyEntry[];
@@ -8,72 +7,52 @@ interface Props {
 
 const { entries } = Astro.props;
 const years = byYear(entries);
-const newest = entries[0];
 
 // Only label the section when the list mixes writing and travel (archive, tags);
 // on /blog every row would say the same thing.
 const mixed = new Set(entries.map((e) => e.collection)).size > 1;
 
-const shortDate = (date: Date) =>
-  date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+// The year is the group heading, so each row only needs the month and day.
+const day = (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 ---
 
-{/* `git log --graph`, for posts. Rows carry their tags in data-tags so
-    TopicFilter can hide them without a round trip. */}
-<ol class="log" data-log>
+{/* Posts grouped by year, newest first: a typeset index, not a card grid. */}
+<ol data-log>
   {
     years.map(([year, group]) => (
-      <>
-        <li class="log__year label tabular-nums" data-log-year={year}>
-          {year}
-        </li>
-        {group.map((entry) => (
-          <li
-            class="log__entry"
-            data-tags={entry.data.tags.join(' ')}
-            data-year={year}
-            data-latest={entry === newest ? '' : undefined}
-          >
-            <a
-              href={`${sectionFor(entry.collection).path}/${entry.id}`}
-              class="log__link"
-              data-nav-item
-            >
-              <span class="log__date label tabular-nums">
-                <time datetime={entry.data.pubDate.toISOString()} title={formatDate(entry.data.pubDate)}>
-                  {shortDate(entry.data.pubDate)}
+      <li class="mt-12 first:mt-0">
+        <h3 class="label border-b border-border pb-2 text-foreground tabular-nums">{year}</h3>
+        <ol>
+          {group.map((entry) => (
+            <li class="border-b border-border">
+              <a
+                href={`${sectionFor(entry.collection).path}/${entry.id}`}
+                class="group grid gap-1 py-6 sm:grid-cols-[6rem_1fr] sm:gap-6"
+              >
+                <time datetime={entry.data.pubDate.toISOString()} class="label pt-1 tabular-nums">
+                  {day(entry.data.pubDate)}
                 </time>
-              </span>
-
-              <span>
-                <span
-                  class="log__title block"
-                  style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
-                >
-                  {entry.data.title}
+                <span>
+                  <span
+                    class="display block text-[1.5rem] leading-[1.2] transition-colors group-hover:text-primary"
+                    style={`view-transition-name: ${titleTransitionName(entry.id)}; view-transition-class: post-title`}
+                  >
+                    {entry.data.title}
+                  </span>
+                  {entry.data.description && (
+                    <span class="mt-2 block max-w-[60ch] leading-relaxed text-muted-foreground">{entry.data.description}</span>
+                  )}
+                  <span class="label mt-3 flex flex-wrap gap-x-3">
+                    <span class="tabular-nums">{readingTime(entry.body ?? '')} min read</span>
+                    {mixed && entry.collection === 'travel' && <span>travel</span>}
+                    {entry.data.tags.map((tag: string) => <span>{tag}</span>)}
+                  </span>
                 </span>
-                {entry.data.description && (
-                  <span class="log__description block">{entry.data.description}</span>
-                )}
-                <span class="log__refs">
-                  {entry === newest && <span class="ref ref--latest">latest</span>}
-                  {mixed && entry.collection === 'travel' && <span class="ref">travel</span>}
-                  {entry.data.tags.map((tag: string) => (
-                    <span class="ref">{tag}</span>
-                  ))}
-                  <span class="label ml-1">{readingTime(entry.body ?? '')} min read</span>
-                </span>
-              </span>
-
-              {entry.data.heroImage ? (
-                <Image src={entry.data.heroImage} alt="" width={320} class="log__thumb" loading="lazy" />
-              ) : (
-                <span />
-              )}
-            </a>
-          </li>
-        ))}
-      </>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </li>
     ))
   }
 </ol>

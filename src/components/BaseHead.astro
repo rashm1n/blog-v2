@@ -53,8 +53,8 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<meta name="theme-color" content="#f2f5f9" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#0d1520" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17191e" media="(prefers-color-scheme: dark)" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href="/rss.xml" />
 <link rel="alternate" type="application/feed+json" title={SITE_TITLE} href="/feed.json" />
@@ -100,9 +100,9 @@ const umamiScriptUrl = import.meta.env.UMAMI_SCRIPT_URL ?? '/stats.js';
 
 <script type="application/ld+json" is:inline set:html={jsonLdScript(graph)}></script>
 
-<Font cssVariable="--font-face-sans" preload />
-<!-- Headlines and interface are set in it, so it is needed on first paint too. -->
-<Font cssVariable="--font-face-mono" preload />
+<Font cssVariable="--font-face-body" preload />
+<Font cssVariable="--font-face-heading" preload />
+<Font cssVariable="--font-face-mono" />
 
 {import.meta.env.PROD && umamiWebsiteId && (
   <script is:inline defer src={umamiScriptUrl} data-website-id={umamiWebsiteId}></script>
