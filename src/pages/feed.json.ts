@@ -39,7 +39,7 @@ export const GET: APIRoute = async (context) => {
           ? { date_modified: entry.data.updatedDate.toISOString() }
           : {}),
         ...(entry.data.tags.length > 0 ? { tags: entry.data.tags } : {}),
-        image: new URL(`/og/${entry.id}.png`, site).href,
+        image: new URL(`/og/${entry.id}.jpg`, site).href,
       };
     }),
   };

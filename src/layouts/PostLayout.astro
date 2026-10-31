@@ -42,7 +42,7 @@ const minutes = readingTime(body);
 const words = wordCount(body);
 const section = sectionFor(entry.collection);
 const sourcePath = markdownPath(entry);
-const ogImage = `/og/${entry.id}.png`;
+const ogImage = `/og/${entry.id}.jpg`;
 
 // Computed here rather than in each route's getStaticPaths so `/blog` and
 // `/travel` can't drift apart on how "related" is defined. The prev/next pair

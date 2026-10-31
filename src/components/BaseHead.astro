@@ -1,7 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 import '../styles/global.css';
-import { AUTHOR_NAME, SITE_TITLE, SITE_DESCRIPTION, SITE_URL } from '../consts';
+import { AUTHOR_NAME, SITE_LEAD, SITE_TITLE, SITE_DESCRIPTION, SITE_URL } from '../consts';
 import { jsonLdScript, siteNodes, type JsonLdNode } from '../utils/schema';
 
 interface Props {
@@ -34,13 +34,16 @@ const {
 const siteURL = Astro.site ?? new URL(SITE_URL);
 const pageTitle = title ? `${title} — ${SITE_TITLE}` : `${SITE_TITLE} — software engineer`;
 const canonicalURL = new URL(Astro.url.pathname, siteURL);
-const ogImageURL = new URL(image ?? '/og-default.png', siteURL);
+const ogImageURL = new URL(image ?? '/og-default.jpg', siteURL);
 
 // Every card src/utils/og.ts renders is exactly this size. Declaring it lets a
 // crawler reserve the space before the bytes arrive, which is the difference
 // between a preview that appears whole and one that pops in.
-const OG_IMAGE = { width: '1200', height: '630', type: 'image/png' } as const;
-const ogImageAlt = `${title ?? SITE_TITLE} — ${SITE_URL.replace(/^https?:\/\//, '')}`;
+const OG_IMAGE = { width: '1200', height: '630', type: 'image/jpeg' } as const;
+// Describes what each card shows: a post card is its title beside the hero; the default card is og-default.jpg.ts.
+const ogImageAlt = image
+  ? `${title} — ${SITE_URL.replace(/^https?:\/\//, '')}`
+  : `${SITE_LEAD} Over a photo of limestone islands in Phang Nga Bay.`;
 const markdownURL = markdownPath ? new URL(markdownPath, siteURL) : undefined;
 const graph = [...siteNodes(siteURL), ...jsonLd];
 
